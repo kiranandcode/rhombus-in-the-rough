@@ -3,6 +3,7 @@
 
 import:
    rhombus/meta open
+   lib("racket/main.rkt") as racket
    lib("raylib/2d/unsafe.rkt") as raylib
 
 expr.macro 'when $expr:
@@ -12,7 +13,8 @@ expr.macro 'when $expr:
      | $expr :
         $body
         ...
-     | ~else #false'
+     | ~else #void'
+
 
 macro 'unless $expr:
          $body
@@ -23,17 +25,56 @@ macro 'unless $expr:
         ...
      | ~else #void'
  
+macro 'while $expr:
+         $body
+         ...' :
+  'block:
+     fun loop ():
+       if $expr
+       | $body
+         ...
+         loop()
+       | #void
+     loop()'
 
-// main loop
+macro
+| 'set ($x) += $y': '$x := $x + $y'
+| 'set ($x) -= $y': '$x := $x - $y'
 
-raylib.InitWindow(800,450, "Game")
+macro 'draw:
+        $body
+        ...':
+ 'block:
+   raylib.BeginDrawing()
+   $body
+   ...
+   raylib.EndDrawing()'
+   
 
-fun loop ():
-    unless (raylib.WindowShouldClose()):
-        raylib.BeginDrawing()
-        raylib.ClearBackground(raylib.RAYWHITE)
-        raylib.DrawText("Congrats!", 190, 200, 20, raylib.LIGHTGRAY)
-        raylib.EndDrawing()
-        loop()    
+// constants
+def screen_width: 800
+def screen_height: 450
 
-loop()
+class Ball(mutable x,mutable y)
+def ball: Ball(0,0)
+
+
+
+block:
+  set (ball.x) += 1
+
+raylib.InitWindow(screen_width,screen_height, "Game")
+raylib.SetTargetFPS(60);
+while (!raylib.WindowShouldClose()):
+
+  when (raylib.IsKeyDown(raylib.KEY_D)): set (ball.x) += 2
+  when (raylib.IsKeyDown(raylib.KEY_A)): set (ball.x) -= 2
+  when (raylib.IsKeyDown(raylib.KEY_W)): set (ball.y) += 2
+  when (raylib.IsKeyDown(raylib.KEY_S)): set (ball.y) -= 2
+
+  draw:
+    raylib.ClearBackground(raylib.RAYWHITE)
+    raylib.DrawText("Move the ball with arrow keys!", 10, 10, 20, raylib.DARKGRAY)
+    raylib.DrawCircle(ball.x, ball.y, 10., raylib.MAROON)
+
+raylib.CloseWindow()
