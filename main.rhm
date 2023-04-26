@@ -89,17 +89,68 @@ block:
   ball.x += 1
 
 raylib.InitWindow(screen_width,screen_height, "Game")
-raylib.SetTargetFPS(60);
-while (!raylib.WindowShouldClose()):
 
-  when (raylib.IsKeyDown(raylib.KEY_D)): ball.x += 2
-  when (raylib.IsKeyDown(raylib.KEY_A)): ball.x -= 2
-  when (raylib.IsKeyDown(raylib.KEY_W)): ball.y -= 2
-  when (raylib.IsKeyDown(raylib.KEY_S)): ball.y += 2
+meta:
+  fun handle_update_vector_2(left,get,set,tail):
+    match tail
+    | '+= $rhs':
+        values('block:
+                 def b :~ _Vector2 = $left
+                 $set(b.self, $get(b.self) + $rhs)',
+               '')
+    | '-= $rhs':
+        values('block:
+                 def b :~ _Vector2 = $left
+                 $set(b.self, $get(b.self) - $rhs)',
+               '')
+    | ~else:
+         'block:
+            def b :~ _Vector2 = $left
+            $get(b.self)'
 
-  draw:
-    raylib.ClearBackground(raylib.RAYWHITE)
-    raylib.DrawText("Move the ball with arrow keys!", 10, 10, 20, raylib.DARKGRAY)
-    raylib.DrawCircle(ball.x, ball.y, 10., raylib.MAROON)
+class Vector2(self):
+  opaque
+  internal _Vector2
+  
+  constructor (x,y):
+    super(raylib.#{make-Vector2}(x,y))
 
-raylib.CloseWindow()
+  method to_string():
+    racket.format("~a,~a", raylib.#{Vector2-x}(self), raylib.#{Vector2-y}(self))
+
+  dot '$left . x' :
+    ~tail : tail
+    handle_update_vector_2('$left', 'raylib.#{Vector2-x}', 'raylib.#{set-Vector2-x!}', tail)
+
+  dot '$left . y' :
+    ~tail : tail
+    handle_update_vector_2('$left', 'raylib.#{Vector2-y}', 'raylib.#{set-Vector2-y!}', tail)
+
+
+def main_character_image: raylib.LoadTexture("resources/images/male_walkcycle.png")
+def character_image_position : raylib.#{make-Vector2}(0.,0.)
+def character_frame_rec : raylib.#{make-Rectangle}(0.,0.,0.,0.)
+
+
+def vec: Vector2(1.,1.)
+println(vec.to_string())
+vec.x += 1.0
+println(vec.x)
+vec.x += 1.0
+println(vec.to_string())
+
+
+// raylib.SetTargetFPS(60);
+// while (!raylib.WindowShouldClose()):
+
+//   when (raylib.IsKeyDown(raylib.KEY_D)): ball.x += 2
+//   when (raylib.IsKeyDown(raylib.KEY_A)): ball.x -= 2
+//   when (raylib.IsKeyDown(raylib.KEY_W)): ball.y -= 2
+//   when (raylib.IsKeyDown(raylib.KEY_S)): ball.y += 2
+
+//   draw:
+//     raylib.ClearBackground(raylib.RAYWHITE)
+//     raylib.DrawText("Move the ball with arrow keys!", 10, 10, 20, raylib.DARKGRAY)
+//     raylib.DrawCircle(ball.x, ball.y, 10., raylib.MAROON)
+
+// raylib.CloseWindow()
