@@ -37,10 +37,6 @@ macro 'while $expr:
        | #void
      loop()'
 
-macro
-| 'set ($x) += $y': '$x := $x + $y'
-| 'set ($x) -= $y': '$x := $x - $y'
-
 macro 'draw:
         $body
         ...':
@@ -55,22 +51,51 @@ macro 'draw:
 def screen_width: 800
 def screen_height: 450
 
-class Ball(mutable x,mutable y)
+class Ball(mutable _x,mutable _y) :
+  opaque
+  internal _Ball
+
+  constructor (x,y) :
+    super (x,y)
+
+  dot '$left . x' :
+    ~tail : tail
+    convert(left, '_x', tail) 
+
+  dot '$left . y' :
+    ~tail : tail
+    convert(left, '_y', tail) 
+
+
+meta:
+  fun convert(left, fld, tail):
+    match tail
+     | '+= $rhs':
+         values('block:
+                   def b :~ _Ball = $left
+                   b . $fld := b . $fld + $rhs',
+                '')
+     | '-= $rhs':
+         values('block:
+                   def b :~ _Ball = $left
+                   b . $fld := b . $fld - $rhs',
+                '')
+     | ~else:
+         '($left :~ _Ball) . $fld'
+
 def ball: Ball(0,0)
 
-
-
 block:
-  set (ball.x) += 1
+  ball.x += 1
 
 raylib.InitWindow(screen_width,screen_height, "Game")
 raylib.SetTargetFPS(60);
 while (!raylib.WindowShouldClose()):
 
-  when (raylib.IsKeyDown(raylib.KEY_D)): set (ball.x) += 2
-  when (raylib.IsKeyDown(raylib.KEY_A)): set (ball.x) -= 2
-  when (raylib.IsKeyDown(raylib.KEY_W)): set (ball.y) += 2
-  when (raylib.IsKeyDown(raylib.KEY_S)): set (ball.y) -= 2
+  when (raylib.IsKeyDown(raylib.KEY_D)): ball.x += 2
+  when (raylib.IsKeyDown(raylib.KEY_A)): ball.x -= 2
+  when (raylib.IsKeyDown(raylib.KEY_W)): ball.y -= 2
+  when (raylib.IsKeyDown(raylib.KEY_S)): ball.y += 2
 
   draw:
     raylib.ClearBackground(raylib.RAYWHITE)
