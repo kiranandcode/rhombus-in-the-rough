@@ -22,6 +22,10 @@ block:
 raylib.InitWindow(screen_width,screen_height, "Game")
 raylib.SetTargetFPS(60);
 
+def sprite_map: raylib.LoadTexture("resources/images/terrain.png")
+def source_tile_rect: Rectangle(0.,0.,32.,32.)
+def dest_tile_rect: Rectangle(10.,10.,320.,320.)
+
 
 def main_character_image: raylib.LoadTexture("resources/images/male_walkcycle.png")
 def character_image_position : Vector2(0.,0.)
@@ -37,6 +41,7 @@ while (!raylib.WindowShouldClose()):
   draw:
     raylib.ClearBackground(raylib.RAYWHITE)
     raylib.DrawText("Move the ball with arrow keys!", 10, 10, 20, raylib.DARKGRAY)
+    raylib.DrawTexturePro(sprite_map, source_tile_rect.inner(), dest_tile_rect.inner(), ball.inner(), 0.0, raylib.WHITE)
     raylib.DrawCircleV(ball.inner(), 10., raylib.MAROON)
 
 raylib.CloseWindow()
