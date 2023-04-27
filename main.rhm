@@ -3,154 +3,40 @@
 
 import:
    rhombus/meta open
+   "datatypes.rhm" open
+   "lang.rhm" open
+   "raylib_lang.rhm" open
    lib("racket/main.rkt") as racket
    lib("raylib/2d/unsafe.rkt") as raylib
 
-expr.macro 'when $expr:
-               $body 
-               ...':
-    'cond 
-     | $expr :
-        $body
-        ...
-     | ~else #void'
-
-
-macro 'unless $expr:
-         $body
-         ...':
-    'cond 
-     | ! $expr :
-        $body
-        ...
-     | ~else #void'
- 
-macro 'while $expr:
-         $body
-         ...' :
-  'block:
-     fun loop ():
-       if $expr
-       | $body
-         ...
-         loop()
-       | #void
-     loop()'
-
-macro 'draw:
-        $body
-        ...':
- 'block:
-   raylib.BeginDrawing()
-   $body
-   ...
-   raylib.EndDrawing()'
-   
 
 // constants
 def screen_width: 800
 def screen_height: 450
 
-class Ball(mutable _x,mutable _y) :
-  opaque
-  internal _Ball
-
-  constructor (x,y) :
-    super (x,y)
-
-  dot '$left . x' :
-    ~tail : tail
-    convert(left, '_x', tail) 
-
-  dot '$left . y' :
-    ~tail : tail
-    convert(left, '_y', tail) 
-
-
-meta:
-  fun convert(left, fld, tail):
-    match tail
-     | '+= $rhs':
-         values('block:
-                   def b :~ _Ball = $left
-                   b . $fld := b . $fld + $rhs',
-                '')
-     | '-= $rhs':
-         values('block:
-                   def b :~ _Ball = $left
-                   b . $fld := b . $fld - $rhs',
-                '')
-     | ~else:
-         '($left :~ _Ball) . $fld'
-
-def ball: Ball(0,0)
+def ball: Vector2(0.,0.)
 
 block:
   ball.x += 1
 
 raylib.InitWindow(screen_width,screen_height, "Game")
-
-meta:
-  fun handle_update_vector_2(left,get,set,tail):
-    match tail
-    | '+= $rhs':
-        values('block:
-                 def b :~ _Vector2 = $left
-                 $set(b.self, $get(b.self) + $rhs)',
-               '')
-    | '-= $rhs':
-        values('block:
-                 def b :~ _Vector2 = $left
-                 $set(b.self, $get(b.self) - $rhs)',
-               '')
-    | ~else:
-         'block:
-            def b :~ _Vector2 = $left
-            $get(b.self)'
-
-class Vector2(self):
-  opaque
-  internal _Vector2
-  
-  constructor (x,y):
-    super(raylib.#{make-Vector2}(x,y))
-
-  method to_string():
-    racket.format("~a,~a", raylib.#{Vector2-x}(self), raylib.#{Vector2-y}(self))
-
-  dot '$left . x' :
-    ~tail : tail
-    handle_update_vector_2('$left', 'raylib.#{Vector2-x}', 'raylib.#{set-Vector2-x!}', tail)
-
-  dot '$left . y' :
-    ~tail : tail
-    handle_update_vector_2('$left', 'raylib.#{Vector2-y}', 'raylib.#{set-Vector2-y!}', tail)
+raylib.SetTargetFPS(60);
 
 
 def main_character_image: raylib.LoadTexture("resources/images/male_walkcycle.png")
-def character_image_position : raylib.#{make-Vector2}(0.,0.)
-def character_frame_rec : raylib.#{make-Rectangle}(0.,0.,0.,0.)
+def character_image_position : Vector2(0.,0.)
+def character_frame_rec : Rectangle(0.,0.,0.,0.)
 
+while (!raylib.WindowShouldClose()):
 
-def vec: Vector2(1.,1.)
-println(vec.to_string())
-vec.x += 1.0
-println(vec.x)
-vec.x += 1.0
-println(vec.to_string())
+  when (raylib.IsKeyDown(raylib.KEY_D)): ball.x += 2.
+  when (raylib.IsKeyDown(raylib.KEY_A)): ball.x -= 2.
+  when (raylib.IsKeyDown(raylib.KEY_W)): ball.y -= 2.
+  when (raylib.IsKeyDown(raylib.KEY_S)): ball.y += 2.
 
+  draw:
+    raylib.ClearBackground(raylib.RAYWHITE)
+    raylib.DrawText("Move the ball with arrow keys!", 10, 10, 20, raylib.DARKGRAY)
+    raylib.DrawCircleV(ball.inner(), 10., raylib.MAROON)
 
-// raylib.SetTargetFPS(60);
-// while (!raylib.WindowShouldClose()):
-
-//   when (raylib.IsKeyDown(raylib.KEY_D)): ball.x += 2
-//   when (raylib.IsKeyDown(raylib.KEY_A)): ball.x -= 2
-//   when (raylib.IsKeyDown(raylib.KEY_W)): ball.y -= 2
-//   when (raylib.IsKeyDown(raylib.KEY_S)): ball.y += 2
-
-//   draw:
-//     raylib.ClearBackground(raylib.RAYWHITE)
-//     raylib.DrawText("Move the ball with arrow keys!", 10, 10, 20, raylib.DARKGRAY)
-//     raylib.DrawCircle(ball.x, ball.y, 10., raylib.MAROON)
-
-// raylib.CloseWindow()
+raylib.CloseWindow()

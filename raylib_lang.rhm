@@ -1,0 +1,21 @@
+#lang rhombus
+
+import:
+  rhombus/meta open
+  "lang.rhm" open
+  lib("raylib/2d/unsafe.rkt") as raylib
+
+export:
+  draw
+
+
+macro 'draw:
+        $body
+        ...':
+ 'block:
+   raylib.BeginDrawing()
+   $body
+   ...
+   raylib.EndDrawing()'
+   
+

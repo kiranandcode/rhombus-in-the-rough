@@ -1,0 +1,40 @@
+#lang rhombus
+
+import:
+   rhombus/meta open
+
+export:
+  when
+  unless
+  while
+
+
+expr.macro 'when $expr:
+               $body 
+               ...':
+    'cond 
+     | $expr :
+        $body
+        ...
+     | ~else #void'
+
+macro 'unless $expr:
+         $body
+         ...':
+    'cond 
+     | ! $expr :
+        $body
+        ...
+     | ~else #void'
+ 
+macro 'while $expr:
+         $body
+         ...' :
+  'block:
+     fun loop ():
+       if $expr
+       | $body
+         ...
+         loop()
+       | #void
+     loop()'

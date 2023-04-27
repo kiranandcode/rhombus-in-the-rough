@@ -1,0 +1,163 @@
+#lang rhombus
+
+import:
+   rhombus/meta open
+   lib("racket/main.rkt") as racket
+   lib("raylib/2d/unsafe.rkt") as raylib
+
+export:
+  Vector2
+  Vector3
+  Vector4
+  Color
+  Rectangle
+
+meta:
+  fun handle_update_vector(left,ty,get,set,tail):
+    match tail
+    | '+= $rhs':
+        values('block:
+                 def b :~ $ty = $left
+                 $set(b.self, $get(b.self) + $rhs)',
+               '')
+    | '-= $rhs':
+        values('block:
+                 def b :~ $ty = $left
+                 $set(b.self, $get(b.self) - $rhs)',
+               '')
+    | ~else:
+         'block:
+            def b :~ $ty = $left
+            $get(b.self)'
+
+
+class Vector2(self):
+  opaque
+  internal _Vector2
+  
+  constructor (x,y):
+    super(raylib.#{make-Vector2}(x,y))
+
+  method to_string():
+    racket.format("#vec2<~a,~a>", raylib.#{Vector2-x}(self), raylib.#{Vector2-y}(self))
+
+  method inner(): self
+
+  dot '$left . x' :
+    ~tail : tail
+    handle_update_vector('$left', '_Vector2', 'raylib.#{Vector2-x}', 'raylib.#{set-Vector2-x!}', tail)
+
+  dot '$left . y' :
+    ~tail : tail
+    handle_update_vector('$left', '_Vector2', 'raylib.#{Vector2-y}', 'raylib.#{set-Vector2-y!}', tail)
+
+
+class Vector3(self):
+  opaque
+  internal _Vector3
+  
+  constructor (x,y,z):
+    super(raylib.#{make-Vector3}(x,y,z))
+
+  method to_string():
+    racket.format("#vec3<~a,~a,~a>", raylib.#{Vector3-x}(self), raylib.#{Vector3-y}(self), raylib.#{Vector3-z}(self))
+
+  method inner(): self
+
+  dot '$left . x' :
+    ~tail : tail
+    handle_update_vector('$left', '_Vector3', 'raylib.#{Vector3-x}', 'raylib.#{set-Vector3-x!}', tail)
+
+  dot '$left . y' :
+    ~tail : tail
+    handle_update_vector('$left', '_Vector3', 'raylib.#{Vector3-y}', 'raylib.#{set-Vector3-y!}', tail)
+
+  dot '$left . z' :
+    ~tail : tail
+    handle_update_vector('$left', '_Vector3', 'raylib.#{Vector3-z}', 'raylib.#{set-Vector3-z!}', tail)
+
+class Vector4(self):
+  opaque
+  internal _Vector4
+  
+  constructor (x,y,z,w):
+    super(raylib.#{make-Vector4}(x,y,z,w))
+
+  method to_string():
+    racket.format("#vec4<~a,~a,~a,~a>", raylib.#{Vector4-x}(self), raylib.#{Vector4-y}(self), raylib.#{Vector4-z}(self), raylib.#{Vector4-w}(self))
+
+  method inner(): self
+
+  dot '$left . x' :
+    ~tail : tail
+    handle_update_vector('$left', '_Vector4', 'raylib.#{Vector4-x}', 'raylib.#{set-Vector4-x!}', tail)
+
+  dot '$left . y' :
+    ~tail : tail
+    handle_update_vector('$left', '_Vector4', 'raylib.#{Vector4-y}', 'raylib.#{set-Vector4-y!}', tail)
+
+  dot '$left . z' :
+    ~tail : tail
+    handle_update_vector('$left', '_Vector4', 'raylib.#{Vector4-z}', 'raylib.#{set-Vector4-z!}', tail)
+
+  dot '$left . w' :
+    ~tail : tail
+    handle_update_vector('$left', '_Vector4', 'raylib.#{Vector4-w}', 'raylib.#{set-Vector4-w!}', tail)
+
+
+class Color(self):
+  opaque
+  internal _Color
+  
+  constructor (r,g,b,a):
+    super(raylib.#{make-Color}(r,g,b,a))
+
+  method to_string():
+    racket.format("#color<~a,~a,~a,~a>", raylib.#{Color-r}(self), raylib.#{Color-g}(self), raylib.#{Color-b}(self), raylib.#{Color-a}(self))
+
+  method inner(): self
+
+  dot '$left . r' :
+    ~tail : tail
+    handle_update_vector('$left', '_Color', 'raylib.#{Color-r}', 'raylib.#{set-Color-r!}', tail)
+
+  dot '$left . g' :
+    ~tail : tail
+    handle_update_vector('$left', '_Color', 'raylib.#{Color-g}', 'raylib.#{set-Color-g!}', tail)
+
+  dot '$left . b' :
+    ~tail : tail
+    handle_update_vector('$left', '_Color', 'raylib.#{Color-b}', 'raylib.#{set-Color-b!}', tail)
+
+  dot '$left . a' :
+    ~tail : tail
+    handle_update_vector('$left', '_Color', 'raylib.#{Color-a}', 'raylib.#{set-Color-a!}', tail)
+
+
+class Rectangle(self):
+  opaque
+  internal _Rectangle
+  
+  constructor (x,y,width,height):
+    super(raylib.#{make-Rectangle}(x,y,width,height))
+
+  method to_string():
+    racket.format("#rect<~a,~a,~a,~a>", raylib.#{Rectangle-x}(self), raylib.#{Rectangle-y}(self), raylib.#{Rectangle-width}(self), raylib.#{Rectangle-height}(self))
+
+  method inner(): self
+
+  dot '$left . x' :
+    ~tail : tail
+    handle_update_vector('$left', '_Rectangle', 'raylib.#{Rectangle-x}', 'raylib.#{set-Rectangle-x!}', tail)
+
+  dot '$left . y' :
+    ~tail : tail
+    handle_update_vector('$left', '_Rectangle', 'raylib.#{Rectangle-y}', 'raylib.#{set-Rectangle-y!}', tail)
+
+  dot '$left . width' :
+    ~tail : tail
+    handle_update_vector('$left', '_Rectangle', 'raylib.#{Rectangle-width}', 'raylib.#{set-Rectangle-width!}', tail)
+
+  dot '$left . height' :
+    ~tail : tail
+    handle_update_vector('$left', '_Rectangle', 'raylib.#{Rectangle-height}', 'raylib.#{set-Rectangle-height!}', tail)
