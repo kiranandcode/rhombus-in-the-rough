@@ -11,10 +11,16 @@ export:
   Vector4
   Color
   Rectangle
+  Camera2D
 
 meta:
   fun handle_update_vector(left,ty,get,set,tail):
     match tail
+    | ':= $rhs':
+        values('block:
+                 def b :~ $ty = $left
+                 $set(b.self, $rhs)',
+               '')
     | '+= $rhs':
         values('block:
                  def b :~ $ty = $left
@@ -30,13 +36,29 @@ meta:
             def b :~ $ty = $left
             $get(b.self)'
 
+  fun handle_update_nested(left, ty, ty_inner, get, set, tail):
+    match tail
+     | ':= $vl':
+        values(
+          'block:
+            def b :~ $ty = $left
+            def vl :~ $ty_inner = $vl
+            $set(b.self, vl.inner())',
+          '')
+     | ~else:
+        values('(block:
+                  def b :~ $ty = $left
+                  ($ty_inner($get(b.self)) :~ $ty_inner) :~ $ty_inner)',
+               tail)
+    
 
 class Vector2(self):
   opaque
   internal _Vector2
   
-  constructor (x,y):
-    super(raylib.#{make-Vector2}(x,y))
+  constructor
+  | (self): super(self)
+  | (x,y): super(raylib.#{make-Vector2}(x,y))
 
   method to_string():
     racket.format("#vec2<~a,~a>", raylib.#{Vector2-x}(self), raylib.#{Vector2-y}(self))
@@ -56,8 +78,11 @@ class Vector3(self):
   opaque
   internal _Vector3
   
-  constructor (x,y,z):
-    super(raylib.#{make-Vector3}(x,y,z))
+
+  constructor
+  | (self): super(self)
+  | (x,y,z):
+      super(raylib.#{make-Vector3}(x,y,z))
 
   method to_string():
     racket.format("#vec3<~a,~a,~a>", raylib.#{Vector3-x}(self), raylib.#{Vector3-y}(self), raylib.#{Vector3-z}(self))
@@ -80,8 +105,10 @@ class Vector4(self):
   opaque
   internal _Vector4
   
-  constructor (x,y,z,w):
-    super(raylib.#{make-Vector4}(x,y,z,w))
+  constructor
+  | (self): super(self)
+  | (x,y,z,w):
+      super(raylib.#{make-Vector4}(x,y,z,w))
 
   method to_string():
     racket.format("#vec4<~a,~a,~a,~a>", raylib.#{Vector4-x}(self), raylib.#{Vector4-y}(self), raylib.#{Vector4-z}(self), raylib.#{Vector4-w}(self))
@@ -109,8 +136,10 @@ class Color(self):
   opaque
   internal _Color
   
-  constructor (r,g,b,a):
-    super(raylib.#{make-Color}(r,g,b,a))
+  constructor
+  | (self): super(self)
+  | (r,g,b,a):
+      super(raylib.#{make-Color}(r,g,b,a))
 
   method to_string():
     racket.format("#color<~a,~a,~a,~a>", raylib.#{Color-r}(self), raylib.#{Color-g}(self), raylib.#{Color-b}(self), raylib.#{Color-a}(self))
@@ -137,14 +166,24 @@ class Color(self):
 class Rectangle(self):
   opaque
   internal _Rectangle
-  
-  constructor (x,y,width,height):
-    super(raylib.#{make-Rectangle}(x,y,width,height))
+
+  constructor
+  | (self): super(self)
+  | (x,y,width,height):
+      super(raylib.#{make-Rectangle}(x,y,width,height))
 
   method to_string():
     racket.format("#rect<~a,~a,~a,~a>", raylib.#{Rectangle-x}(self), raylib.#{Rectangle-y}(self), raylib.#{Rectangle-width}(self), raylib.#{Rectangle-height}(self))
 
   method inner(): self
+
+  method intersects(other :: Rectangle):
+    cond
+    | other.x + other.width < self.x : #false
+    | other.y + other.height < self.y : #false
+    | self.x + self.width < other.x : #false
+    | self.y + self.height < other.y : #false
+    | ~else: #true
 
   dot '$left . x' :
     ~tail : tail
@@ -161,3 +200,39 @@ class Rectangle(self):
   dot '$left . height' :
     ~tail : tail
     handle_update_vector('$left', '_Rectangle', 'raylib.#{Rectangle-height}', 'raylib.#{set-Rectangle-height!}', tail)
+
+
+
+class Camera2D(self):
+  opaque
+  internal _Camera2D
+  
+  constructor (offset :: Vector2 = Vector2(0.,0.), target :: Vector2  = Vector2(0.,0.), rotation=0., zoom=1.):
+    super(raylib.#{make-Camera2D}(offset.inner(), target.inner(), rotation, zoom))
+
+  method to_string():
+    racket.format(
+       "#rect<~a,~a,~a,~a>",
+       Vector2(raylib.#{Camera2D-offset}(self)).to_string(),
+       Vector2(raylib.#{Camera2D-target}(self)).to_string(),
+       raylib.#{Camera2D-rotation}(self),
+       raylib.#{Camera2D-zoom}(self))
+
+  method inner(): self
+
+  dot '$left . offset' :
+    ~tail: tail
+    handle_update_nested('$left', '_Camera2D', 'Vector2', 'raylib.#{Camera2D-offset}', 'raylib.#{set-Camera2D-offset}', tail)
+
+  dot '$left . target' :
+    ~tail: tail
+    handle_update_nested('$left', '_Camera2D', 'Vector2', 'raylib.#{Camera2D-target}', 'raylib.#{set-Camera2D-target}', tail)
+
+  dot '$left . rotation' :
+    ~tail : tail
+    handle_update_vector('$left', '_Camera2D', 'raylib.#{Camera2D-rotation}', 'raylib.#{set-Camera2D-rotation!}', tail)
+
+  dot '$left . zoom' :
+    ~tail : tail
+    handle_update_vector('$left', '_Camera2D', 'raylib.#{Camera2D-zoom}', 'raylib.#{set-Camera2D-zoom!}', tail)
+

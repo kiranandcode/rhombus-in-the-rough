@@ -1,0 +1,32 @@
+#lang rhombus
+
+import:
+   rhombus/meta open
+   "datatypes.rhm" open
+   "lang.rhm" open
+   "raylib_lang.rhm" open
+   lib("racket/main.rkt") as racket
+   lib("raylib/2d/unsafe.rkt") as raylib
+   
+export :
+  View
+
+class View(camera:: Camera2D, view_rect:: Rectangle):
+
+  constructor
+  | (): super(Camera2D(), Rectangle(0.,0.,0.,0.))
+  
+  private method update_view_rect():
+     def cam_target: camera.target
+     def cam_offset: camera.offset
+
+     view_rect.x := cam_target.x - (cam_offset.x / camera.zoom)
+     view_rect.y := cam_target.y - (cam_offset.y / camera.zoom)
+     view_rect.width := raylib.GetScreenWidth() / camera.zoom
+     view_rect.height := raylib.GetScreenHeight() / camera.zoom
+
+  method rect_in_view(rect :: Rectangle):
+    view_rect.intersects(rect)
+
+  method update():
+     update_view_rect()

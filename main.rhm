@@ -1,11 +1,12 @@
 #lang rhombus
 
-
 import:
    rhombus/meta open
    "datatypes.rhm" open
    "lang.rhm" open
    "raylib_lang.rhm" open
+   "view.rhm" open
+   "map.rhm" open
    lib("racket/main.rkt") as racket
    lib("raylib/2d/unsafe.rkt") as raylib
 

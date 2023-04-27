@@ -1,0 +1,41 @@
+#lang rhombus
+
+import:
+   rhombus/meta open
+   "datatypes.rhm" open
+   "lang.rhm" open
+   "raylib_lang.rhm" open
+   "view.rhm" open
+   lib("racket/main.rkt") as racket
+   lib("raylib/2d/unsafe.rkt") as raylib
+
+fun tile_display_rect(x, y, tile_size :: Vector2):
+  def half_width: tile_size.x * 0.5
+  def half_height: tile_size.y * 0.5
+  def quarter_height: tile_size.x * 0.25
+  Rectangle(
+    x * half_width - y * half_width - half_width,
+    y * half_height + (x * half_height),
+    tile_size.x,
+    tile_size.y
+  )
+
+fun draw_sprite(id, x, y, rotation, scale, tint):
+  #void
+
+
+def tile_size: Rectangle(0.,0.,32.,32.)
+
+class Map(width, height, base, elements):
+
+  method draw(view :: View):
+    for:
+      each x : 0 .. width
+      each y : 0 .. height
+      def dest_rect : tile_display_rect(x,y,tile_size)
+      keep_when view.rect_in_view(dest_rect)
+      
+      draw_sprite(base, dest_rect.x, dest_rect.y, 0., 1., raylib.WHITE)
+      
+
+
