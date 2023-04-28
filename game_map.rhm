@@ -1,0 +1,49 @@
+#lang rhombus
+
+import:
+   rhombus/meta open
+   "datatypes.rhm" open
+   "lang.rhm" open
+   "raylib_lang.rhm" open
+   "view.rhm" open
+   "terrain.rhm"
+   lib("racket/main.rkt") as racket
+   lib("raylib/2d/unsafe.rkt") as raylib
+
+export:
+  Map
+
+fun set_tile_display_rect(x :: Real, y :: Real, dest_rect::Rectangle):
+
+  def half_width: tile_size.x * 0.5
+  def half_height: tile_size.y * 0.5
+
+  def quarter_height: tile_size.x * 0.25
+
+  def rect_x :~ Real = x * half_width - y * half_width - half_width
+  def rect_y :~ Real = y * half_height + (x * half_height)
+
+  dest_rect.x := math.inexact(rect_x)
+  dest_rect.y := math.inexact(rect_y)
+
+
+fun draw_sprite(id :: terrain.Terrain, x :: Real, y :: Real):
+  id.draw_tile(terrain.tiles.BASE0, Vector2(math.inexact(x),math.inexact(y)))
+
+
+def tile_size: Vector2(32.,32.)
+
+class Map(width :: Integral, height :: Integral, base, elements, dest_rect :: Rectangle):
+
+  constructor(width, height, base):
+    super(width, height, base, [], Rectangle(0., 0., tile_size.x, tile_size.y))
+
+
+  method draw(view :: View):
+    for:
+      each x : 0 .. width
+      each y : 0 .. height
+      set_tile_display_rect(x,y,dest_rect)
+      keep_when view.rect_in_view(dest_rect)
+      draw_sprite(base, dest_rect.x, dest_rect.y)
+      

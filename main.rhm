@@ -6,7 +6,7 @@ import:
    "lang.rhm" open
    "raylib_lang.rhm" open
    "view.rhm" open
-   "map.rhm" open
+   "game_map.rhm"
    "resources.rhm" expose: def_texture
    "terrain.rhm"
    lib("racket/main.rkt") as racket
@@ -28,6 +28,8 @@ def_texture main_character_image : "./resources/images/male_walkcycle.png"
 def character_image_position : Vector2(0.,0.)
 def character_frame_rec : Rectangle(0.,0.,0.,0.)
 
+def view : View()
+def map : game_map.Map(100,100, terrain.rock)
 
 raylib.InitWindow(screen_width,screen_height, "Game")
 resources.init()
@@ -43,6 +45,7 @@ while (!raylib.WindowShouldClose()):
 
   draw:
     raylib.ClearBackground(raylib.RAYWHITE)
+    map.draw(view)
     raylib.DrawText("Move the ball with arrow keys!", 10, 10, 20, raylib.DARKGRAY)
     raylib.DrawTexturePro(sprite_map, source_tile_rect.inner(), dest_tile_rect.inner(), ball.inner(), 0.0, raylib.WHITE)
     terrain.grass.draw_tile(terrain.tiles.BASE0, ball)

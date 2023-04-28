@@ -179,10 +179,10 @@ class Rectangle(self):
 
   method intersects(other :: Rectangle):
     cond
-    | other.x + other.width < self.x : #false
-    | other.y + other.height < self.y : #false
-    | self.x + self.width < other.x : #false
-    | self.y + self.height < other.y : #false
+    | other.x + other.width < this.x : #false
+    | other.y + other.height < this.y : #false
+    | this.x + this.width < other.x : #false
+    | this.y + this.height < other.y : #false
     | ~else: #true
 
   dot '$left . x' :

@@ -10,6 +10,7 @@ import:
 
 export:
   tiles
+  Terrain
   terrain rock dark_rock hot_rock obsidian_rock volcanic_rock
 
   lava

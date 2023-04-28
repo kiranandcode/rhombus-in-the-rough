@@ -11,14 +11,14 @@ import:
 export :
   View
 
-class View(camera:: Camera2D, view_rect:: Rectangle):
+class View(camera :: Camera2D, view_rect :: Rectangle):
 
   constructor
   | (): super(Camera2D(), Rectangle(0.,0.,0.,0.))
   
   private method update_view_rect():
-     def cam_target: camera.target
-     def cam_offset: camera.offset
+     def cam_target :~ Vector2 = camera.target
+     def cam_offset :~ Vector2 = camera.offset
 
      view_rect.x := cam_target.x - (cam_offset.x / camera.zoom)
      view_rect.y := cam_target.y - (cam_offset.y / camera.zoom)
