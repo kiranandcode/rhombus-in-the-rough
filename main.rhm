@@ -7,6 +7,8 @@ import:
    "raylib_lang.rhm" open
    "view.rhm" open
    "map.rhm" open
+   "resources.rhm" expose: def_texture
+   "terrain.rhm"
    lib("racket/main.rkt") as racket
    lib("raylib/2d/unsafe.rkt") as raylib
 
@@ -17,20 +19,20 @@ def screen_height: 450
 
 def ball: Vector2(0.,0.)
 
-block:
-  ball.x += 1
-
-raylib.InitWindow(screen_width,screen_height, "Game")
-raylib.SetTargetFPS(60);
-
-def sprite_map: raylib.LoadTexture("resources/images/terrain.png")
+def_texture sprite_map : "./resources/images/terrain.png"
 def source_tile_rect: Rectangle(0.,0.,32.,32.)
 def dest_tile_rect: Rectangle(10.,10.,320.,320.)
 
 
-def main_character_image: raylib.LoadTexture("resources/images/male_walkcycle.png")
+def_texture main_character_image : "./resources/images/male_walkcycle.png"
 def character_image_position : Vector2(0.,0.)
 def character_frame_rec : Rectangle(0.,0.,0.,0.)
+
+
+raylib.InitWindow(screen_width,screen_height, "Game")
+resources.init()
+raylib.SetTargetFPS(60);
+
 
 while (!raylib.WindowShouldClose()):
 
@@ -43,6 +45,7 @@ while (!raylib.WindowShouldClose()):
     raylib.ClearBackground(raylib.RAYWHITE)
     raylib.DrawText("Move the ball with arrow keys!", 10, 10, 20, raylib.DARKGRAY)
     raylib.DrawTexturePro(sprite_map, source_tile_rect.inner(), dest_tile_rect.inner(), ball.inner(), 0.0, raylib.WHITE)
+    terrain.grass.draw_tile(terrain.tiles.BASE0, ball)
     raylib.DrawCircleV(ball.inner(), 10., raylib.MAROON)
 
 raylib.CloseWindow()

@@ -1,0 +1,120 @@
+#lang rhombus
+
+import:
+   rhombus/meta open
+   "datatypes.rhm" open
+   "lang.rhm" open
+   "resources.rhm" expose: def_texture
+   lib("racket/main.rkt") as racket
+   lib("raylib/2d/unsafe.rkt") as raylib
+
+export:
+  tiles
+  terrain rock dark_rock hot_rock obsidian_rock volcanic_rock
+
+  lava
+  outside_chasm
+  inside_chasm
+  chasm
+  water
+
+
+  grass
+  rosy_grass
+  dark_grass
+  raised_grass
+  raised_light_grass
+  raised_sand
+  sand_pit
+  light_water
+
+  dark_platform
+  light_platform
+
+def_texture terrain : "./resources/images/terrain.png"
+
+class Tile (x,y)
+
+defn.macro
+| 'tile_row_helper([$(tile :: Identifier), $next, $rest, ...], $r, $(c :: Int))':
+    'def $tile : Tile($c,$r)
+     tile_row_helper([$next, $rest, ...], $r, $(c.unwrap() + 1))'
+| 'tile_row_helper([$tile], $r, $c)':
+    'def $tile : Tile($c,$r)'
+
+defn.macro
+| 'tile_grid_helper([$row, $next, $rest, ...], $(r :: Int))':
+    'tile_row_helper($row, $r, 0)
+     tile_grid_helper([$next, $rest, ...], $(r.unwrap() + 1))'
+| 'tile_grid_helper([$row], $r)':
+    'tile_row_helper($row, $r, 0)'
+
+expr.macro
+| 'tile_grid_export_helper([$row, ...])':
+    'tile_grid_row_export_helper($row)
+     ...'
+
+defn.macro
+| 'tile_grid $name:
+     $(tile :: Identifier) ...
+     ...' :
+   'namespace $name:
+      export:
+        $tile ...
+        ...
+      tile_grid_helper([[$tile, ...], ...], 0)'
+
+tile_grid tiles:
+ ROCK1    ICONW     ICONE
+
+ ROCK2    ICOSW     ICOSE
+
+ OCONW    EDGEN     OCONE
+
+ EDGEW    BASE0     EDGEE 
+
+ OCOSW    EDGES     OCOSE
+
+ BASE3    BASE2     BASE1
+
+def dest_tile: Rectangle(0.,0., 32.,32.)
+
+class Terrain(
+  sprite_rect :: Rectangle,
+  offset_x, offset_y
+):
+  constructor (x,y):
+    super(Rectangle(0.,0.,32.,32.),x * 32. * 3, y * 32. * 6)
+
+  method draw_tile(tile::Tile, pos :: Vector2, rotation = 0.0, tint = raylib.WHITE):
+    sprite_rect.x := offset_x + tile.x * 32.
+    sprite_rect.y := offset_y + tile.y * 32.
+    raylib.DrawTexturePro(terrain, sprite_rect.inner(), dest_tile.inner(), pos.inner(), rotation, tint)
+    
+def rock: Terrain(0,0)
+def dark_rock: Terrain(1,0)
+def hot_rock: Terrain(2,0)
+
+def obsidian_rock: Terrain(3,0)
+def volcanic_rock: Terrain(4,0)
+
+def lava: Terrain(5,0)
+def outside_chasm: Terrain(6,0)
+def inside_chasm: Terrain(7,0)
+def chasm: Terrain(8,0)
+def water: Terrain(9,0)
+
+
+def grass: Terrain(0,1)
+def rosy_grass: Terrain(1,1)
+def dark_grass: Terrain(2,1)
+def raised_grass: Terrain(3,1)
+def raised_light_grass: Terrain(4,1)
+def raised_sand: Terrain(5,1)
+def sand_pit: Terrain(6,1)
+def light_water: Terrain(7,1)
+
+def dark_platform: Terrain(0,2)
+def light_platform: Terrain(1,2)
+
+

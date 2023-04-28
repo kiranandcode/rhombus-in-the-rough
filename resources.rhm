@@ -1,0 +1,46 @@
+#lang rhombus
+
+import:
+  rhombus/meta open
+  lib("racket/main.rkt") as racket
+  lib("raylib/2d/unsafe.rkt") as raylib
+
+export:
+  init
+  def_texture
+
+def mutable initialised: #false
+def textures: MutableMap()
+def mutable texture_requests: MutableMap()
+
+fun load_texture(resource):
+  if textures.has_key(resource)
+  | textures[resource]
+  | textures[resource] := raylib.LoadTexture(resource)
+    textures[resource]
+
+fun declare_texture(resource,on_load):
+  cond
+  | initialised:
+     on_load(load_texture(resource))
+  | ~else:
+     if (texture_requests.has_key(resource))
+     | texture_requests[resource] := List.cons(on_load, texture_requests[resource])
+     | texture_requests[resource] := [on_load]
+
+fun init():
+  for:
+    each (k, v): texture_requests
+    def texture: load_texture(k)
+    each on_load: v
+    on_load(texture)
+  texture_requests := MutableMap()
+
+
+defn.macro 'def_texture $name : $(resource :: String)':
+  'def mutable $name: []
+   declare_texture(
+     $resource,
+     fun (vl):
+       $name := vl
+   )'
