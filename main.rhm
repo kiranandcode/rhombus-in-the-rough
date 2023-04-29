@@ -17,7 +17,7 @@ import:
 def screen_width: 800
 def screen_height: 450
 
-def target: Vector2(400.,225.)
+def target: Vector2(-52.,-400.)
 
 def_texture sprite_map : "./resources/images/terrain.png"
 def source_tile_rect: Rectangle(0.,0.,32.,32.)
@@ -43,6 +43,7 @@ while (!raylib.WindowShouldClose()):
   when (raylib.IsKeyDown(raylib.KEY_W)): target.y -= 2.
   when (raylib.IsKeyDown(raylib.KEY_S)): target.y += 2.
 
+  view.set_target(target)
   view.update()
 
   draw_block:
@@ -52,9 +53,16 @@ while (!raylib.WindowShouldClose()):
 
       map.draw(view)
 
-      raylib.DrawCircleV(target.inner(), 10., raylib.MAROON)
+      raylib.DrawCircleV(Vector2(0.0,0.0).inner(), 10., raylib.MAROON)
 
-    raylib.DrawText("Move the ball with arrow keys!", 10, 10, 20, raylib.DARKGRAY)
+    def msg:
+      racket.format(
+         "target is ~a, view_rect: ~a, (camera_zoom: ~a)",
+         target.to_string(),
+         view.view_rect.to_string(),
+         view.camera.zoom
+      )
+    raylib.DrawText(msg, 10, 10, 20, raylib.DARKGRAY)
 
 
 raylib.CloseWindow()

@@ -87,7 +87,7 @@ class Terrain(
   constructor (x,y):
     super(Rectangle(0.,0.,32.,32.),x * 32. * 3, y * 32. * 6)
 
-  method draw_tile(tile::Tile, pos :: Vector2, rotation = 0.0, tint = raylib.WHITE):
+  method draw_tile(tile :: Tile, pos :: Vector2, rotation = 0.0, tint = raylib.WHITE):
     sprite_rect.x := offset_x + tile.x * 32.
     sprite_rect.y := offset_y + tile.y * 32.
     raylib.DrawTexturePro(terrain, sprite_rect.inner(), dest_tile.inner(), pos.inner(), rotation, tint)

@@ -15,21 +15,22 @@ export:
 
 fun set_tile_display_rect(x :: Real, y :: Real, dest_rect::Rectangle):
 
-  def half_width: tile_size.x * 0.5
-  def half_height: tile_size.y * 0.5
+  // def half_width: tile_size.x * 0.5
+  // def half_height: tile_size.y * 0.5
 
-  def quarter_height: tile_size.x * 0.25
-
-  def rect_x :~ Real = x * half_width - y * half_width - half_width
-  def rect_y :~ Real = y * half_height + (x * half_height)
+  def rect_x :~ Real = x * tile_size.x
+  def rect_y :~ Real = y * tile_size.y
 
   dest_rect.x := math.inexact(rect_x)
-  dest_rect.y := math.inexact(rect_y)
+  dest_rect.y := - math.inexact(rect_y)
 
+
+def draw_sprite_pos : Vector2(0.,0.)
 
 fun draw_sprite(id :: terrain.Terrain, x :: Real, y :: Real):
-  id.draw_tile(terrain.tiles.BASE0, Vector2(math.inexact(x),math.inexact(y)))
-
+  draw_sprite_pos.x := - math.inexact(x)
+  draw_sprite_pos.y := math.inexact(y)
+  id.draw_tile(terrain.tiles.BASE0, draw_sprite_pos)
 
 def tile_size: Vector2(32.,32.)
 
@@ -44,6 +45,7 @@ class Map(width :: Integral, height :: Integral, base, elements, dest_rect :: Re
       each x : 0 .. width
       each y : 0 .. height
       set_tile_display_rect(x,y,dest_rect)
-      keep_when view.rect_in_view(dest_rect)
+      def alt_dest_rect : Rectangle(dest_rect.x, - dest_rect.y, dest_rect.width, dest_rect.height)
+      keep_when view.rect_in_view(alt_dest_rect)
       draw_sprite(base, dest_rect.x, dest_rect.y)
       
