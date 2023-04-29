@@ -4,7 +4,6 @@ import:
    rhombus/meta open
    "datatypes.rhm" open
    "lang.rhm" open
-   "raylib_lang.rhm" open
    lib("racket/main.rkt") as racket
    lib("raylib/2d/unsafe.rkt") as raylib
    
@@ -15,7 +14,7 @@ class View(camera :: Camera2D, view_rect :: Rectangle):
 
   constructor
   | (): super(Camera2D(), Rectangle(0.,0.,0.,0.))
-  
+
   private method update_view_rect():
      def cam_target :~ Vector2 = camera.target
      def cam_offset :~ Vector2 = camera.offset
@@ -27,6 +26,9 @@ class View(camera :: Camera2D, view_rect :: Rectangle):
 
   method rect_in_view(rect :: Rectangle):
     view_rect.intersects(rect)
+
+  method set_target(target :: Vector2):
+    camera.target := target
 
   method update():
      update_view_rect()

@@ -1,3 +1,7 @@
 * DONE Look up how to render tilemap in Raylib
 CLOSED: [2023-04-27 Thu 10:46]
-* TODO Load tilemap and draw it
+* DONE Load tilemap and draw it
+CLOSED: [2023-04-29 Sat 08:15]
+* DONE Fix tilemap so it shows up on screen
+CLOSED: [2023-04-29 Sat 08:50]
+* TODO Update camera to follow player

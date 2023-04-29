@@ -17,7 +17,7 @@ import:
 def screen_width: 800
 def screen_height: 450
 
-def ball: Vector2(0.,0.)
+def target: Vector2(400.,225.)
 
 def_texture sprite_map : "./resources/images/terrain.png"
 def source_tile_rect: Rectangle(0.,0.,32.,32.)
@@ -38,17 +38,23 @@ raylib.SetTargetFPS(60);
 
 while (!raylib.WindowShouldClose()):
 
-  when (raylib.IsKeyDown(raylib.KEY_D)): ball.x += 2.
-  when (raylib.IsKeyDown(raylib.KEY_A)): ball.x -= 2.
-  when (raylib.IsKeyDown(raylib.KEY_W)): ball.y -= 2.
-  when (raylib.IsKeyDown(raylib.KEY_S)): ball.y += 2.
+  when (raylib.IsKeyDown(raylib.KEY_D)): target.x += 2.
+  when (raylib.IsKeyDown(raylib.KEY_A)): target.x -= 2.
+  when (raylib.IsKeyDown(raylib.KEY_W)): target.y -= 2.
+  when (raylib.IsKeyDown(raylib.KEY_S)): target.y += 2.
 
-  draw:
+  view.update()
+
+  draw_block:
     raylib.ClearBackground(raylib.RAYWHITE)
-    map.draw(view)
+
+    draw_2d view:
+
+      map.draw(view)
+
+      raylib.DrawCircleV(target.inner(), 10., raylib.MAROON)
+
     raylib.DrawText("Move the ball with arrow keys!", 10, 10, 20, raylib.DARKGRAY)
-    raylib.DrawTexturePro(sprite_map, source_tile_rect.inner(), dest_tile_rect.inner(), ball.inner(), 0.0, raylib.WHITE)
-    terrain.grass.draw_tile(terrain.tiles.BASE0, ball)
-    raylib.DrawCircleV(ball.inner(), 10., raylib.MAROON)
+
 
 raylib.CloseWindow()

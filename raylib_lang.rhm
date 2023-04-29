@@ -3,13 +3,16 @@
 import:
   rhombus/meta open
   "lang.rhm" open
+  "view.rhm" open
+  "datatypes.rhm" open
   lib("raylib/2d/unsafe.rkt") as raylib
 
 export:
-  draw
+  draw_block
+  draw_2d
 
 
-macro 'draw:
+macro 'draw_block:
         $body
         ...':
  'block:
@@ -18,4 +21,15 @@ macro 'draw:
    ...
    raylib.EndDrawing()'
    
+fun begin_mode_2d(view :: View):
+  def camera :~ Camera2D = view.camera
+  raylib.BeginMode2D(camera.inner())
 
+macro 'draw_2d $view:
+        $body
+        ...':
+ 'block:
+   begin_mode_2d($view)
+   $body
+   ...
+   raylib.EndMode2D()'

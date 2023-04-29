@@ -226,7 +226,7 @@ class Camera2D(self):
 
   dot '$left . target' :
     ~tail: tail
-    handle_update_nested('$left', '_Camera2D', 'Vector2', 'raylib.#{Camera2D-target}', 'raylib.#{set-Camera2D-target}', tail)
+    handle_update_nested('$left', '_Camera2D', 'Vector2', 'raylib.#{Camera2D-target}', 'raylib.#{set-Camera2D-target!}', tail)
 
   dot '$left . rotation' :
     ~tail : tail
