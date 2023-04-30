@@ -1,0 +1,110 @@
+#lang rhombus
+
+import:
+   rhombus/meta open
+   "../datatypes.rhm" open
+   "../lang.rhm" open
+   "../raylib_lang.rhm" open
+   "../resources.rhm" expose: def_texture
+   lib("racket/main.rkt") as racket
+   lib("raylib/2d/unsafe.rkt") as raylib
+   lib("raylib/raymath/unsafe.rkt") as raymath
+
+export: HumanoidEntity
+
+def humanoid_entity_sprite : Rectangle(0.,0.,64.,64.)
+def humanoid_entity_bounding_box: Rectangle(0., 0., 64., 64.)
+def humanoid_entity_origin : Vector2(0.,0.)
+
+def HUMANOID_FRAMES : 9
+
+class HumanoidEntity(
+   texture :: resources.Texture,
+   mutable position :: Vector2,
+   speed :: Real,
+   frame_update_speed :: Real,
+   mutable moving :: Boolean,
+   mutable velocity :: Vector2,
+   mutable facing_direction :: direction.Direction,
+   mutable frame_counter :: Integral,
+   mutable last_frame_update_time :: Real,
+ ):
+  
+  constructor (texture, position=Vector2(0.,0.)):
+    def posn :~ Vector2 = position
+    super(
+      texture,
+      Vector2(posn.x, posn.y),
+      100.,
+      0.05,
+      #false,
+      Vector2(0.,0.),
+      direction.DOWN,
+      0,
+      raylib.GetTime()
+    )
+
+
+  method handle_input():
+    def mutable new_direction : facing_direction
+    def mutable any_input : #false
+    velocity.x := 0.; velocity.y := 0.
+    
+    when (raylib.IsKeyDown(raylib.KEY_D)):
+      new_direction := direction.RIGHT
+      velocity.x += 1.
+      any_input := #true
+    when (raylib.IsKeyDown(raylib.KEY_A)):
+      new_direction := direction.LEFT
+      velocity.x -= 1.
+      any_input := #true
+    when (raylib.IsKeyDown(raylib.KEY_W)):
+      new_direction := direction.UP
+      velocity.y -= 1.
+      any_input := #true
+    when (raylib.IsKeyDown(raylib.KEY_S)):
+      new_direction := direction.DOWN
+      velocity.y += 1.
+      any_input := #true
+
+    if any_input
+    | velocity := velocity.normalize()
+      velocity := velocity.scale(speed)
+      when (facing_direction != new_direction || ! moving):
+        facing_direction := new_direction
+        last_frame_update_time := raylib.GetTime()
+        frame_counter := 0
+      moving := #true
+    | frame_counter := 0
+      moving := #false
+
+  method update_frame_counter():
+    def current_time : raylib.GetTime()
+    def delta : (current_time - last_frame_update_time)
+    when (delta > frame_update_speed):
+      def increment: math.floor(delta / frame_update_speed)
+      frame_counter := (frame_counter + increment) mod HUMANOID_FRAMES
+      last_frame_update_time := current_time
+
+
+  method update():
+    handle_input()
+    when moving:
+      def delta : raylib.GetFrameTime()
+      position := position.add(velocity.scale(delta))
+      update_frame_counter()
+
+  
+  method draw():
+    humanoid_entity_bounding_box.x := math.inexact(position.x - 32.)
+    humanoid_entity_bounding_box.y := math.inexact(position.y - 32.)
+    humanoid_entity_sprite.x := math.inexact(64. * frame_counter)
+    humanoid_entity_sprite.y := math.inexact(64. * facing_direction.ind)
+    raylib.DrawTexturePro(
+      texture.inner(),
+      humanoid_entity_sprite.inner(),
+      humanoid_entity_bounding_box.inner(),
+      humanoid_entity_origin.inner(),
+      0.,
+      raylib.WHITE
+    )

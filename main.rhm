@@ -9,6 +9,7 @@ import:
    "game_map.rhm"
    "resources.rhm" expose: def_texture
    "terrain.rhm"
+   "entities/humanoid.rhm"
    lib("racket/main.rkt") as racket
    lib("raylib/2d/unsafe.rkt") as raylib
    lib("raylib/raymath/unsafe.rkt") as raymath
@@ -18,112 +19,8 @@ import:
 def screen_width: 800
 def screen_height: 450
 
-
-def humanoid_entity_sprite : Rectangle(0.,0.,64.,64.)
-def humanoid_entity_bounding_box: Rectangle(0., 0., 64., 64.)
-def humanoid_entity_origin : Vector2(0.,0.)
-
-class Direction(ind::Integral):
-  constructor (ind): super(ind)
-
-def HUMANOID_FRAMES : 9
-def HUMANOID_UP: Direction(0)
-def HUMANOID_LEFT: Direction(1)
-def HUMANOID_DOWN: Direction(2)
-def HUMANOID_RIGHT: Direction(3)
-
-class HumanoidEntity(
-   texture :: resources.Texture,
-   mutable position :: Vector2,
-   speed :: Real,
-   frame_update_speed :: Real,
-   mutable moving :: Boolean,
-   mutable velocity :: Vector2,
-   mutable facing_direction :: Direction,
-   mutable frame_counter :: Integral,
-   mutable last_frame_update_time :: Real,
- ):
-  
-  constructor (texture, position=Vector2(0.,0.)):
-    def posn :~ Vector2 = position
-    super(
-      texture,
-      Vector2(posn.x, posn.y),
-      100.,
-      0.05,
-      #false,
-      Vector2(0.,0.),
-      HUMANOID_DOWN,
-      0,
-      raylib.GetTime()
-    )
-
-
-  method handle_input():
-    def mutable new_direction : facing_direction
-    def mutable any_input : #false
-    velocity.x := 0.; velocity.y := 0.
-    when (raylib.IsKeyDown(raylib.KEY_D)):
-      new_direction := HUMANOID_RIGHT
-      velocity.x += 1.
-      any_input := #true
-    when (raylib.IsKeyDown(raylib.KEY_A)):
-      new_direction := HUMANOID_LEFT
-      velocity.x -= 1.
-      any_input := #true
-    when (raylib.IsKeyDown(raylib.KEY_W)):
-      new_direction := HUMANOID_UP
-      velocity.y -= 1.
-      any_input := #true
-    when (raylib.IsKeyDown(raylib.KEY_S)):
-      new_direction := HUMANOID_DOWN
-      velocity.y += 1.
-      any_input := #true
-
-    if any_input
-    | velocity := velocity.normalize()
-      velocity := velocity.scale(speed)
-      when (facing_direction != new_direction || ! moving):
-        facing_direction := new_direction
-        last_frame_update_time := raylib.GetTime()
-        frame_counter := 0
-      moving := #true
-    | frame_counter := 0
-      moving := #false
-
-  method update_frame_counter():
-    def current_time : raylib.GetTime()
-    def delta : (current_time - last_frame_update_time)
-    when (delta > frame_update_speed):
-      def increment: math.floor(delta / frame_update_speed)
-      frame_counter := (frame_counter + increment) mod HUMANOID_FRAMES
-      last_frame_update_time := current_time
-
-
-  method update():
-    handle_input()
-    when moving:
-      def delta : raylib.GetFrameTime()
-      position := position.add(velocity.scale(delta))
-      update_frame_counter()
-
-  
-  method draw():
-    humanoid_entity_bounding_box.x := math.inexact(position.x - 32.)
-    humanoid_entity_bounding_box.y := math.inexact(position.y - 32.)
-    humanoid_entity_sprite.x := math.inexact(64. * frame_counter)
-    humanoid_entity_sprite.y := math.inexact(64. * facing_direction.ind)
-    raylib.DrawTexturePro(
-      texture.inner(),
-      humanoid_entity_sprite.inner(),
-      humanoid_entity_bounding_box.inner(),
-      humanoid_entity_origin.inner(),
-      0.,
-      raylib.WHITE
-    )
-
 def_texture main_character_image : "./resources/images/male_walkcycle.png"
-def character: HumanoidEntity(main_character_image)
+def character: humanoid.HumanoidEntity(main_character_image)
 
 def view : View()
 def map : game_map.Map(100,100, terrain.rock)
@@ -137,12 +34,6 @@ raylib.SetTargetFPS(60);
 
 while (!raylib.WindowShouldClose()):
 
-  // when (raylib.IsKeyDown(raylib.KEY_D)): target.x += 2.
-  // when (raylib.IsKeyDown(raylib.KEY_A)): target.x -= 2.
-  // when (raylib.IsKeyDown(raylib.KEY_W)): target.y -= 2.
-  // when (raylib.IsKeyDown(raylib.KEY_S)): target.y += 2.
-
-  view.set_target(target)
   view.update()
   character.update()
 
@@ -153,6 +44,7 @@ while (!raylib.WindowShouldClose()):
 
       map.draw_base(view)
       character.draw()
+
 
     def msg:
       racket.format("Nothing to show....")
