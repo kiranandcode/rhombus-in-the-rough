@@ -94,7 +94,7 @@ class Terrain(
     sprite_rect.y := offset_y + tile.y * 32.
     dest_tile.x := pos.x
     dest_tile.y := pos.y
-    raylib.DrawTexturePro(terrain, sprite_rect.inner(), dest_tile.inner(), origin_vector.inner(), rotation, tint)
+    raylib.DrawTexturePro(terrain.inner(), sprite_rect.inner(), dest_tile.inner(), origin_vector.inner(), rotation, tint)
     
 def rock: Terrain(0,0)
 def dark_rock: Terrain(1,0)

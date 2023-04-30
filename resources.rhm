@@ -8,6 +8,16 @@ import:
 export:
   init
   def_texture
+  Texture
+
+class Texture(mutable self):
+
+  constructor(): super(#false)
+
+  method initialize(value):
+    self := value
+
+  method inner(): self
 
 def mutable initialised: #false
 def textures: MutableMap()
@@ -38,9 +48,9 @@ fun init():
 
 
 defn.macro 'def_texture $name : $(resource :: String)':
-  'def mutable $name: []
+  'def $name: Texture()
    declare_texture(
      $resource,
      fun (vl):
-       $name := vl
+       ($name :~ Texture).initialize(vl)
    )'

@@ -33,7 +33,7 @@ def HUMANOID_DOWN: Direction(2)
 def HUMANOID_RIGHT: Direction(3)
 
 class HumanoidEntity(
-   texture,
+   texture :: resources.Texture,
    mutable position :: Vector2,
    speed :: Real,
    frame_update_speed :: Real,
@@ -114,7 +114,7 @@ class HumanoidEntity(
     humanoid_entity_sprite.x := math.inexact(64. * frame_counter)
     humanoid_entity_sprite.y := math.inexact(64. * facing_direction.ind)
     raylib.DrawTexturePro(
-      texture,
+      texture.inner(),
       humanoid_entity_sprite.inner(),
       humanoid_entity_bounding_box.inner(),
       humanoid_entity_origin.inner(),
@@ -123,9 +123,7 @@ class HumanoidEntity(
     )
 
 def_texture main_character_image : "./resources/images/male_walkcycle.png"
-def character_image_origin : Vector2(0.,0.)
-def character_sprite : Rectangle(0.,0.,64.,64.)
-def character_dest : Rectangle(0.,0.,64.,64.)
+def character: HumanoidEntity(main_character_image)
 
 def view : View()
 def map : game_map.Map(100,100, terrain.rock)
@@ -136,7 +134,6 @@ raylib.InitWindow(screen_width,screen_height, "Game")
 resources.init()
 raylib.SetTargetFPS(60);
 
-def character: HumanoidEntity(main_character_image)
 
 while (!raylib.WindowShouldClose()):
 
@@ -148,9 +145,6 @@ while (!raylib.WindowShouldClose()):
   view.set_target(target)
   view.update()
   character.update()
-
-  character_dest.x := target.x + 400. - 32.
-  character_dest.y := target.y + 225. - 32.
 
   draw_block:
     raylib.ClearBackground(raylib.RAYWHITE)
