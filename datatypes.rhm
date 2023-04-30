@@ -58,7 +58,7 @@ class Vector2(self):
   
   constructor
   | (self): super(self)
-  | (x,y): super(raylib.#{make-Vector2}(x,y))
+  | (x,y): super(raylib.#{make-Vector2}(math.inexact(x),math.inexact(y)))
 
   method to_string():
     racket.format("#vec2<~a,~a>", raylib.#{Vector2-x}(self), raylib.#{Vector2-y}(self))
@@ -82,7 +82,11 @@ class Vector3(self):
   constructor
   | (self): super(self)
   | (x,y,z):
-      super(raylib.#{make-Vector3}(x,y,z))
+      super(raylib.#{make-Vector3}(
+         math.inexact(x),
+         math.inexact(y),
+         math.inexact(z)
+      ))
 
   method to_string():
     racket.format("#vec3<~a,~a,~a>", raylib.#{Vector3-x}(self), raylib.#{Vector3-y}(self), raylib.#{Vector3-z}(self))
@@ -108,7 +112,12 @@ class Vector4(self):
   constructor
   | (self): super(self)
   | (x,y,z,w):
-      super(raylib.#{make-Vector4}(x,y,z,w))
+      super(raylib.#{make-Vector4}(
+        math.inexact(x),
+        math.inexact(y),
+        math.inexact(z),
+        math.inexact(w)
+      ))
 
   method to_string():
     racket.format("#vec4<~a,~a,~a,~a>", raylib.#{Vector4-x}(self), raylib.#{Vector4-y}(self), raylib.#{Vector4-z}(self), raylib.#{Vector4-w}(self))
@@ -170,7 +179,12 @@ class Rectangle(self):
   constructor
   | (self): super(self)
   | (x,y,width,height):
-      super(raylib.#{make-Rectangle}(x,y,width,height))
+      super(raylib.#{make-Rectangle}(
+        math.inexact(x),
+        math.inexact(y),
+        math.inexact(width),
+        math.inexact(height)
+      ))
 
   method to_string():
     racket.format("#rect<~a,~a,~a,~a>", raylib.#{Rectangle-x}(self), raylib.#{Rectangle-y}(self), raylib.#{Rectangle-width}(self), raylib.#{Rectangle-height}(self))

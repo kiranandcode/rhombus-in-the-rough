@@ -17,7 +17,7 @@ import:
 def screen_width: 800
 def screen_height: 450
 
-def target: Vector2(-52.,-400.)
+def target: Vector2(0.,0.)
 
 def_texture sprite_map : "./resources/images/terrain.png"
 def source_tile_rect: Rectangle(0.,0.,32.,32.)
@@ -56,12 +56,7 @@ while (!raylib.WindowShouldClose()):
       raylib.DrawCircleV(Vector2(0.0,0.0).inner(), 10., raylib.MAROON)
 
     def msg:
-      racket.format(
-         "target is ~a, view_rect: ~a, (camera_zoom: ~a)",
-         target.to_string(),
-         view.view_rect.to_string(),
-         view.camera.zoom
-      )
+      racket.format("Nothing to show....")
     raylib.DrawText(msg, 10, 10, 20, raylib.DARKGRAY)
 
 
