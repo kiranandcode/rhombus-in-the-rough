@@ -10,6 +10,7 @@ import:
 export:
   draw_block
   draw_2d
+  handle_inputs
 
 
 macro 'draw_block:
@@ -33,3 +34,31 @@ macro 'draw_2d $view:
    $body
    ...
    raylib.EndMode2D()'
+
+expr.macro
+| 'handle_input_any_body([~any, [$body, ...]], $rest, ...)':
+    'block:
+      $body
+      ...'
+| 'handle_input_any_body([$key, [$body, ...]], $rest, ...)':
+    'handle_input_any_body($rest, ...)'
+| 'handle_input_any_body([])': '#void'
+
+expr.macro
+| 'generate_input_case($fn, ~any, [$body, ...], $any_body)':
+    '#void'
+| 'generate_input_case($fn, $key, [$body, ...], $any_body)':
+    'when ($fn($key)):
+       $body
+       ...
+       $any_body'
+
+expr.macro 'handle_inputs $fn
+            | $key
+              $body
+              ...
+            | ...':
+   def any_body: 'handle_input_any_body([$key,[$body, ...]], ...)'
+   'block:
+     generate_input_case($fn, $key, [$body, ...], $any_body)
+     ...'

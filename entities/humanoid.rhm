@@ -44,28 +44,27 @@ class HumanoidEntity(
       raylib.GetTime()
     )
 
-
   method handle_input():
     def mutable new_direction : facing_direction
     def mutable any_input : #false
     velocity.x := 0.; velocity.y := 0.
     
-    when (raylib.IsKeyDown(raylib.KEY_D)):
+    handle_inputs (raylib.IsKeyDown)
+    | raylib.KEY_D
       new_direction := direction.RIGHT
       velocity.x += 1.
-      any_input := #true
-    when (raylib.IsKeyDown(raylib.KEY_A)):
+    | raylib.KEY_A
       new_direction := direction.LEFT
       velocity.x -= 1.
-      any_input := #true
-    when (raylib.IsKeyDown(raylib.KEY_W)):
+    | raylib.KEY_W
       new_direction := direction.UP
       velocity.y -= 1.
-      any_input := #true
-    when (raylib.IsKeyDown(raylib.KEY_S)):
+    | raylib.KEY_S
       new_direction := direction.DOWN
       velocity.y += 1.
+    | ~any
       any_input := #true
+
 
     if any_input
     | velocity := velocity.normalize()
