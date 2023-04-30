@@ -17,24 +17,54 @@ import:
 def screen_width: 800
 def screen_height: 450
 
-def target: Vector2(0.,0.)
 
-def_texture sprite_map : "./resources/images/terrain.png"
-def source_tile_rect: Rectangle(0.,0.,32.,32.)
-def dest_tile_rect: Rectangle(10.,10.,320.,320.)
+def humanoid_entity_sprite : Rectangle(0.,0.,64.,64.)
+def humanoid_entity_bounding_box: Rectangle(0., 0., 64., 64.)
+def humanoid_entity_origin : Vector2(0.,0.)
 
+class HumanoidEntity(texture, mutable position :: Vector2, speed :: Real, target :: Vector2, mutable target_active):
+  
+  constructor (texture, position=Vector2(0.,0.)):
+    super(texture, Vector2(position.x, position.y), 3., Vector2(0.,0.), #false)
+
+  method update():
+    cond
+    | target_active:
+       def movement : target.subtract(position)
+       def distance : movement.distance()
+       def frame_speed : raylib.GetFrametime() * speed
+       if distance <= frame_speed
+       | target_active := #false
+         position := target
+       | def direction : movement.normalize()
+         def new_position : position.add(direction.scale(frame_speed))
+         position := new_position
+  
+  method draw():
+    humanoid_entity_bounding_box.x := position.x - 32.
+    humanoid_entity_bounding_box.y := position.y - 32.
+    raylib.DrawTexturePro(
+      texture,
+      humanoid_entity_sprite.inner(),
+      humanoid_entity_bounding_box.inner(),
+      humanoid_entity_origin.inner(),
+      0.,
+      raylib.WHITE
+    )
 
 def_texture main_character_image : "./resources/images/male_walkcycle.png"
-def character_image_position : Vector2(0.,0.)
-def character_frame_rec : Rectangle(0.,0.,0.,0.)
+def character_image_origin : Vector2(0.,0.)
+def character_sprite : Rectangle(0.,0.,64.,64.)
+def character_dest : Rectangle(0.,0.,64.,64.)
 
 def view : View()
 def map : game_map.Map(100,100, terrain.rock)
 
+def target: Vector2(0.,0.)
+
 raylib.InitWindow(screen_width,screen_height, "Game")
 resources.init()
 raylib.SetTargetFPS(60);
-
 
 while (!raylib.WindowShouldClose()):
 
@@ -46,18 +76,28 @@ while (!raylib.WindowShouldClose()):
   view.set_target(target)
   view.update()
 
+  character_dest.x := target.x + 400. - 32.
+  character_dest.y := target.y + 225. - 32.
+
   draw_block:
     raylib.ClearBackground(raylib.RAYWHITE)
 
     draw_2d view:
 
-      map.draw(view)
+      map.draw_base(view)
 
       raylib.DrawCircleV(Vector2(0.0,0.0).inner(), 10., raylib.MAROON)
+      raylib.DrawTexturePro(
+        main_character_image,
+        character_sprite.inner(),
+        character_dest.inner(),
+        character_image_origin.inner(),
+        0.,
+        raylib.WHITE
+      )
 
     def msg:
       racket.format("Nothing to show....")
     raylib.DrawText(msg, 10, 10, 20, raylib.DARKGRAY)
-
 
 raylib.CloseWindow()

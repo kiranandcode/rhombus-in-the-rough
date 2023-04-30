@@ -4,4 +4,6 @@ CLOSED: [2023-04-27 Thu 10:46]
 CLOSED: [2023-04-29 Sat 08:15]
 * DONE Fix tilemap so it shows up on screen
 CLOSED: [2023-04-29 Sat 08:50]
-* TODO Update camera to follow player
+* DONE Update camera to follow player
+CLOSED: [2023-04-30 Sun 07:09]
+* TODO Draw Characters

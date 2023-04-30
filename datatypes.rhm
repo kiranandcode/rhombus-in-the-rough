@@ -63,6 +63,19 @@ class Vector2(self):
   method to_string():
     racket.format("#vec2<~a,~a>", raylib.#{Vector2-x}(self), raylib.#{Vector2-y}(self))
 
+  method distance(): raylib.Vector2Length(self)
+
+  method normalize(): raylib.Vector2Normalize(self)
+
+  method subtract(other :: Vector2):
+    Vector2(raylib.Vector2Subtract(self, other.self))
+
+  method add(other :: Vector2):
+    Vector2(raylib.Vector2Add(self, other.self))
+
+  method scale(by :: Real):
+    Vector2(raylib.Vector2Scale(self, math.inexact(by)))
+
   method inner(): self
 
   dot '$left . x' :
@@ -90,6 +103,17 @@ class Vector3(self):
 
   method to_string():
     racket.format("#vec3<~a,~a,~a>", raylib.#{Vector3-x}(self), raylib.#{Vector3-y}(self), raylib.#{Vector3-z}(self))
+
+  method distance(): raylib.Vector3Length(self)
+
+  method subtract(other :: Vector3):
+    Vector3(raylib.Vector3Subtract(self, other.self))
+
+  method add(other :: Vector3):
+    Vector3(raylib.Vector3Add(self, other.self))
+
+  method scale(by :: Real):
+    Vector3(raylib.Vector3Scale(self, math.inexact(by)))
 
   method inner(): self
 
@@ -121,6 +145,17 @@ class Vector4(self):
 
   method to_string():
     racket.format("#vec4<~a,~a,~a,~a>", raylib.#{Vector4-x}(self), raylib.#{Vector4-y}(self), raylib.#{Vector4-z}(self), raylib.#{Vector4-w}(self))
+
+  method distance(): raylib.Vector4Length(self)
+
+  method subtract(other :: Vector4):
+    Vector4(raylib.Vector4Subtract(self, other.self))
+
+  method add(other :: Vector4):
+    Vector4(raylib.Vector4Add(self, other.self))
+
+  method scale(by :: Real):
+    Vector4(raylib.Vector4Scale(self, math.inexact(by)))
 
   method inner(): self
 

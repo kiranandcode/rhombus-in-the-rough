@@ -49,7 +49,7 @@ class Map(width :: Integral, height :: Integral, base, elements, dest_rect :: Re
     def stop_y: math.min(math.ceiling((view_rect.y + view_rect.height) / tile_size.y), height)
     values(start_x, stop_x, start_y, stop_y)
 
-  method draw(view :: View):
+  method draw_base(view :: View):
     def values(start_x, stop_x, start_y, stop_y): calculate_iteration_bounds(view)
     for:
       each x : start_x .. stop_x
