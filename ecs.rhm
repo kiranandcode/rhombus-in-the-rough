@@ -2,45 +2,149 @@
 
 import:
    rhombus/meta open
+   "datatypes.rhm" open
    lib("racket/main.rkt") as racket
    lib("raylib/2d/unsafe.rkt") as raylib
    lib("raylib/raymath/unsafe.rkt") as raymath
+   lib("ffi/unsafe.rkt") as unsafe
+
+def max_entities: 4
 
 namespace entity:
-  export: Entity create
+  export: Entity create available_entities
 
-  class Entity(id::Integral):
+  def mutable available_entities: racket.#{build-list}(max_entities, fun (id): id)
+
+  class Entity(id::Integral, mutable destroyed :: Boolean):
 
     method add_component(comp):
       #void
       
-
-  def mutable next_id : 0 
+    method destroy():
+      if destroyed
+      | error("Attempt to destroy an invalid entity")
+      | // TODO: clear all components
+        available_entities := List.cons(id, available_entities)
+        destroyed := #true
 
   fun create():
-    def id: next_id
-    next_id := next_id + 1
-    Entity(id)
+    def List.cons(id, rest) : available_entities
+    available_entities := rest
+    def entity: Entity(id, #false)
+    unsafe.#{register-finalizer}(
+        entity,
+        fun (obj :: Entity):
+          if obj.destroyed
+          | #void
+          | obj.destroy())
+    entity
+
+class ComponentData(
+  entity_to_index_map :: Array,
+  index_to_entity_map :: Array,
+  data :: Array,
+  mutable next_index :: Integral
+ ):
+  constructor():
+    super(
+      Array.make(max_entities, #false),
+      Array.make(max_entities, #false),
+      Array.make(max_entities, #false),
+      0
+    )
+  
+  method add_component(entity :: Integral, value):
+    if entity_to_index_map[entity]
+    | error("attempt to add duplicate components to entity")
+    | def index : next_index
+
+      entity_to_index_map[entity] := index
+      index_to_entity_map[index] := entity
+      data[index] := value
+
+      next_index := next_index + 1
+      
+  method remove_component(entity :: Integral):
+    if (!entity_to_index_map[entity])
+    | #void
+    | def index : entity_to_index_map[entity]
+      for:
+        each other_ind: (index + 1) .. next_index
+        def entity: index_to_entity_map[other_ind]
+
+        entity_to_index_map[entity] := other_ind - 1
+        index_to_entity_map[other_ind - 1] := entity
+
+        data[other_ind - 1] := data[other_ind]
+
+      block:
+        entity_to_index_map[entity] := #false
+        index_to_entity_map[next_index - 1] := #false
+        data[next_index - 1] := #false
+      next_index := next_index - 1
+
+  method get_data(entity :: Integral):
+    def index: entity_to_index_map[entity]
+    if (!index)
+    | error("entity does not have component")
+    | data[index]
 
 
+check:
+  def Position : ComponentData()
+  Position.add_component(0, "hello")
+  Position.add_component(1, "world")
+  Position.add_component(2, "!!!")
+  Position.get_data(0) ++ Position.get_data(1) ++ Position.get_data(2)
+  ~is "helloworld!!!"
 
-fun Position(value :: Vector2):
-  #void
+check:
+  def Position : ComponentData()
+  Position.add_component(0, "hello")
+  Position.add_component(1, "world")
+  Position.add_component(2, "!!!")
+  Position.remove_component(1)
+  Position.get_data(0) ++ Position.get_data(2)
+  ~is "hello!!!"
+
+check:
+  def Position : ComponentData()
+  Position.add_component(0, "hello")
+  Position.add_component(1, "world")
+  Position.add_component(2, "!!!")
+  Position.remove_component(1)
+  Position.remove_component(2)
+  Position.get_data(0)
+  ~is "hello"
+
+check:
+  def Position : ComponentData()
+  Position.add_component(0, "hello")
+  Position.add_component(1, "world")
+  Position.add_component(2, "!!!")
+  Position.remove_component(1)
+  Position.remove_component(2)
+  Position.get_data(0)
+  ~is "hello"
+
+
+// fun Position(value :: Vector2):
+//   #void
   
 
 
-// component Position(value :: Vector2)
-// component Velocity(value :: Vector2)
+// // component Position(value :: Vector2)
+// // component Velocity(value :: Vector2)
 
-// system Transform(position :: Position, velocity :: Velocity):
+// // system Transform(position :: Position, velocity :: Velocity):
   
-//   def update():
-//     def dt : raylib.GetFrameTime()
-//     position.value := position.value.add(velocity.value.scale(dt))
+// //   def update():
+// //     def dt : raylib.GetFrameTime()
+// //     position.value := position.value.add(velocity.value.scale(dt))
 
 
-def character :
-  entity
-    .create()
-    .add_component(Position(Vector2(0.,0.)))
-    .add_component(Velocity(Vector2(0.,0.)))
+// def character :
+//   entity
+//     .create()
+//     .add_component(Position(Vector2(0.,0.)))
+//     // .add_component(Velocity(Vector2(0.,0.)))
