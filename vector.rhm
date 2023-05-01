@@ -1,0 +1,66 @@
+#lang rhombus
+
+import:
+  rhombus/meta open
+  lib("racket/base.rkt") as racket
+  lib("racket/vector.rkt") as vector
+
+
+annot.macro 'Vector':
+  annot_meta.pack_predicate(
+    'fun (x): racket.#{vector?}(x)',
+    '(($(statinfo_meta.dot_provider_key),
+       vector_dot_provider),
+      ($(statinfo_meta.map_ref_key),
+       ref),
+      ($(statinfo_meta.map_set_key),
+       set))'
+  )
+
+dot.macro 'vector_dot_provider $left $dot $right':
+  match right
+  | 'length': 'fun (): length($left)'
+  | 'to_list': 'fun (): to_list($left)'
+  | 'fill': 'fun (elt): fill($left, elt)'
+  | 'copy': 'fun (dest_start, src, src_start, src_end): copy($left, dest_start, src, src_start, src_end)'
+  | 'is_empty': 'fun (): is_empty($left)'
+
+fun make(size :: Integral, v=0):
+  racket.#{make-vector}(size,v)
+
+fun build_vector(n::Integral, proc):
+  racket.#{build-vector}(n, proc)
+
+fun ref(vec :: Vector, elt :: Integral):
+  racket.#{vector-ref}(vec,elt)
+
+fun set(vec :: Vector, pos :: Integral, elt):
+  racket.#{vector-set!}(vec,pos,elt)
+
+fun to_list(vec :: Vector):
+  racket.#{vector->list}(vec)
+
+fun of_list(ls :: List):
+  racket.#{list->vector}(ls)
+
+fun fill(vec :: Vector, elt):
+  racket.#{vector-fill!}(vec, elt)
+
+fun copy(vec :: Vector, dest_start :: Integral, src :: Vector, src_start :: Integral, src_end :: Integral):
+  racket.#{vector-copy!}(vec, dest_start, src, src_start, src_end)
+
+fun length(vec :: Vector):
+  racket.#{vector-length}(vec)
+
+fun is_empty(vec :: Vector):
+  vector.#{vector-empty?}(vec)
+
+fun map(vec :: Vector, proc):
+  vector.#{vector-map}(proc, vec)
+
+def v :: Vector = Array.make(10)
+
+v[0]
+
+
+

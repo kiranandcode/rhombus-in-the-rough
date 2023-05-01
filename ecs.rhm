@@ -1,0 +1,46 @@
+#lang rhombus
+
+import:
+   rhombus/meta open
+   lib("racket/main.rkt") as racket
+   lib("raylib/2d/unsafe.rkt") as raylib
+   lib("raylib/raymath/unsafe.rkt") as raymath
+
+namespace entity:
+  export: Entity create
+
+  class Entity(id::Integral):
+
+    method add_component(comp):
+      #void
+      
+
+  def mutable next_id : 0 
+
+  fun create():
+    def id: next_id
+    next_id := next_id + 1
+    Entity(id)
+
+
+
+fun Position(value :: Vector2):
+  #void
+  
+
+
+// component Position(value :: Vector2)
+// component Velocity(value :: Vector2)
+
+// system Transform(position :: Position, velocity :: Velocity):
+  
+//   def update():
+//     def dt : raylib.GetFrameTime()
+//     position.value := position.value.add(velocity.value.scale(dt))
+
+
+def character :
+  entity
+    .create()
+    .add_component(Position(Vector2(0.,0.)))
+    .add_component(Velocity(Vector2(0.,0.)))
