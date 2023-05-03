@@ -12,7 +12,7 @@ export:
   component
   entity
 
-def max_entities: 100_000
+def max_entities: 10
 
 def mutable systems: []
 def mutable components: []
@@ -66,12 +66,13 @@ namespace entity:
 class.together:
 
   class System(
+     name :: String,
      mutable _entities :: MutableSet,
      components :: List.of(Component)
    ):
 
-     constructor(components :: List.of(Component)):
-       def sys: super(MutableSet{}, components)
+     constructor(name :: String, components :: List.of(Component)):
+       def sys: super(name, MutableSet{}, components)
        // add self to components
        for:
           each comp: components
@@ -95,6 +96,7 @@ class.together:
        racket.#{in-set}(_entities)
 
   class Component(
+    name :: String,
     entity_to_index_map :: Array,
     index_to_entity_map :: Array,
     data :: Array,
@@ -102,9 +104,10 @@ class.together:
     mutable next_index :: Integral
    ):
 
-    constructor():
+    constructor(name, ):
       def comp:
         super(
+          name, 
           Array.make(max_entities, #false),
           Array.make(max_entities, #false),
           Array.make(max_entities, #false),
@@ -182,7 +185,7 @@ class.together:
 fun has_data(entity :: entity.Entity, comps :: List.of(Component)):
   def mutable all_has_data: #true
   for:
-    each comp: components
+    each comp: comps
     all_has_data := comp.has_data(entity)
     break_when (!all_has_data)
     #void
@@ -191,7 +194,7 @@ fun has_data(entity :: entity.Entity, comps :: List.of(Component)):
 
 fun test():
   check:
-    def Position : Component()
+    def Position : Component("Position")
     def [e1,e2,e3]: [entity.Entity(0,#false),entity.Entity(1,#false),entity.Entity(2,#false)]
     Position.add_component(e1, "hello")
     Position.add_component(e2, "world")
@@ -200,7 +203,7 @@ fun test():
     ~is "helloworld!!!"
 
   check:
-    def Position : Component()
+    def Position : Component("Position")
     def [e1,e2,e3]: [entity.Entity(0,#false),entity.Entity(1,#false),entity.Entity(2,#false)]
     Position.add_component(e1, "hello")
     Position.add_component(e2, "world")
@@ -210,7 +213,7 @@ fun test():
     ~is "hello!!!"
 
   check:
-    def Position : Component()
+    def Position : Component("Position")
     def [e1,e2,e3]: [entity.Entity(0,#false),entity.Entity(1,#false),entity.Entity(2,#false)]
     Position.add_component(e1, "hello")
     Position.add_component(e2, "world")
@@ -221,7 +224,7 @@ fun test():
     ~is "hello"
 
   check:
-    def Position : Component()
+    def Position : Component("Position")
     def [e1,e2,e3]: [entity.Entity(0,#false),entity.Entity(1,#false),entity.Entity(2,#false)]
     Position.add_component(e1, "hello")
     Position.add_component(e2, "world")
@@ -232,7 +235,7 @@ fun test():
     ~is "hello"
 
   check:
-    def _Position : Component()
+    def _Position : Component("Position")
     fun Position(data): [_Position, data]
     def e1: entity.create()
     def e2: entity.create()
@@ -249,7 +252,7 @@ defn.macro
    def _name_value : match name | '$(x::Identifier)': to_string(x.unwrap())
    def _name : Syntax.make(syntax.#{format-id}(name_stx, "_~a", _name_value)).relocate(name)
    def _name_class : Syntax.make(syntax.#{format-id}(name_stx, "~a_class", _name_value)).relocate(name)
-   '«def $_name: Component()
+   '«def $_name: Component($_name_value)
      class $_name_class(mutable $field_name :: $ty, ...)
      annot.macro '$name': '$_name_class'
      fun
@@ -259,7 +262,7 @@ defn.macro
    def name_stx: Syntax.make('$name')
    def _name_value : match name | '$(x::Identifier)': to_string(x.unwrap())
    def _name : Syntax.make(syntax.#{format-id}(name_stx, "_~a", _name_value)).relocate(name)
-   '«def $_name: Component()
+   '«def $_name: Component($_name_value)
      annot.macro '$name': '$ty'
      fun 
      | $name(data :: $ty) : [$_name, data]
@@ -318,6 +321,7 @@ meta:
 defn.macro
 | 'system $name($component_name :: $component, ...):
      $body ...':
+    def _name_value : match name | '$(x::Identifier)': to_string(x.unwrap())
     def component_list: 'component_names([$component, ...])'
     def system_body: build_system_body('[[$component_name, $component], ...]', '$body ...')
     def exports: build_system_exports('$body ...')
@@ -325,7 +329,7 @@ defn.macro
         export:
           _system
           $exports
-        def _system: System([name_to_component_value($component), ...])
+        def _system: System($_name_value, [name_to_component_value($component), ...])
         $system_body
       »'
      
