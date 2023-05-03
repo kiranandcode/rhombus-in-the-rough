@@ -10,9 +10,27 @@ import:
    "resources.rhm" expose: def_texture
    "terrain.rhm"
    "entities/humanoid.rhm"
+   "ecs.rhm" open
    lib("racket/main.rkt") as racket
    lib("raylib/2d/unsafe.rkt") as raylib
    lib("raylib/raymath/unsafe.rkt") as raymath
+
+component Position(value :: Vector2)
+component Velocity(value :: Vector2)
+
+system Transform(position :: Position, velocity :: Velocity):
+  
+  fun update():
+    def dt : raylib.GetFrameTime()
+    position.value := position.value.add(velocity.value.scale(dt))
+
+
+def base_character :
+  entity
+    .create()
+    .add_component(Position(Vector2(0.,0.)))
+    .add_component(Velocity(Vector2(1.,0.)))
+
 
 
 // constants

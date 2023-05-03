@@ -6,4 +6,17 @@ CLOSED: [2023-04-29 Sat 08:15]
 CLOSED: [2023-04-29 Sat 08:50]
 * DONE Update camera to follow player
 CLOSED: [2023-04-30 Sun 07:09]
+* TODO Implement systems
+** Add System
+*** for each component, add self to component
+*** select entities in first component
+**** filter entities that occur in all other components
+*** add entities to system
+** Add component to entity
+*** for each system interested in the component,
+*** add entity to system (if entity has all other fields)
+** Remove component from entity
+*** for each system interested in the component
+*** remove entity from system
+
 * TODO Draw Characters
