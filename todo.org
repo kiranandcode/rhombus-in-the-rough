@@ -6,7 +6,8 @@ CLOSED: [2023-04-29 Sat 08:15]
 CLOSED: [2023-04-29 Sat 08:50]
 * DONE Update camera to follow player
 CLOSED: [2023-04-30 Sun 07:09]
-* TODO Implement systems
+* DONE Implement systems
+CLOSED: [2023-05-03 Wed 18:19]
 ** Add System
 *** for each component, add self to component
 *** select entities in first component
@@ -19,4 +20,23 @@ CLOSED: [2023-04-30 Sun 07:09]
 *** for each system interested in the component
 *** remove entity from system
 
-* TODO Draw Characters
+* DONE Draw Characters
+CLOSED: [2023-05-03 Wed 18:19]
+* Minor steps
+** TODO Lookup examples of component designs
+** TODO Refactor Components
+** TODO Add a second character
+** TODO Sort drawing by y-order
+** TODO Add interactable component
+*** Has value representing action
+** TODO Add interaction system
+*** TODO for entity with interaction and position, if distance from player is less than n, show interaction dialog
+** TODO Add dialog box (non ECS)
+* TODO Add dialog writing lang
+** P1: .... P2: ..... Choice: ..... Narrator: .....
+* TODO Add map description lang
+* TODO Add item/inventory description lang
+* TODO Add multiple worlds
+* TODO Add enemies description lang
+* TODO Add quest description lang
+
