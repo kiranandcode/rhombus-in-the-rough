@@ -17,33 +17,114 @@ import:
 
 component Position(value :: Vector2)
 component Velocity(value :: Vector2)
+component AnimatedSprite(
+   texture :: resources.Texture,
+   moving :: Boolean,
+   facing_direction :: direction.Direction,
+   frame_counter :: Integral,
+   last_frame_update_time :: Real,
+   frames :: Integral
+)
+component ControlledByUser(speed :: Real)
 
-system Transform(position :: Position, velocity :: Velocity):
+system UserControlled(
+    anim :: AnimatedSprite,
+    velocity :: Velocity,
+    control :: ControlledByUser 
+  ):
+
+  fun update():
+    def mutable new_direction : anim.facing_direction
+    def mutable any_input : #false
+    velocity.value.x := 0.; velocity.value.y := 0.
+    
+    handle_inputs (raylib.IsKeyDown)
+    | raylib.KEY_D
+      new_direction := direction.RIGHT
+      velocity.value.x += 1.
+    | raylib.KEY_A
+      new_direction := direction.LEFT
+      velocity.value.x -= 1.
+    | raylib.KEY_W
+      new_direction := direction.UP
+      velocity.value.y -= 1.
+    | raylib.KEY_S
+      new_direction := direction.DOWN
+      velocity.value.y += 1.
+    | ~any
+      any_input := #true
+
+    if any_input
+    | velocity.value := velocity.value.normalize()
+      velocity.value := velocity.value.scale(control.speed)
+      when (anim.facing_direction != new_direction || ! anim.moving):
+        anim.facing_direction := new_direction
+        anim.last_frame_update_time := raylib.GetTime()
+        anim.frame_counter := 0
+      anim.moving := #true
+    | anim.frame_counter := 0
+      anim.moving := #false
+
+system SpriteAnimation(anim :: AnimatedSprite):
   
   fun update():
-    def dt : raylib.GetFrameTime()
-    position.value := position.value.add(velocity.value.scale(dt))
+    when (anim.moving):
+      def current_time : raylib.GetTime()
+      def delta : (current_time - anim.last_frame_update_time)
+      when (delta > anim.frame_update_speed):
+        def increment: math.floor(delta / anim.frame_update_speed)
+        anim.frame_counter := (anim.frame_counter + increment) mod anim.frames
+        anim.last_frame_update_time := current_time
 
+def humanoid_entity_sprite : Rectangle(0.,0.,64.,64.)
+def humanoid_entity_bounding_box: Rectangle(0., 0., 64., 64.)
+def humanoid_entity_origin : Vector2(0.,0.)
 
-def base_character :
+def HUMANOID_FRAMES : 9
+
+system HumanDrawable(
+    position :: Position,
+    anim :: AnimatedSprite
+  ):
+
+    fun draw():
+      println("drawing")
+      humanoid_entity_bounding_box.x := math.inexact(position.value.x - 32.)
+      humanoid_entity_bounding_box.y := math.inexact(position.value.y - 32.)
+      humanoid_entity_sprite.x := math.inexact(64. * anim.frame_counter)
+      humanoid_entity_sprite.y := math.inexact(64. * anim.facing_direction.ind)
+      raylib.DrawTexturePro(
+        anim.texture.inner(),
+        humanoid_entity_sprite.inner(),
+        humanoid_entity_bounding_box.inner(),
+        humanoid_entity_origin.inner(),
+        0.,
+        raylib.WHITE
+      )
+
+def_texture main_character_image : "./resources/images/male_walkcycle.png"
+
+def character:
   entity
     .create()
-    .add_component(Position(Vector2(0.,0.)))
-    .add_component(Velocity(Vector2(1.,0.)))
-
-
-
+    .add_component(Position(Vector2(320.,320.)))
+    .add_component(Velocity(Vector2(0.,0.)))
+    .add_component(AnimatedSprite(
+      main_character_image,
+      #false,
+      direction.DOWN,
+      0.,
+      0.,
+      HUMANOID_FRAMES
+    ))
+    .add_component(ControlledByUser(3.0))
+    
 // constants
 def screen_width: 800
 def screen_height: 450
 
-def_texture main_character_image : "./resources/images/male_walkcycle.png"
-def character: humanoid.HumanoidEntity(main_character_image)
-
 def view : View()
 def map : game_map.Map(100,100, terrain.rock)
-
-def target: Vector2(0.,0.)
 
 raylib.InitWindow(screen_width,screen_height, "Game")
 resources.init()
@@ -53,7 +134,8 @@ raylib.SetTargetFPS(60);
 while (!raylib.WindowShouldClose()):
 
   view.update()
-  character.update()
+  UserControlled.update()
+  SpriteAnimation.update()
 
   draw_block:
     raylib.ClearBackground(raylib.RAYWHITE)
@@ -61,7 +143,8 @@ while (!raylib.WindowShouldClose()):
     draw_2d view:
 
       map.draw_base(view)
-      character.draw()
+      HumanDrawable.draw()
+
 
 
     def msg:

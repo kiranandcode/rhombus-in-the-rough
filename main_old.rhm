@@ -1,0 +1,35 @@
+#lang rhombus
+
+def_texture main_character_image : "./resources/images/male_walkcycle.png"
+def character: humanoid.HumanoidEntity(main_character_image)
+
+def view : View()
+def map : game_map.Map(100,100, terrain.rock)
+
+def target: Vector2(0.,0.)
+
+raylib.InitWindow(screen_width,screen_height, "Game")
+resources.init()
+raylib.SetTargetFPS(60);
+
+
+while (!raylib.WindowShouldClose()):
+
+  view.update()
+  character.update()
+
+  draw_block:
+    raylib.ClearBackground(raylib.RAYWHITE)
+
+    draw_2d view:
+
+      map.draw_base(view)
+      character.draw()
+
+
+    def msg:
+      racket.format("Nothing to show....")
+    raylib.DrawText(msg, 10, 10, 20, raylib.DARKGRAY)
+    raylib.DrawFPS(0,0)
+
+raylib.CloseWindow()
