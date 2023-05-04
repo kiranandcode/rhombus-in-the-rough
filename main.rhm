@@ -11,6 +11,8 @@ import:
    "terrain.rhm"
    "entities/humanoid.rhm"
    "ecs.rhm" open
+   meta:
+     lib("racket/syntax.rkt") as syntax
    lib("racket/main.rkt") as racket
    lib("raylib/2d/unsafe.rkt") as raylib
    lib("raylib/raymath/unsafe.rkt") as raymath
@@ -33,7 +35,7 @@ system Movement(
     velocity :: Velocity
   ):
 
- fun update():
+ method update():
    def delta : raylib.GetFrameTime()
    position.value := position.value.add(velocity.value.scale(delta))
 
@@ -43,7 +45,7 @@ system UserControlled(
     control :: ControlledByUser 
   ):
 
-  fun update():
+  method update():
     def mutable new_direction : anim.facing_direction
     def mutable any_input : #false
     velocity.value.x := 0.; velocity.value.y := 0.
@@ -76,7 +78,7 @@ system UserControlled(
       anim.moving := #false
 
 system SpriteAnimation(anim :: AnimatedSprite):
-  fun update():
+  method update():
     when (anim.moving):
       def current_time : raylib.GetTime()
       def delta : (current_time - anim.last_frame_update_time)
@@ -96,7 +98,7 @@ system HumanDrawable(
     anim :: AnimatedSprite
   ):
 
-    fun draw():
+    method draw():
       humanoid_entity_bounding_box.x := math.inexact(position.value.x - 32.)
       humanoid_entity_bounding_box.y := math.inexact(position.value.y - 32.)
       humanoid_entity_sprite.x := math.inexact(64. * anim.frame_counter)
@@ -113,12 +115,11 @@ system HumanDrawable(
 
 def_texture main_character_image : "./resources/images/male_walkcycle.png"
 
-def character:
-  entity
-    .create()
-    .add_component(Position(Vector2(320.,320.)))
-    .add_component(Velocity(Vector2(0.,0.)))
-    .add_component(AnimatedSprite(
+  
+instance Player:
+  component position :~ Position = Vector2(320.,320.)
+  component velocity :~ Velocity = Vector2(0.,0.)
+  component sprite :~ AnimatedSprite = AnimatedSprite(
       main_character_image,
       #false,
       direction.DOWN,
@@ -126,8 +127,10 @@ def character:
       0.05,
       0.,
       HUMANOID_FRAMES
-    ))
-    .add_component(ControlledByUser(100.0))
+    )
+  component control :~ ControlledByUser = 100.0
+  
+def character: Player.create()
     
 // constants
 def screen_width: 800

@@ -11,6 +11,7 @@ export:
   system
   component
   entity
+  instance
 
 def max_entities: 10
 
@@ -33,6 +34,9 @@ namespace entity:
       def comp : fn()
       comp.get_data(this)
 
+    method get_component_opt(fn):
+      def comp : fn()
+      comp.get_data_opt(this)
 
     method destroy():
       if destroyed
@@ -181,6 +185,13 @@ class.together:
       if (!index)
       | error("entity does not have component")
       | data[index]
+
+    method get_data_opt(entity :: entity.Entity):
+      def index: entity_to_index_map[entity.id]
+      if (!index)
+      | #false
+      | data[index]
+
 
 fun has_data(entity :: entity.Entity, comps :: List.of(Component)):
   def mutable all_has_data: #true
@@ -380,3 +391,94 @@ defn.macro
         $system_body
       »'
      
+fun add_component_helper(entity :: entity.Entity, comp):
+  entity.add_component(comp)
+
+meta:
+  fun
+  | extract_entity_arg('[component $name :: $component]'): '$name'
+  | extract_entity_arg('[component optional $name :: $component]'): '$name = #false'
+  | extract_entity_arg('[component $name :~ $component = $body ...]'): '$name = ($body ...)'
+
+  fun
+  | build_entity_args('$fn','[[$comp ...], $rest, ...]', '[$arg, ...]'):
+     def comp_arg: extract_entity_arg('[$comp ...]')
+     build_entity_args('$fn','[$rest, ...]', '[$comp_arg, $arg, ...]')
+  | build_entity_args('$fn','[[$comp ...]]', '[$arg, ...]'):
+     def comp_arg: extract_entity_arg('[$comp ...]')
+     build_entity_args('$fn','[]', '[$comp_arg, $arg, ...]')
+
+  | build_entity_args('$fn','[]', '[$arg, ...]'):
+     '$fn($arg, ...)'
+
+  fun
+  | extract_entity_export('[component $name :: $component]'): '$name'
+  | extract_entity_export('[component optional $name :: $component]'): '$name'
+  | extract_entity_export('[component $name :~ $component = $body ...]'): '$name'
+
+  fun 
+  | build_entity_exports('[[$comp ...], $rest, ...]'):
+     def name: extract_entity_export('[$comp ...]')
+     def exports: build_entity_exports('[$rest, ...]')
+     '$name $exports'
+  | build_entity_exports('[[$comp ...]]'):
+     def name: extract_entity_export('[$comp ...]')
+     '$name'
+  | build_entity_exports('[]'):
+     ''
+
+defn.macro
+| 'build_entity_helper([component $name :: $component])':
+   'fun $name(entity :: entity.Entity) :: $component: entity.get_component($component)'
+| 'build_entity_helper([component optional $name :: $component])':
+   'fun $name(entity :: entity.Entity) :: $component: entity.get_component_opt($component)'
+| 'build_entity_helper([component $name :~ $component = $body ...])':
+   'fun $name(entity :: entity.Entity) :: $component: entity.get_component($component)'
+
+defn.macro
+| 'build_entity_helpers([$comp, ...])':
+   'build_entity_helper($comp)
+    ...'
+| 'build_entity_helpers([])': ''
+
+
+expr.macro
+| 'build_entity_create_body_def($entity, [component $name :: $component])':
+   'add_component_helper($entity, $component($name))'
+| 'build_entity_create_body_def($entity, [component optional $name :: $component])':
+   'if $name
+      | add_component_helper($entity, $component($name))
+      | #void'
+| 'build_entity_create_body_def($entity, [component $name :~ $(component :: Identifier) = $(fn :: Identifier)($body, ...)])':
+    if to_string(fn.unwrap()) == to_string(component.unwrap())
+    | 'add_component_helper($entity, $name)'
+    | 'add_component_helper($entity, $component($name))'   
+| 'build_entity_create_body_def($entity, [component $name :~ $(component :: Identifier) = $body ...])':
+    'add_component_helper($entity, $component($name))'   
+
+expr.macro
+| 'build_entity_create_body($entity, [$comp, ...])':
+   'block:
+      build_entity_create_body_def($entity, $comp)
+      ...
+      $entity'
+
+defn.macro
+| 'instance $name:
+     $body ...
+     ...':
+   def fn: build_entity_args('create','[[$body ...], ...]', '[]')
+   def helpers: 'build_entity_helpers([[$body ...], ...])'
+   def exports: build_entity_exports('[[$body ...], ...]')
+
+   'namespace $name:
+     export:
+       create
+       $exports
+
+     $helpers
+
+     fun $fn :: entity.Entity:
+       def ent :~ entity.Entity = entity.create()
+       build_entity_create_body(ent, [[$body ...], ...])'
+
