@@ -252,28 +252,21 @@ defn.macro
    def _name_value : match name | '$(x::Identifier)': to_string(x.unwrap())
    def _name : Syntax.make(syntax.#{format-id}(name_stx, "_~a", _name_value)).relocate(name)
    def _name_class : Syntax.make(syntax.#{format-id}(name_stx, "~a_class", _name_value)).relocate(name)
-   '«def $_name: Component($_name_value)
-     class $_name_class(mutable $field_name :: $ty, ...)
-     annot.macro '$name': '$_name_class'
+   '«namespace $name:
+       export: $_name $_name_class
+       def $_name: Component($_name_value)
+       class $_name_class(mutable $field_name :: $ty, ...)
+     annot.macro '$name': '$name . $_name_class'
      fun
-     | $name($field_name :: $ty, ...) : [$_name, $_name_class($field_name, ...)]
-     | $name(): $_name»'
-| 'component $name($ty)':
-   def name_stx: Syntax.make('$name')
-   def _name_value : match name | '$(x::Identifier)': to_string(x.unwrap())
-   def _name : Syntax.make(syntax.#{format-id}(name_stx, "_~a", _name_value)).relocate(name)
-   '«def $_name: Component($_name_value)
-     annot.macro '$name': '$ty'
-     fun 
-     | $name(data :: $ty) : [$_name, data]
-     | $name(): $_name»'
+     | $name($field_name :: $ty, ...) : [$name . $_name, $name . $_name_class($field_name, ...)]
+     | $name(): $name . $_name»'
 
 expr.macro
 | 'name_to_component_value($(name :: Identifier))':
    def name_stx: Syntax.make('$name')
    def _name_value: to_string(name.unwrap())
    def _name : Syntax.make(syntax.#{format-id}(name_stx, "_~a", _name_value)).relocate(name)
-   '$_name'
+   '$name . $_name'
 
 expr.macro
 | 'system_defs($name, [[$component_name, $component], ...], [$body, ...])':
