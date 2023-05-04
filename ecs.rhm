@@ -279,7 +279,7 @@ expr.macro
 meta:
   fun build_system_body(components, body):
     match body
-    | 'def $fn($arg, ...):
+    | 'method $fn($arg, ...):
          $body
          ...
        $rest ...':
@@ -289,13 +289,44 @@ meta:
            each entity: _system._entities
            system_defs(entity, $components, [$body, ...])
         $system_body'  
-    | 'fun $fn($arg, ...):
+    | 'method $fn($arg, ...):
          $body
          ...':
        'fun $fn($arg, ...):
          for:
            each entity: _system._entities
            system_defs(entity, $components, [$body,...])'  
+    | 'fun $fn($arg, ...):
+         $body
+         ...
+       $rest ...':
+       def system_body: build_system_body(components, '$rest ...')
+       'fun $fn($arg, ...):
+           $body
+           ...
+        $system_body'  
+    | 'fun $fn($arg, ...):
+         $body
+         ...':
+       'fun $fn($arg, ...):
+          $body
+          ...'  
+
+    | 'def $fn:
+         $body
+         ...
+       $rest ...':
+       def system_body: build_system_body(components, '$rest ...')
+       'def $fn:
+           $body
+           ...
+        $system_body'  
+    | 'def $fn:
+         $body
+         ...':
+       'def $fn:
+          $body
+          ...'  
 
   fun build_system_exports(body):
     match body
@@ -310,6 +341,29 @@ meta:
          $body
          ...':
        '$fn'  
+    | 'method $fn($arg, ...):
+         $body
+         ...
+       $rest ...':
+       def exports: build_system_exports('$rest ...')
+       '$fn
+        $exports'  
+    | 'method $fn($arg, ...):
+         $body
+         ...':
+       '$fn'  
+    | 'def $fn:
+         $body
+         ...
+       $rest ...':
+       def exports: build_system_exports('$rest ...')
+       '$fn
+        $exports'  
+    | 'def $fn:
+         $body
+         ...':
+       '$fn'  
+
 
 defn.macro
 | 'system $name($component_name :: $component, ...):
