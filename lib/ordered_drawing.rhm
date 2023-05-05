@@ -3,12 +3,18 @@
 import:
    rhombus/meta open
    lib("racket/main.rkt") as racket
+
    meta:
      lib("racket/syntax.rkt") as syntax
-   lib("ffi/unsafe.rkt") as unsafe
+
+   lib("raylib/2d/unsafe.rkt") as raylib
+   lib("racket/flonum.rkt") as flonum
+   lib("racket/unsafe/ops.rkt") as unsafe_ops
+
    "float_struct.rhm" open
-
-
+   "resources.rhm" expose: Texture
+   "datatypes.rhm" open
+ 
 float_struct DrawFloatData(
   bounding_box_x,
   bounding_box_y,
@@ -23,4 +29,44 @@ float_struct DrawFloatData(
   rotation
 )
 
+def bounding_box : Rectangle(0.,0.,0.,0.)
+def sprite_box : Rectangle(0.,0.,0.,0.)
+def origin : Vector2(0.,0.)
 
+
+class DrawData(
+   texture :: Texture,
+   float_data :: DrawFloatData,
+   color :: Integral
+ ):
+   
+  method draw():
+    bounding_box.x := DrawFloatData.bounding_box_x(this.float_data)
+    bounding_box.y := DrawFloatData.bounding_box_y(this.float_data)
+    bounding_box.w := DrawFloatData.bounding_box_w(this.float_data)
+    bounding_box.h := DrawFloatData.bounding_box_h(this.float_data)
+
+    sprite_box.x := DrawFloatData.sprite_box_x(this.float_data)
+    sprite_box.y := DrawFloatData.sprite_box_y(this.float_data)
+    sprite_box.w := DrawFloatData.sprite_box_w(this.float_data)
+    sprite_box.h := DrawFloatData.sprite_box_h(this.float_data)
+
+    origin.x := DrawFloatData.origin_x(this.float_data)
+    origin.y := DrawFloatData.origin_y(this.float_data)
+
+    raylib.DrawTexturePro(
+       this.texture.inner(),
+       sprite_box.inner(),
+       bounding_box.inner(),
+       origin.inner(),
+       DrawFloatData.rotation(this.float_data),
+       this.color
+    )
+
+fun draw_order_less_than(d1 :: DrawData, d2 :: DrawData):
+  unsafe_ops.#{unsafe-fl<}(
+    DrawFloatData.bounding_box_y(d1.float_data),
+    DrawFloatData.bounding_box_y(d2.float_data)
+  )
+  
+  
