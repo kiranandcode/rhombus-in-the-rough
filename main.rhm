@@ -96,7 +96,7 @@ def HUMANOID_FRAMES : 9
 system HumanDrawable(
     position :: Position,
     anim :: AnimatedSprite
-  ):
+  ) with this:
 
     method draw():
       humanoid_entity_bounding_box.x := math.inexact(position.value.x - 32.)

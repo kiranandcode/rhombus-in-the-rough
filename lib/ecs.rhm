@@ -108,7 +108,7 @@ class.together:
     mutable next_index :: Integral
    ):
 
-    constructor(name, ):
+    constructor(name):
       def comp:
         super(
           name, 
@@ -288,30 +288,30 @@ expr.macro
       ...'
 
 meta:
-  fun build_system_body(components, body):
+  fun build_system_body(components, body, this):
     match body
     | 'method $fn($arg, ...):
          $body
          ...
        $rest ...':
-       def system_body: build_system_body(components, '$rest ...')
+       def system_body: build_system_body(components, '$rest ...', this)
        'fun $fn($arg, ...):
          for:
-           each entity: _system._entities
-           system_defs(entity, $components, [$body, ...])
+           each $this: _system._entities
+           system_defs($this, $components, [$body, ...])
         $system_body'  
     | 'method $fn($arg, ...):
          $body
          ...':
        'fun $fn($arg, ...):
          for:
-           each entity: _system._entities
-           system_defs(entity, $components, [$body,...])'  
+           each $this: _system._entities
+           system_defs($this, $components, [$body,...])'
     | 'fun $fn($arg, ...):
          $body
          ...
        $rest ...':
-       def system_body: build_system_body(components, '$rest ...')
+       def system_body: build_system_body(components, '$rest ...', this)
        'fun $fn($arg, ...):
            $body
            ...
@@ -327,7 +327,7 @@ meta:
          $body
          ...
        $rest ...':
-       def system_body: build_system_body(components, '$rest ...')
+       def system_body: build_system_body(components, '$rest ...', this)
        'def $fn:
            $body
            ...
@@ -338,6 +338,9 @@ meta:
        'def $fn:
           $body
           ...'  
+  fun
+  | extract_this_parameter(''): 'entity'
+  | extract_this_parameter('with $name'): '$name'
 
   fun build_system_exports(body):
     match body
@@ -373,15 +376,17 @@ meta:
     | 'def $fn:
          $body
          ...':
-       '$fn'  
+       '$fn'
+       
 
 
 defn.macro
-| 'system $name($component_name :: $component, ...):
+| 'system $name($component_name :: $component, ...) $rest ...:
      $body ...':
     def _name_value : match name | '$(x::Identifier)': to_string(x.unwrap())
     def component_list: 'component_names([$component, ...])'
-    def system_body: build_system_body('[[$component_name, $component], ...]', '$body ...')
+    def this_value: extract_this_parameter('$rest ...')
+    def system_body: build_system_body('[[$component_name, $component], ...]', '$body ...', '$this_value')
     def exports: build_system_exports('$body ...')
     '«namespace $name:
         export:
