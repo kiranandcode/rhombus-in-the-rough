@@ -290,7 +290,7 @@ expr.macro
 meta:
   fun build_system_body(components, body, this):
     match body
-    | 'method $fn($arg, ...):
+    | 'method $fn($arg, ...) $opt ...:
          $body
          ...
        $rest ...':
@@ -300,7 +300,7 @@ meta:
            each $this: _system._entities
            system_defs($this, $components, [$body, ...])
         $system_body'  
-    | 'method $fn($arg, ...):
+    | 'method $fn($arg, ...) $opt ...:
          $body
          ...':
        'fun $fn($arg, ...):
@@ -355,14 +355,14 @@ meta:
          $body
          ...':
        '$fn'  
-    | 'method $fn($arg, ...):
+    | 'method $fn($arg, ...)  $opt ...:
          $body
          ...
        $rest ...':
        def exports: build_system_exports('$rest ...')
        '$fn
         $exports'  
-    | 'method $fn($arg, ...):
+    | 'method $fn($arg, ...)  $opt ...:
          $body
          ...':
        '$fn'  
