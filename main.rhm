@@ -114,7 +114,7 @@ system HumanDrawable(
 
 
 def_texture main_character_image : "./resources/images/male_walkcycle.png"
-
+def_texture blacksmith_image : "./resources/images/soldier.png"
   
 instance Player:
   component position :~ Position = Vector2(320.,320.)
@@ -129,8 +129,24 @@ instance Player:
       HUMANOID_FRAMES
     )
   component control :~ ControlledByUser = 100.0
+
+instance NPC:
+  component position :~ Position = Vector2(320.,320.)
+  component velocity :~ Velocity = Vector2(0.,0.)
+  component sprite :~ AnimatedSprite = AnimatedSprite(
+      blacksmith_image,
+      #false,
+      direction.DOWN,
+      0,
+      0.05,
+      0.,
+      HUMANOID_FRAMES
+    )
+
+
   
 def character: Player.create()
+def blacksmith: NPC.create()
     
 // constants
 def screen_width: 800
