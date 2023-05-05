@@ -2,8 +2,8 @@
 
 import:
    rhombus/meta open
-   "datatypes.rhm" open
-   "lang.rhm" open
+   "../lib/datatypes.rhm" open
+   "../lib/lang.rhm" open
    "raylib_lang.rhm" open
    "view.rhm" open
    "terrain.rhm"

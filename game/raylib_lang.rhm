@@ -2,9 +2,9 @@
 
 import:
   rhombus/meta open
-  "lang.rhm" open
+  "../lib/lang.rhm" open
   "view.rhm" open
-  "datatypes.rhm" open
+  "../lib/datatypes.rhm" open
   lib("raylib/2d/unsafe.rkt") as raylib
 
 export:

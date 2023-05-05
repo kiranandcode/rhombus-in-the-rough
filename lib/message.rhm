@@ -1,0 +1,60 @@
+#lang rhombus
+
+import:
+  rhombus/meta open
+  meta:
+    lib("racket/base.rkt") as base
+    rhombus open
+
+export:
+  message
+
+
+meta:
+  def message_defs: MutableMap()
+
+  fun
+  | extract_fields('[$(field :: Identifier), $rest, ...]', acc):
+     def new_acc: List.cons(to_string(field.unwrap()), acc)
+     extract_fields('[$rest, ...]', new_acc)
+  | extract_fields('[]', acc):
+     List.reverse(acc)
+
+  fun
+  | extract_tys('[[$ty], $rest, ...]', acc):
+     def new_acc: List.cons(to_string(ty.unwrap()), acc)
+     extract_tys('[$rest, ...]', new_acc)
+  | extract_tys('[]', acc):
+     List.reverse(acc)
+
+
+decl.macro
+| 'message $(name :: Identifier)($(field :: Identifier) :: $ty, ...)':
+    def name_vl : to_string(name.unwrap())
+    def fields: extract_fields('[$field, ...]', [])
+    def tys: extract_tys('[[$ty], ...]', [])
+    def decl: 'class $('$')$name($field :: $ty, ...)'
+    '«meta.bridge id:
+        fun ($name):
+          if message_defs.has_key($name_vl)
+          | def [ofields, otys, defn]: message_defs[$name_vl]
+            check:
+              $fields
+              ~is ofields
+            check:
+              $tys
+              ~is otys
+            defn('$('$') $name')
+          | def result:
+              'meta.bridge f:
+                fun defn(oname):
+                  ('«annot.macro '$('$') (' $('$') ') oname': '$('$')$name'
+                     bind.macro '$('$') (' $('$') ') oname($('$') (' $('$') ') ('$('$') (' $('$') ')') $field, ...)': '$('$')$name($('$') (' $('$') ') ('$('$') (' $('$') ')') $field, ...)'
+                     fun $('$') (' $('$') ') oname ($field :: $ty, ...): $('$')$name($field, ...)»')
+                message_defs[$name_vl] := [$fields, $tys, defn]
+               $decl'
+            result
+        
+      defn.macro 'message_internal $('$')$name': base.#{syntax-local-value}('id')($name)
+      message_internal $name»'
+

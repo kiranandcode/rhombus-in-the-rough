@@ -2,15 +2,15 @@
 
 import:
    rhombus/meta open
-   "datatypes.rhm" open
-   "lang.rhm" open
-   "raylib_lang.rhm" open
-   "view.rhm" open
-   "game_map.rhm"
-   "resources.rhm" expose: def_texture
-   "terrain.rhm"
+   "lib/datatypes.rhm" open
+   "lib/lang.rhm" open
+   "game/raylib_lang.rhm" open
+   "game/view.rhm" open
+   "game/game_map.rhm"
+   "lib/resources.rhm" expose: def_texture
+   "game/terrain.rhm"
    "entities/humanoid.rhm"
-   "ecs.rhm" open
+   "lib/ecs.rhm" open
    meta:
      lib("racket/syntax.rkt") as syntax
    lib("racket/main.rkt") as racket

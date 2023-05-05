@@ -2,10 +2,10 @@
 
 import:
    rhombus/meta open
-   "../datatypes.rhm" open
-   "../lang.rhm" open
-   "../raylib_lang.rhm" open
-   "../resources.rhm" expose: def_texture
+   "../lib/datatypes.rhm" open
+   "../lib/lang.rhm" open
+   "../game/raylib_lang.rhm" open
+   "../lib/resources.rhm" expose: def_texture
    lib("racket/main.rkt") as racket
    lib("raylib/2d/unsafe.rkt") as raylib
    lib("raylib/raymath/unsafe.rkt") as raymath
