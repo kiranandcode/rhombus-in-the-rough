@@ -1,0 +1,120 @@
+#lang rhombus
+
+import:
+  rhombus/meta open
+  meta:
+    lib("racket/syntax.rkt") as syntax
+  lib("raylib/2d/unsafe.rkt") as raylib
+  lib("racket/unsafe/ops.rkt") as unsafe_ops
+  lib("racket/main.rkt") as racket
+  lib("racket/flonum.rkt") as flonum
+
+export:
+  float_struct
+
+
+defn.macro
+| 'build_setter($this, [$(field :: Identifier), $rest, ...], $(ind :: Int))':
+     def ind: ind.unwrap()
+     def next_ind: ind + 1
+     'block:
+       unsafe_ops.#{unsafe-flvector-set!}($this, $ind, $field)
+       build_setter($this, [$rest, ...], $next_ind)'
+| 'build_setter($this, [], $ind)': '$this'
+
+
+defn.macro
+| 'build_accessors([$(field :: Identifier), $rest, ...], $(ind :: Int))':
+     def ind: ind.unwrap()
+     def next_ind: ind + 1
+     def field_stx: Syntax.make('$field')
+     def set_field:
+       Syntax.make(syntax.#{format-id}(field_stx, "set_~a", field.unwrap())).relocate(field)
+     'fun $field(data): unsafe_ops.#{unsafe-flvector-ref}(data, $ind)
+      fun $set_field(data, vl): unsafe_ops.#{unsafe-flvector-set!}(data, $ind, vl)
+      build_accessors([$rest, ...], $next_ind)'
+| 'build_accessors([], $ind)': ''
+
+meta:
+  fun
+  | build_field_export('[$field, $rest, ...]'):
+      def field_stx: Syntax.make('$field')
+      def set_field:
+         Syntax.make(syntax.#{format-id}(field_stx, "set_~a", field.unwrap())).relocate(field)
+      def rest: build_field_export('[$rest, ...]')
+      '$field $set_field $rest'
+  | build_field_export('[]'): ' '
+
+  fun
+  | build_def_export('[fun $name($field, ...) $opt ...: $body ...]'):
+     '$name'
+  | build_def_export('[method $name($field, ...) $opt ...: $body ...]'):
+     '$name'
+  | build_def_export('[def $name: $body ...]'):
+     '$name'
+  | build_def_export('[$other ...]'):
+     ''
+
+  fun
+  | build_body_export('[[$def], $rest, ...]'):
+     let def_export:
+        build_def_export('[$def]')
+     let rest:
+       build_body_export('[$rest, ...]')
+
+     '$def_export $rest'
+  | build_body_export('[]'): ' '
+
+expr.macro
+| 'build_bindings($this, [$field, ...], [$body, ...])':
+   'block:
+     let $field: $field($this)
+     ...
+     $body
+     ...'
+
+defn.macro
+| 'build_body([$field, ...], [method $fn($arg, ...): $body ...])':
+   'fun $fn(this, $arg, ...):
+     build_bindings(this, [$field, ...], [$body, ...])'
+| 'build_body([$field, ...], [$body])': '$body'
+
+
+defn.macro
+| 'float_struct $name($(field :: Identifier), ...):
+     $body
+     ...':
+    def no_fields: [field, ...].length()
+    def field_exports: build_field_export('[$field, ...]')
+    def body_exports: build_body_export('[[$body], ...]')
+    def fields: '[$field, ...]'
+    '«namespace $name:
+       export:
+         create
+         $field_exports
+         $body_exports
+       fun create():
+         flonum.#{make-flvector}($no_fields,0.)
+       build_accessors([$field, ...], 0)
+       build_body($fields, [$body])
+       ...
+      fun $name($field, ...):
+       def this : flonum.#{make-flvector}($no_fields, 0.)
+       build_setter(this, [$field, ...], 0)»'
+| 'float_struct $name($(field :: Identifier), ...)':
+    def no_fields: [field, ...].length()
+    def field_exports: build_field_export('[$field, ...]')
+    def fields: '[$field, ...]'
+    '«annot.macro '$name':
+        annot_meta.pack_predicate('fun (x): (flonum.#{flvector?}(x) && (unsafe_ops.#{unsafe-flvector-length}(x) == $no_fields))')
+      namespace $name:
+        export:
+          create
+          $field_exports
+        fun create():
+          flonum.#{make-flvector}($no_fields,0.)
+        build_accessors([$field, ...], 0)
+      fun $name($field, ...):
+       def this : flonum.#{make-flvector}($no_fields, 0.)
+       build_setter(this, [$field, ...], 0)»'
+

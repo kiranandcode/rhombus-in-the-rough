@@ -1,0 +1,127 @@
+#lang rhombus
+
+import:
+  rhombus/meta open
+  lib("racket/main.rkt") as racket
+  lib("data/gvector.rkt") as gvector
+
+export: GVector
+
+annot.macro 'GVector':
+  annot_meta.pack_predicate(
+    'fun (x): (gvector.#{gvector?}(x))',
+    '(($(statinfo_meta.map_ref_key),
+       gvector_get_provider),
+      ($(statinfo_meta.map_set_key),
+       gvector_set_provider),
+      ($(statinfo_meta.dot_provider_key),
+       gvector_dot_provider))'
+  )
+fun gvector_get_provider(gvec, ind):
+  gvector.#{gvector-ref}(gvec, ind)
+
+fun gvector_set_provider(gvec, ind, vl):
+  gvector.#{gvector-set!}(gvec, ind, vl)
+
+
+namespace GVector:
+  export: make get set insert remove remove_last add count to_vector of_vector elements sort
+  
+  fun
+  | make() :~ GVector : (gvector.#{make-gvector}())
+  | make(capacity) :~ GVector : (gvector.#{make-gvector}(~capacity: capacity))
+
+  fun get(gvec, ind):
+    gvector.#{gvector-ref}(gvec, ind)
+
+  fun set(gvec, ind, vl):
+    gvector.#{gvector-set!}(gvec, ind, vl)
+
+  fun insert(gvec, ind, vl):
+    gvector.#{gvector-insert!}(gvec, ind, vl)
+
+  fun remove(gvec, ind):
+    gvector.#{gvector-remove!}(gvec, ind)
+
+  fun remove_last(gvec):
+    gvector.#{gvector-remove-last!}(gvec)
+
+  fun add(gvec, vl, ...):
+    gvector.#{gvector-add!}(gvec, vl, ...)
+
+  fun count(gvec):
+    gvector.#{gvector-count}(gvec)
+
+  fun to_vector(gvec):
+    gvector.#{gvector->vector}(gvec)
+
+  fun of_vector(gvec) :~ GVector :
+    gvector.#{vector->gvector}(gvec)
+
+  fun elements(gvec):
+    gvector.#{in-gvector}(gvec)
+
+  fun sort_internal(gvec, start, stop, less_than):
+    cond
+    | stop <= start || stop == start + 1: #void
+    | start + 2 == stop:
+        def v1: get(gvec,start)
+        def v2: get(gvec,start + 1)
+        if less_than(v1, v2)
+        | #void
+        | set(gvec,start,v2)
+          set(gvec,start + 1, v1)
+    | ~else:
+       def pivot: math.floor((start + stop)/2)
+       def pivot_vl: get(gvec, pivot)
+       block:
+         if pivot == stop - 1
+         | #void
+         | def stop_vl: get(gvec, stop - 1)
+           set(gvec, pivot, stop_vl)
+           set(gvec, stop - 1, pivot_vl)
+       def mutable i: start
+       for:
+         each j: start .. (stop - 1)
+         def current_vl: get(gvec,j)
+         if less_than(current_vl, pivot_vl)
+         | def ind_vl: get(gvec,i)
+           set(gvec, i, current_vl)
+           set(gvec, j, ind_vl)
+           i := i + 1
+         | #void
+       def last_vl: get(gvec,stop - 1)
+       def i_vl: get(gvec,i)
+       set(gvec, stop - 1, i_vl)
+       set(gvec, i, last_vl)
+       sort_internal(gvec, start, i, less_than)
+       sort_internal(gvec, i + 1, stop, less_than)
+
+  fun
+  | sort(gvec, less_than): sort_internal(gvec, 0, count(gvec), less_than)
+  | sort(gvec, stop :: Integral, less_than): sort_internal(gvec, 0, stop, less_than)
+  | sort(gvec, start :: Integral, stop :: Integral, less_than): sort_internal(gvec, start, stop, less_than)
+
+dot.macro
+| 'gvector_dot_provider $left $dot $right':
+    match right
+    | 'get ($ind)': 'GVector.get($left, $ind)'
+    | 'get': 'fun (ind): GVector.get($left, ind)'
+    | 'set ($ind,$vl)': 'GVector.set($left, $ind, $vl)'
+    | 'set': 'fun (ind,vl): GVector.get($left, ind, vl)'
+    | 'remove ($ind)': 'GVector.remove($left, $ind)'
+    | 'remove': 'fun (ind): GVector.remove($left, ind)'
+    | 'remove_last ()': 'GVector.remove_last($left)'
+    | 'remove_last': 'fun (): GVector.remove_last($left)'
+    | 'add ($vl,...)': 'GVector.add($left,$vl,...)'
+    | 'add': 'fun (vl,$('...')): GVector.add($left, vl,$('...'))'
+    | 'count ()': 'GVector.count($left)'
+    | 'count': 'fun (): GVector.count($left)'
+    | 'to_vector ()': 'GVector.to_vector($left)'
+    | 'to_vector': 'fun (): GVector.to_vector($left)'
+
+    | 'sort ($arg,...)': 'GVector.sort($left, $arg, ...)'
+    | 'sort': 'fun (vl,$('...')): GVector.sort($left,vl,$('...'))'
+
+    | 'elements ()': 'GVector.elements($left)'
+    | 'elements': 'fun (): GVector.elements($left)'

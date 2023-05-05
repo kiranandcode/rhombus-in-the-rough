@@ -1,0 +1,26 @@
+#lang rhombus
+
+import:
+   rhombus/meta open
+   lib("racket/main.rkt") as racket
+   meta:
+     lib("racket/syntax.rkt") as syntax
+   lib("ffi/unsafe.rkt") as unsafe
+   "float_struct.rhm" open
+
+
+float_struct DrawFloatData(
+  bounding_box_x,
+  bounding_box_y,
+  bounding_box_w,
+  bounding_box_h,
+  sprite_box_x,
+  sprite_box_y,
+  sprite_box_w,
+  sprite_box_h,
+  origin_x,
+  origin_y,
+  rotation
+)
+
+
