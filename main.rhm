@@ -11,6 +11,7 @@ import:
    "game/terrain.rhm"
    "entities/humanoid.rhm"
    "lib/ecs.rhm" open
+   "lib/ordered_drawing.rhm"
    meta:
      lib("racket/syntax.rkt") as syntax
    lib("racket/main.rkt") as racket
@@ -87,31 +88,26 @@ system SpriteAnimation(anim :: AnimatedSprite):
         anim.frame_counter := (anim.frame_counter + increment) mod anim.frames
         anim.last_frame_update_time := current_time
 
-def humanoid_entity_sprite : Rectangle(0.,0.,64.,64.)
-def humanoid_entity_bounding_box: Rectangle(0., 0., 64., 64.)
-def humanoid_entity_origin : Vector2(0.,0.)
-
 def HUMANOID_FRAMES : 9
-
 system HumanDrawable(
     position :: Position,
     anim :: AnimatedSprite
   ) with this:
 
     method draw():
-      humanoid_entity_bounding_box.x := math.inexact(position.value.x - 32.)
-      humanoid_entity_bounding_box.y := math.inexact(position.value.y - 32.)
-      humanoid_entity_sprite.x := math.inexact(64. * anim.frame_counter)
-      humanoid_entity_sprite.y := math.inexact(64. * anim.facing_direction.ind)
-      raylib.DrawTexturePro(
-        anim.texture.inner(),
-        humanoid_entity_sprite.inner(),
-        humanoid_entity_bounding_box.inner(),
-        humanoid_entity_origin.inner(),
+      ordered_drawing.queue_draw(
+        anim.texture,
+        math.inexact(position.value.x - 32.),
+        math.inexact(position.value.y - 32.),
+        64.,
+        64.,
+        math.inexact(64. * anim.frame_counter),
+        math.inexact(64. * anim.facing_direction.ind),
+        64.,
+        64.,
         0.,
-        raylib.WHITE
+        0.
       )
-
 
 def_texture main_character_image : "./resources/images/male_walkcycle.png"
 def_texture blacksmith_image : "./resources/images/soldier.png"
@@ -175,7 +171,7 @@ while (!raylib.WindowShouldClose()):
       map.draw_base(view)
       HumanDrawable.draw()
 
-
+      ordered_drawing.draw()
 
     def msg:
       racket.format("Nothing to show....")

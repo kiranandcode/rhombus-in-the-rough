@@ -65,6 +65,35 @@ meta:
      '$def_export $rest'
   | build_body_export('[]'): ' '
 
+  fun
+  | build_cases(name, left, '[$(field :: Identifier)]'):
+      def field_stx: Syntax.make('$field')
+      def set_field:
+           Syntax.make(syntax.#{format-id}(field_stx, "set_~a", field.unwrap())).relocate(field)
+      ['«['$field := $('$') rest $('...')': '$name . $set_field($('$') $left, $('$') rest $('...'))']»',
+       '«['$field': '$name . $field($('$') $left)']»']
+  | build_cases(name, left, '[$field, $rest, ...]'):
+      def field_stx: Syntax.make('$field')
+      def set_field:
+           Syntax.make(syntax.#{format-id}(field_stx, "set_~a", field.unwrap())).relocate(field)
+      def rest_cases: build_cases(name, left, '[$rest, ...]')
+      ['«['$field := $('$') rest $('...')': '$name . $set_field($('$') $left, $('$') rest $('...'))']»',
+       '«['$field': '$name . $field($('$') $left)']»'] ++ rest_cases
+
+        
+
+  fun build_dot_provider(dot_provider, name, fields):
+    def left: 'left'
+    def right: 'right'
+    def cases: build_cases(name, left, fields)
+    match cases
+    | ['[$case]', ...]: 
+       '«dot.macro '$dot_provider $('$')$left $('$')dot $('$')$right':
+           match $right
+           | $case
+           | ...
+         »'
+
 expr.macro
 | 'build_bindings($this, [$field, ...], [$body, ...])':
    'block:
@@ -105,8 +134,15 @@ defn.macro
     def no_fields: [field, ...].length()
     def field_exports: build_field_export('[$field, ...]')
     def fields: '[$field, ...]'
-    '«annot.macro '$name':
-        annot_meta.pack_predicate('fun (x): (flonum.#{flvector?}(x) && (unsafe_ops.#{unsafe-flvector-length}(x) == $no_fields))')
+    def struct_dot_provider: 'struct_dot_provider'
+    def dot_provider: build_dot_provider(struct_dot_provider, name, fields)
+    '«
+      annot.macro '$name':
+        annot_meta.pack_predicate(
+            'fun (x): (flonum.#{flvector?}(x) && (unsafe_ops.#{unsafe-flvector-length}(x) == $no_fields))',
+            '(($('$')(statinfo_meta.dot_provider_key),
+               $struct_dot_provider))'
+        )
       namespace $name:
         export:
           create
@@ -116,5 +152,6 @@ defn.macro
         build_accessors([$field, ...], 0)
       fun $name($field, ...):
        def this : flonum.#{make-flvector}($no_fields, 0.)
-       build_setter(this, [$field, ...], 0)»'
+       build_setter(this, [$field, ...], 0)
 
+      $dot_provider»'
