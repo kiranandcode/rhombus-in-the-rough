@@ -11,7 +11,8 @@ import:
    "game/raylib_lang.rhm" open
    "game/view.rhm" open
    "game/game_map.rhm"
-   "game/dialog_box.rhm" as dialog_box
+   "game/dialog_box.rhm"
+   "game/icons.rhm"
    "lib/resources.rhm" expose: def_texture
    "game/terrain.rhm"
    "entities/humanoid.rhm"
@@ -21,12 +22,14 @@ import:
    "components/movement.rhm" open
    "components/graphics.rhm" open
    "components/input.rhm" open
+   "components/interaction.rhm" open
 
    "systems/movement.rhm" open
    "systems/user_control.rhm" open
    "systems/animation.rhm" open
    "systems/drawing.rhm" open
    "systems/collision.rhm" open
+   "systems/interaction.rhm" open
 
    meta:
      lib("racket/syntax.rkt") as syntax
@@ -38,8 +41,9 @@ def_texture main_character_image : "./resources/images/male_walkcycle.png"
 def_texture blacksmith_image : "./resources/images/soldier.png"
 
 def HUMANOID_FRAMES : 9
-  
+
 instance Player:
+  component player :~ IsPlayer = IsPlayer(0)
   component position :~ Position = Vector2(320.,320.)
   component collision_box :~ CollisionBox = CollisionBox(Rectangle(-16.,16., 32., 16.),0)
   component velocity :~ Velocity = Vector2(0.,0.)
@@ -59,6 +63,12 @@ instance NPC:
   // component velocity :~ Velocity = Vector2(0.,0.)
   component collision_box :~ CollisionBox = CollisionBox(Rectangle(-16.,16., 32., 16.),0)
   component orientation :~ Orientation = direction.DOWN
+  component interactable :~ Interactable = Interactable(
+      icons.TALK,
+      -16.,
+      -48.,
+      #false
+    )
   component sprite :~ AnimatedSprite = AnimatedSprite(
       blacksmith_image,
       #false,
@@ -99,6 +109,7 @@ while (!raylib.WindowShouldClose()):
   AnimationSystem.update()
   MovementSystem.update()
   CollisionSystem.update()
+  InteractionSystem.update()
 
   draw_block:
     raylib.ClearBackground(raylib.RAYWHITE)
@@ -111,28 +122,21 @@ while (!raylib.WindowShouldClose()):
 
       ordered_drawing.draw()
 
-      raylib.DrawTexturePro(
-         ui_texture.inner(),
-         // Rectangle(758.,82.,32.,32.).inner(),
-         // Rectangle(802.,480.,47.,47.).inner(),
-         Rectangle(96.,104.,16.,16.).inner(),
-         Rectangle(304.,254.,32.,32.).inner(),
-         Vector2(0.,0.).inner(),
-         0.,
-         raylib.WHITE
-      )
-
-    dialog_box.draw()
+      InteractionSystem.draw()
 
       // raylib.DrawTexturePro(
-      //    inspect_icon.inner(),
+      //    ui_texture.inner(),
       //    // Rectangle(758.,82.,32.,32.).inner(),
-      //    Rectangle(0.,0.,96.,96.).inner(),
-      //    Rectangle(304.,256.,32.,32.).inner(),
+      //    // Rectangle(802.,480.,47.,47.).inner(),
+      //    Rectangle(96.,104.,16.,16.).inner(),
+      //    Rectangle(304.,254.,32.,32.).inner(),
       //    Vector2(0.,0.).inner(),
       //    0.,
       //    raylib.WHITE
       // )
+
+    // dialog_box.draw()
+
 
 
     def msg:

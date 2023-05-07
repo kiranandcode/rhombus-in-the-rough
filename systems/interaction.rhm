@@ -1,0 +1,55 @@
+#lang rhombus
+
+import:
+  lib("raylib/2d/unsafe.rkt") as raylib
+
+  "../lib/datatypes.rhm" open
+  "../lib/ecs.rhm" open
+  "../lib/lang.rhm" open
+  "../game/raylib_lang.rhm" open
+  "../game/icons.rhm"
+
+  "../components/interaction.rhm" open
+  "../components/movement.rhm" open
+
+export:
+  InteractionSystem
+
+use_static
+
+def interaction_distance_squared: 600
+
+system PlayerSystem(player :: IsPlayer, position :: Position) with this:
+
+  method for_each(f):
+    f(this)
+
+system InteractionSystem(
+    position :: Position,
+    interactable :: Interactable
+  ):
+
+ method update_internal(player_pos :: Vector2):
+   def dx: (position.value.x - player_pos.x)
+   def dy: (position.value.y - player_pos.y)
+   // println(["comparing ", ((dx * dx) + (dy * dy)), " to ", to_string(interaction_distance_squared)])
+   if ((dx * dx) + (dy * dy) < interaction_distance_squared)
+   | interactable.enabled := #true
+   | interactable.enabled := #false
+
+ fun update():
+   PlayerSystem.for_each(
+       fun (player :: entity.Entity):
+         def player_pos :: Position = player.get_component(Position)
+         update_internal(player_pos.value)
+   )
+     
+
+ method draw():
+   when (interactable.enabled):
+     icons.draw(
+       interactable.icon,
+       position.value.x + interactable.offset_x,
+       position.value.y + interactable.offset_y
+     )
+

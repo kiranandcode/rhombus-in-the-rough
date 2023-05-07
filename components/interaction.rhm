@@ -1,0 +1,23 @@
+#lang rhombus
+
+import:
+  "../lib/datatypes.rhm" open
+  "../lib/ecs.rhm" open
+  "../lib/resources.rhm"
+  "../game/icons.rhm"
+
+export:
+  IsPlayer
+  Interactable
+  IsActiveInteraction
+
+component IsPlayer(dummy :: Integral)
+
+component Interactable(
+  icon :: icons.Icon,
+  offset_x :: Real,
+  offset_y :: Real,
+  enabled :: Boolean
+)
+
+component IsActiveInteraction()

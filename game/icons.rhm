@@ -1,0 +1,55 @@
+#lang rhombus
+
+import:
+  "../lib/datatypes.rhm" open
+  "../lib/resources.rhm" expose: def_texture
+  lib("raylib/2d/unsafe.rkt") as raylib
+
+use_static
+
+def_texture ui_texture: "./resources/images/ui_big_pieces.png"
+
+export:
+  Icon draw
+
+  READ INSPECT TALK
+  PLUS MINUS LEFT RIGHT
+  ACCEPT REJECT UP DOWN
+
+
+class Icon(x :: Real,y :: Real):
+  internal _Icon
+
+fun icon(x,y): Icon(80. + x * 16., 104. + y * 16.)
+
+def READ: icon(0,0)
+def INSPECT: icon(1,0)
+def TALK: icon(2,0)
+
+def PLUS: icon(0,1)
+def MINUS: icon(1,1)
+def LEFT: icon(2,1)
+def RIGHT: icon(3,1)
+
+def ACCEPT: icon(0,2)
+def REJECT: icon(1,2)
+def UP: icon(2,2)
+def DOWN: icon(3,2)
+
+def sprite_rect: Rectangle(0.,0.,16.,16.)
+def dest_rect: Rectangle(0.,0.,32.,32.)
+def origin: Vector2(0.,0.)
+
+fun draw(icon :: Icon, x :: Real, y :: Real):
+  sprite_rect.x := math.inexact(icon.x)
+  sprite_rect.y := math.inexact(icon.y)
+  dest_rect.x := math.inexact(x)
+  dest_rect.y := math.inexact(y)
+  raylib.DrawTexturePro(
+    ui_texture.inner(),
+    sprite_rect.inner(),
+    dest_rect.inner(),
+    origin.inner(),
+    0.,
+    raylib.WHITE
+  )

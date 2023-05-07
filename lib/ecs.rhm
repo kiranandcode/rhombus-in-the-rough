@@ -103,7 +103,7 @@ class.together:
        | _entities[entity] := #false
 
      method entities():
-       racket.#{in-set}(_entities)
+       _entities
 
   class Component(
     name :: String,
@@ -370,12 +370,27 @@ defn.macro
         '«namespace $name:
             export:
               _system
+              entities
               $id
               ...
             def _system: System($_name_value, [name_to_component_value($component), ...])
+            fun entities(): _system.entities()
             $definition
             ...
           »'
+| 'system $name($component_name :: $component, ...) $rest ...':
+    def _name_value : match name | '$(x::Identifier)': to_string(x.unwrap())
+    def component_list: 'component_names([$component, ...])'
+    def this_value: extract_this_parameter('$rest ...')
+    '«namespace $name:
+        export:
+          _system
+          entities
+        def _system: System($_name_value, [name_to_component_value($component), ...])
+        fun entities(): _system.entities()
+      »'
+
+
      
 fun add_component_helper(entity :: entity.Entity, comp):
   entity.add_component(comp)
