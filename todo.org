@@ -23,10 +23,13 @@ CLOSED: [2023-05-03 Wed 18:19]
 * DONE Draw Characters
 CLOSED: [2023-05-03 Wed 18:19]
 * Minor steps
-** TODO Lookup examples of component designs
+** DONE Lookup examples of component designs
+CLOSED: [2023-05-06 Sat 13:23]
 ** TODO Refactor Components
-** TODO Add a second character
-** TODO Sort drawing by y-order
+** DONE Add a second character
+CLOSED: [2023-05-06 Sat 13:23]
+** DONE Sort drawing by y-order
+CLOSED: [2023-05-06 Sat 13:23]
 ** TODO Add interactable component
 *** Has value representing action
 ** TODO Add interaction system

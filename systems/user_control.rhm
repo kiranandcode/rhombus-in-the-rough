@@ -1,0 +1,58 @@
+#lang rhombus
+
+import:
+  lib("raylib/2d/unsafe.rkt") as raylib
+
+  "../lib/datatypes.rhm" open
+  "../lib/ecs.rhm" open
+  "../lib/lang.rhm" open
+  "../game/raylib_lang.rhm" open
+
+  "../components/movement.rhm" open
+  "../components/graphics.rhm" open
+  "../components/input.rhm" open
+
+export:
+  UserControlSystem
+
+use_static
+
+system UserControlSystem(
+    anim :: AnimatedSprite,
+    orientation :: Orientation,
+    velocity :: Velocity,
+    control :: UserController 
+  ):
+
+  method update():
+    def mutable new_direction : orientation.facing_direction
+    def mutable any_input : #false
+    velocity.value.x := 0.; velocity.value.y := 0.
+    
+    handle_inputs (raylib.IsKeyDown)
+    | raylib.KEY_D
+      new_direction := direction.RIGHT
+      velocity.value.x += 1.
+    | raylib.KEY_A
+      new_direction := direction.LEFT
+      velocity.value.x -= 1.
+    | raylib.KEY_W
+      new_direction := direction.UP
+      velocity.value.y -= 1.
+    | raylib.KEY_S
+      new_direction := direction.DOWN
+      velocity.value.y += 1.
+    | ~any
+      any_input := #true
+
+    if any_input
+    | velocity.value := velocity.value.normalize()
+      velocity.value := velocity.value.scale(control.speed)
+      when (orientation.facing_direction != new_direction || ! anim.moving):
+        orientation.facing_direction := new_direction
+        anim.last_frame_update_time := raylib.GetTime()
+        anim.frame_counter := 0
+      anim.moving := #true
+    | anim.frame_counter := 0
+      anim.moving := #false
+

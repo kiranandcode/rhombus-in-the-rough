@@ -1,0 +1,14 @@
+#lang rhombus
+
+import:
+  "../lib/datatypes.rhm" open
+  "../lib/ecs.rhm" open
+
+export:
+  Position
+  Velocity
+  Orientation
+
+component Position(value :: Vector2)
+component Velocity(value :: Vector2)
+component Orientation(facing_direction :: direction.Direction)

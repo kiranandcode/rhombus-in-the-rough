@@ -1,0 +1,10 @@
+#lang rhombus
+
+import:
+  "../lib/datatypes.rhm" open
+  "../lib/ecs.rhm" open
+
+export:
+  UserController
+
+component UserController(speed :: Real)

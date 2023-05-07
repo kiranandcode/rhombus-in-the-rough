@@ -1,0 +1,26 @@
+#lang rhombus
+
+import:
+  lib("raylib/2d/unsafe.rkt") as raylib
+
+  "../lib/datatypes.rhm" open
+  "../lib/ecs.rhm" open
+  "../lib/lang.rhm" open
+
+  "../components/graphics.rhm" open
+
+export:
+  AnimationSystem
+
+use_static
+
+system AnimationSystem(anim :: AnimatedSprite):
+  method update():
+    when (anim.moving):
+      def current_time : raylib.GetTime()
+      def delta : (current_time - anim.last_frame_update_time)
+      when (delta > anim.frame_update_speed):
+        def increment: math.floor(delta / anim.frame_update_speed)
+        anim.frame_counter := (anim.frame_counter + increment) mod anim.frames
+        anim.last_frame_update_time := current_time
+

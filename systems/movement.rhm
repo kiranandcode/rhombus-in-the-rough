@@ -1,0 +1,23 @@
+#lang rhombus
+
+import:
+  lib("raylib/2d/unsafe.rkt") as raylib
+
+  "../lib/datatypes.rhm" open
+  "../lib/ecs.rhm" open
+  "../components/movement.rhm" open
+
+export:
+  MovementSystem
+
+use_static
+
+system MovementSystem(
+    position :: Position,
+    velocity :: Velocity
+  ):
+
+ method update():
+   def delta : raylib.GetFrameTime()
+   position.value := position.value.add(velocity.value.scale(delta))
+
