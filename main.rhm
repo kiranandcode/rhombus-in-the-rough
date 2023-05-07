@@ -11,6 +11,7 @@ import:
    "game/raylib_lang.rhm" open
    "game/view.rhm" open
    "game/game_map.rhm"
+   "game/dialog_box.rhm" as dialog_box
    "lib/resources.rhm" expose: def_texture
    "game/terrain.rhm"
    "entities/humanoid.rhm"
@@ -82,9 +83,13 @@ def screen_height: 450
 def view : View()
 def map : game_map.Map(100,100, terrain.rock)
 
+def_texture ui_texture: "./resources/images/ui_big_pieces.png"
+def_texture inspect_icon: "./resources/images/icons/inspect_small.png"
+
 raylib.InitWindow(screen_width,screen_height, "Game")
 resources.init()
 raylib.SetTargetFPS(60);
+
 
 
 while (!raylib.WindowShouldClose()):
@@ -105,6 +110,30 @@ while (!raylib.WindowShouldClose()):
       CharacterDrawingSystem.draw()
 
       ordered_drawing.draw()
+
+      raylib.DrawTexturePro(
+         ui_texture.inner(),
+         // Rectangle(758.,82.,32.,32.).inner(),
+         // Rectangle(802.,480.,47.,47.).inner(),
+         Rectangle(96.,104.,16.,16.).inner(),
+         Rectangle(304.,254.,32.,32.).inner(),
+         Vector2(0.,0.).inner(),
+         0.,
+         raylib.WHITE
+      )
+
+    dialog_box.draw()
+
+      // raylib.DrawTexturePro(
+      //    inspect_icon.inner(),
+      //    // Rectangle(758.,82.,32.,32.).inner(),
+      //    Rectangle(0.,0.,96.,96.).inner(),
+      //    Rectangle(304.,256.,32.,32.).inner(),
+      //    Vector2(0.,0.).inner(),
+      //    0.,
+      //    raylib.WHITE
+      // )
+
 
     def msg:
       racket.format("Nothing to show....")

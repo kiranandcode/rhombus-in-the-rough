@@ -1,0 +1,81 @@
+#lang rhombus
+
+import:
+   rhombus/meta open
+   "../lib/datatypes.rhm" open
+   "../lib/lang.rhm" open
+   "../lib/resources.rhm" expose: def_texture
+   lib("racket/main.rkt") as racket
+   lib("raylib/2d/unsafe.rkt") as raylib
+export:
+  draw
+
+use_static
+
+def_texture ui_texture: "./resources/images/ui_big_pieces.png"
+
+
+fun cell(x :: Real, y :: Real) :: Rectangle:
+  Rectangle(x,y,16.,16.)
+
+
+def [TOP_CORNER_LEFT, LEFT_EDGE, BOTTOM_CORNER_LEFT] :~ List.of(Rectangle) = [
+    cell(16.,424.),
+    cell(16.,440.),
+    cell(16.,448.),
+ ]
+
+def [TOP_MIDDLE, MIDDLE, BOTTOM_MIDDLE] :~ List.of(Rectangle) = [
+    cell(33.,424.),
+    cell(33.,440.),
+    cell(33.,448.),
+ ]
+
+def [TOP_CORNER_RIGHT, RIGHT_EDGE, BOTTOM_CORNER_RIGHT] :~ List.of(Rectangle) = [
+    cell(154.,424.),
+    cell(154.,432.),
+    cell(154.,448.),
+ ]
+
+def dest_box : Rectangle(0.,0.,32.,32.)
+def origin : Vector2(0.,0.)
+def width_cells: 18
+def height_cells: 5
+
+def width_pixels: (width_cells * 32.)
+def height_pixels: (height_cells * 32.)
+
+fun draw_cell(cell :: Rectangle, x :: Real, y :: Real):
+  dest_box.x := math.inexact(x)
+  dest_box.y := math.inexact(y)
+  raylib.DrawTexturePro(
+    ui_texture.inner(),
+    cell.inner(),
+    dest_box.inner(),
+    origin.inner(),
+    0.,
+    raylib.WHITE
+  )
+
+fun draw():
+  def width: raylib.GetScreenWidth()
+  def height: raylib.GetScreenHeight()
+  def offset_width: (width - width_pixels) / 2.
+  def offset_height: height - height_pixels
+
+  for:
+    each i: 0 .. width_cells
+    each j: 0 .. height_cells
+    def cell:
+      cond
+      | i == 0 && j == 0                             : TOP_CORNER_LEFT
+      | i == width_cells - 1 && j == 0               : TOP_CORNER_RIGHT
+      | i == 0 && j == height_cells - 1              : BOTTOM_CORNER_LEFT
+      | i == width_cells - 1 && j == height_cells - 1: BOTTOM_CORNER_RIGHT
+      | i == 0                                       : LEFT_EDGE
+      | j == 0                                       : TOP_MIDDLE
+      | i == width_cells - 1                         : RIGHT_EDGE
+      | j == height_cells - 1                        : BOTTOM_MIDDLE
+      | ~else                                        : MIDDLE
+
+    draw_cell(cell, offset_width + 32. * i, offset_height + 32. * j)
