@@ -42,4 +42,10 @@ CLOSED: [2023-05-06 Sat 13:23]
 * TODO Add multiple worlds
 * TODO Add enemies description lang
 * TODO Add quest description lang
+* Writing a contextual action button
+** Add a interactable component that has a sprite, and offset
+** Add an interaction system, that iterates through entities with interactable, and if user nearby, shows the interaction sprite
+** If the user is nearby and user presses action, then add ActiveInteraction() component to entity
+** For each interaction that you want to support, add a component with extra details and add system to handle entities with ActiveInteraction
+** For example, to have a basic dialog system to NPCs (we'll extend later), add ConversationContent(sprite,text) component, and system, when given activeinteraction and conversation text, changes the game state to dialog mode with the text
 
