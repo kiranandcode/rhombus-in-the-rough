@@ -25,6 +25,7 @@ import:
    "systems/user_control.rhm" open
    "systems/animation.rhm" open
    "systems/drawing.rhm" open
+   "systems/collision.rhm" open
 
    meta:
      lib("racket/syntax.rkt") as syntax
@@ -39,6 +40,7 @@ def HUMANOID_FRAMES : 9
   
 instance Player:
   component position :~ Position = Vector2(320.,320.)
+  component collision_box :~ CollisionBox = CollisionBox(Rectangle(-16.,0., 32., 32.),0)
   component velocity :~ Velocity = Vector2(0.,0.)
   component orientation :~ Orientation = direction.DOWN
   component sprite :~ AnimatedSprite = AnimatedSprite(
@@ -53,7 +55,8 @@ instance Player:
 
 instance NPC:
   component position :~ Position = Vector2(320.,320.)
-  component velocity :~ Velocity = Vector2(0.,0.)
+  // component velocity :~ Velocity = Vector2(0.,0.)
+  component collision_box :~ CollisionBox = CollisionBox(Rectangle(-16.,0., 32., 32.), 0)
   component orientation :~ Orientation = direction.DOWN
   component sprite :~ AnimatedSprite = AnimatedSprite(
       blacksmith_image,
@@ -68,6 +71,9 @@ instance NPC:
   
 def character: Player.create()
 def blacksmith: NPC.create()
+def blacksmith_2 :: entity.Entity : NPC.create()
+def posn :: Position = blacksmith_2.get_component(Position)
+posn.value.x := 100.
     
 // constants
 def screen_width: 800
@@ -87,6 +93,7 @@ while (!raylib.WindowShouldClose()):
   UserControlSystem.update()
   AnimationSystem.update()
   MovementSystem.update()
+  CollisionSystem.update()
 
   draw_block:
     raylib.ClearBackground(raylib.RAYWHITE)
@@ -94,6 +101,7 @@ while (!raylib.WindowShouldClose()):
     draw_2d view:
 
       map.draw_base(view)
+      CollisionSystem.draw()
       CharacterDrawingSystem.draw()
 
       ordered_drawing.draw()

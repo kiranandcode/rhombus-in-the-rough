@@ -225,6 +225,7 @@ class Rectangle(self):
     | this.y + this.height < other.y : #false
     | ~else: #true
 
+
   dot '$left . x' :
     ~tail : tail
     handle_update_vector('$left', '_Rectangle', 'raylib.#{Rectangle-x}', 'raylib.#{set-Rectangle-x!}', tail)
@@ -241,7 +242,11 @@ class Rectangle(self):
     ~tail : tail
     handle_update_vector('$left', '_Rectangle', 'raylib.#{Rectangle-height}', 'raylib.#{set-Rectangle-height!}', tail)
 
+fun Rectangle.check_collision(left :: Rectangle, right :: Rectangle) :: Boolean :
+  (raylib.CheckCollisionRecs(left.self, right.self))
 
+fun Rectangle.get_collision_rect(left :: Rectangle, right :: Rectangle) :: Rectangle:
+  Rectangle(raylib.GetCollisionRec(left.self, right.self))
 
 class Camera2D(self):
   opaque

@@ -8,7 +8,12 @@ export:
   Position
   Velocity
   Orientation
+  CollisionBox
 
 component Position(value :: Vector2)
 component Velocity(value :: Vector2)
 component Orientation(facing_direction :: direction.Direction)
+
+component CollisionBox(area :: Rectangle, collision_update_count :: Integral) // relative to position
+
+

@@ -20,4 +20,3 @@ system MovementSystem(
  method update():
    def delta : raylib.GetFrameTime()
    position.value := position.value.add(velocity.value.scale(delta))
-

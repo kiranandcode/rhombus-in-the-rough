@@ -13,6 +13,8 @@ export:
   entity
   instance
 
+use_static
+
 def max_entities: 10
 
 def mutable systems: []
@@ -22,30 +24,34 @@ namespace entity:
   export: Entity create available_entities lookup
 
   def mutable available_entities: racket.#{build-list}(max_entities, fun (id): id)
-  def entities: racket.#{build-vector}(max_entities, fun (_): #false)
+  def entities :: Array : racket.#{build-vector}(max_entities, fun (_): #false)
 
   class Entity(id::Integral, mutable destroyed :: Boolean):
 
-    method add_component([comp,data]) :: Entity:
+    method add_component([comp :: Component,data]) :: Entity:
       comp.add_component(this, data)
       this
       
+    method has_component(fn):
+      def comp :: Component : fn()
+      comp.has_data(this)
+
     method get_component(fn):
-      def comp : fn()
+      def comp :: Component : fn()
       comp.get_data(this)
 
     method get_component_opt(fn):
-      def comp : fn()
+      def comp :: Component : fn()
       comp.get_data_opt(this)
 
     method destroy():
       if destroyed
       | error("Attempt to destroy an invalid entity")
       | for:
-          each comp : components
+          each comp :: Component : components
           comp.remove_component(id)
         for:
-          each sys : systems
+          each sys :: System : systems
           sys.remove_entity(this)
         entities[id] := #false
         available_entities := List.cons(id, available_entities)
@@ -210,8 +216,8 @@ fun test():
     Position.add_component(e1, "hello")
     Position.add_component(e2, "world")
     Position.add_component(e3, "!!!")
-    Position.get_data(e1) ++ Position.get_data(e2) ++ Position.get_data(e3)
-    ~is "helloworld!!!"
+    [Position.get_data(e1), Position.get_data(e2), Position.get_data(e3)]
+    ~is ["hello","world", "!!!"]
 
   check:
     def Position : Component("Position")
@@ -220,8 +226,8 @@ fun test():
     Position.add_component(e2, "world")
     Position.add_component(e3, "!!!")
     Position.remove_component(e2)
-    Position.get_data(e1) ++ Position.get_data(e3)
-    ~is "hello!!!"
+    [Position.get_data(e1), Position.get_data(e3)]
+    ~is ["hello","!!!"]
 
   check:
     def Position : Component("Position")
@@ -254,8 +260,8 @@ fun test():
     e1.add_component(Position("hello "))
     e2.add_component(Position("world"))
     e3.add_component(Position("!!!"))
-    _Position.get_data(e1) ++ _Position.get_data(e2) ++ _Position.get_data(e3)
-    ~is "hello world!!!"
+    [_Position.get_data(e1), _Position.get_data(e2), _Position.get_data(e3)]
+    ~is ["hello ", "world", "!!!"]
   
 defn.macro
 | 'component $name($field_name :: $ty, ...)':
@@ -288,113 +294,88 @@ expr.macro
       ...'
 
 meta:
-  fun build_system_body(components, body, this):
+
+  fun build_system_definition(components, body, this):
     match body
     | 'method $fn($arg, ...) $opt ...:
          $body
-         ...
-       $rest ...':
-       def system_body: build_system_body(components, '$rest ...', this)
-       'fun $fn($arg, ...):
-         for:
-           each $this: _system._entities
-           system_defs($this, $components, [$body, ...])
-        $system_body'  
-    | 'method $fn($arg, ...) $opt ...:
-         $body
          ...':
        'fun $fn($arg, ...):
          for:
            each $this: _system._entities
-           system_defs($this, $components, [$body,...])'
-    | 'fun $fn($arg, ...):
+           system_defs($this, $components, [$body, ...])'  
+    | 'fun $fn $arg ...:
          $body
-         ...
-       $rest ...':
-       def system_body: build_system_body(components, '$rest ...', this)
-       'fun $fn($arg, ...):
+         ...':
+       'fun $fn $arg ...:
            $body
-           ...
-        $system_body'  
-    | 'fun $fn($arg, ...):
+           ...'  
+    | 'def $fn $opt ...:
          $body
          ...':
-       'fun $fn($arg, ...):
-          $body
-          ...'  
+       'def $fn $opt ...:
+           $body
+           ...'  
 
-    | 'def $fn:
-         $body
-         ...
-       $rest ...':
-       def system_body: build_system_body(components, '$rest ...', this)
-       'def $fn:
-           $body
-           ...
-        $system_body'  
-    | 'def $fn:
-         $body
-         ...':
-       'def $fn:
-          $body
-          ...'  
+  fun build_system_body(components, body, this) :: List:
+    match body
+    | '[[$body]]':
+       [build_system_definition(components, '$body', this)]
+    | '[[$body], $rest, ...]':
+       def defn: build_system_definition(components, '$body', this)
+       def rest: build_system_body(components, '[$rest,...]', this)
+       [defn] ++ rest
+
   fun
   | extract_this_parameter(''): 'entity'
   | extract_this_parameter('with $name'): '$name'
 
-  fun build_system_exports(body):
+  fun extract_export(body):
     match body
-    | 'fun $fn($arg, ...):
-         $body
-         ...
-       $rest ...':
-       def exports: build_system_exports('$rest ...')
-       '$fn
-        $exports'  
-    | 'fun $fn($arg, ...):
+    | 'fun $fn $arg ...:
          $body
          ...':
        '$fn'  
-    | 'method $fn($arg, ...)  $opt ...:
-         $body
-         ...
-       $rest ...':
-       def exports: build_system_exports('$rest ...')
-       '$fn
-        $exports'  
-    | 'method $fn($arg, ...)  $opt ...:
+    | 'method $fn $arg ...:
          $body
          ...':
        '$fn'  
-    | 'def $fn:
-         $body
-         ...
-       $rest ...':
-       def exports: build_system_exports('$rest ...')
-       '$fn
-        $exports'  
-    | 'def $fn:
+    | 'def $fn $opt ...:
          $body
          ...':
        '$fn'
-       
+
+
+  fun build_system_exports(body) :: List:
+    match body
+    | '[[$body], ...]': [extract_export('$body'), ...]
 
 
 defn.macro
 | 'system $name($component_name :: $component, ...) $rest ...:
-     $body ...':
+     $body
+     ...':
     def _name_value : match name | '$(x::Identifier)': to_string(x.unwrap())
     def component_list: 'component_names([$component, ...])'
     def this_value: extract_this_parameter('$rest ...')
-    def system_body: build_system_body('[[$component_name, $component], ...]', '$body ...', '$this_value')
-    def exports: build_system_exports('$body ...')
-    '«namespace $name:
-        export:
-          _system
-          $exports
-        def _system: System($_name_value, [name_to_component_value($component), ...])
-        $system_body
-      »'
+    def system_body:
+       build_system_body(
+        '[[$component_name, $component], ...]',
+        '[[$body], ...]',
+        '$this_value'
+       )
+    def exports: build_system_exports('[[$body], ...]')
+    match [system_body, exports]
+    | [[definition, ...],[id, ...]]:
+        '«namespace $name:
+            export:
+              _system
+              $id
+              ...
+            def _system: System($_name_value, [name_to_component_value($component), ...])
+            $definition
+            ...
+          »'
      
 fun add_component_helper(entity :: entity.Entity, comp):
   entity.add_component(comp)

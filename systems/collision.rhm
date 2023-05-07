@@ -1,0 +1,79 @@
+#lang rhombus
+
+import:
+  lib("raylib/2d/unsafe.rkt") as raylib
+
+  "../lib/datatypes.rhm" open
+  "../lib/ecs.rhm" open
+  "../lib/lang.rhm" open
+  "../game/raylib_lang.rhm" open
+
+  "../lib/ordered_drawing.rhm"
+
+  "../components/movement.rhm" open
+  "../components/graphics.rhm" open
+
+export:
+  CollisionSystem
+
+use_static
+
+def collision_box : Rectangle(0.,0.,0.,0.)
+def mutable update_count :: Integral = 0
+fun start_update_cycle():
+  match update_count
+  | 0: update_count := 1
+  | ~else: update_count := 0
+
+system CollisionSystem(
+    position :: Position,
+    collision_area :: CollisionBox
+ ) with this:
+
+  fun handle_collision_between(c1 :: entity.Entity, c2 :: entity.Entity, area :: Rectangle):
+    cond
+    | c1.has_component(Velocity) && !c2.has_component(Velocity):
+        def c1_pos :: Position = c1.get_component(Position)
+        if area.width < area.height
+        | c1_pos.value.x := c1_pos.value.x - area.width
+        | c1_pos.value.y := c1_pos.value.y - area.height
+    | !c1.has_component(Velocity) && c2.has_component(Velocity):
+        def c2_pos :: Position = c2.get_component(Position)
+        if area.width < area.height
+        | c2_pos.value.x := c2_pos.value.x - area.width
+        | c2_pos.value.y := c2_pos.value.y - area.height
+    | c1.has_component(Velocity) && c2.has_component(Velocity): #void
+    | ~else: #void
+
+  method check_collisions_with(o_entity :: entity.Entity, o_area :: Rectangle):
+    when (o_entity != this && collision_area.collision_update_count != update_count):
+      collision_box.x := position.value.x + collision_area.area.x
+      collision_box.y := position.value.y + collision_area.area.y
+      collision_box.width := collision_area.area.width
+      collision_box.height := collision_area.area.height
+      when (Rectangle.check_collision(collision_box, o_area)):
+        def collision :: Rectangle : Rectangle.get_collision_rect(collision_box, o_area)
+        handle_collision_between(this, o_entity, collision)
+
+  method update_internal():
+    collision_area.collision_update_count := update_count
+    def area: Rectangle(
+      position.value.x + collision_area.area.x,
+      position.value.y + collision_area.area.y,
+      collision_area.area.width,
+      collision_area.area.height
+    )
+    check_collisions_with(this, area)
+  fun update():
+    start_update_cycle()
+    update_internal()
+
+  method draw():
+    collision_box.x := position.value.x + collision_area.area.x
+    collision_box.y := position.value.y + collision_area.area.y
+    collision_box.width := collision_area.area.width
+    collision_box.height := collision_area.area.height
+    raylib.DrawRectangleRec(
+       collision_box.inner(),
+       raylib.RED
+    )
