@@ -9,30 +9,27 @@ export:
   send
   handle
 
+use_static
 
-def mutable message_queue: gvector.GVector.make()
-
+def mutable message_queue :: gvector.GVector: gvector.GVector.make()
 
 fun send(m :: message.Message):
-  message_queue.add(m)
+  gvector.GVector.add(message_queue, m)
 
 fun retrieve() :: Array.of(message.Message):
-  def result : message_queue.to_vector()
-  message_queue := gvector.GVector.make(result.length())
+  def result :: Array.of(message.Message) : gvector.GVector.to_vector(message_queue)
+  message_queue := if result.length() > 0 | gvector.GVector.make(result.length()) | gvector.GVector.make()
   result
 
 expr.macro
 | 'handle
-   | $case:
-       $body
-       ...
+   | $case ...: $body ...
    | ...':
+
     'block:
       def messages: retrieve()
       for:
-        each message: messages
-        match message
-        | $case:
-            $body
-            ...
+        each msg: messages
+        match msg
+        | $case ...: $body ...
         | ...'
