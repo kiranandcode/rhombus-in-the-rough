@@ -1,0 +1,38 @@
+#lang rhombus
+
+import:
+  rhombus/meta open
+  "message.rhm"
+  "gvector.rhm"
+
+export:
+  send
+  handle
+
+
+def mutable message_queue: gvector.GVector.make()
+
+
+fun send(m :: message.Message):
+  message_queue.add(m)
+
+fun retrieve() :: Array.of(message.Message):
+  def result : message_queue.to_vector()
+  message_queue := gvector.GVector.make(result.length())
+  result
+
+expr.macro
+| 'handle
+   | $case:
+       $body
+       ...
+   | ...':
+    'block:
+      def messages: retrieve()
+      for:
+        each message: messages
+        match message
+        | $case:
+            $body
+            ...
+        | ...'

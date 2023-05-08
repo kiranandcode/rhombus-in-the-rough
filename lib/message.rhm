@@ -8,6 +8,10 @@ import:
 
 export:
   message
+  Message
+
+class Message():
+  nonfinal
 
 
 meta:
@@ -33,28 +37,30 @@ decl.macro
     def name_vl : to_string(name.unwrap())
     def fields: extract_fields('[$field, ...]', [])
     def tys: extract_tys('[[$ty], ...]', [])
-    def decl: 'class $('$')$name($field :: $ty, ...)'
-    '«meta.bridge id:
-        fun ($name):
-          if message_defs.has_key($name_vl)
-          | def [ofields, otys, defn]: message_defs[$name_vl]
-            check:
-              $fields
-              ~is ofields
-            check:
-              $tys
-              ~is otys
-            defn('$('$') $name')
-          | def result:
-              'meta.bridge f:
-                fun defn(oname):
-                  ('«annot.macro '$('$') (' $('$') ') oname': '$('$')$name'
-                     bind.macro '$('$') (' $('$') ') oname($('$') (' $('$') ') ('$('$') (' $('$') ')') $field, ...)': '$('$')$name($('$') (' $('$') ') ('$('$') (' $('$') ')') $field, ...)'
-                     fun $('$') (' $('$') ') oname ($field :: $ty, ...): $('$')$name($field, ...)»')
-                message_defs[$name_vl] := [$fields, $tys, defn]
-               $decl'
-            result
-        
-      defn.macro 'message_internal $('$')$name': base.#{syntax-local-value}('id')($name)
-      message_internal $name»'
+    def decl: 'class $('$')$name($field :: $ty, ...):
+                 extends Message'
+    match [tys, fields]
+    | [[tys_ty, ...], [fields_field, ...]]:
+        '«meta.bridge id:
+            fun ($name):
+              if message_defs.has_key($name_vl)
+              | def [ofields, otys, defn]: message_defs[$name_vl]
+                check:
+                  [$fields_field, ...]
+                  ~is ofields
+                check:
+                  [$tys_ty, ...]
+                  ~is otys
+                defn('$('$') $name')
+              | def result:
+                  'meta.bridge f:
+                    fun defn(oname):
+                      ('«annot.macro '$('$') (' $('$') ') oname': '$('$')$name'
+                         bind.macro '$('$') (' $('$') ') oname($('$') (' $('$') ') ('$('$') (' $('$') ')') $field, ...)': '$('$')$name($('$') (' $('$') ') ('$('$') (' $('$') ')') $field, ...)'
+                         fun $('$') (' $('$') ') oname ($field :: $ty, ...): $('$')$name($field, ...)»')
+                    message_defs[$name_vl] := [$fields_field, ..., $tys_ty, ..., defn]
+                   $decl'
+                result
 
+          defn.macro 'message_internal $('$')$name': base.#{syntax-local-value}('id')($name)
+          message_internal $name»'
