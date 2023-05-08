@@ -33,15 +33,18 @@ namespace entity:
       this
       
     method has_component(fn):
-      def comp :: Component : fn()
+      def comps :: List: fn()
+      def comp :: Component: comps[0]
       comp.has_data(this)
 
     method get_component(fn):
-      def comp :: Component : fn()
+      def comps :: List = fn()
+      def comp :: Component: comps[0]
       comp.get_data(this)
 
     method get_component_opt(fn):
-      def comp :: Component : fn()
+      def comps :: List = fn()
+      def comp :: Component : comps[0]
       comp.get_data_opt(this)
 
     method destroy():
@@ -276,7 +279,7 @@ defn.macro
      annot.macro '$name': '$name . $_name_class'
      fun
      | $name($field_name :: $ty, ...) : [$name . $_name, $name . $_name_class($field_name, ...)]
-     | $name(): $name . $_name»'
+     | $name(): [$name . $_name]»'
 
 expr.macro
 | 'name_to_component_value($(name :: Identifier))':
@@ -302,7 +305,7 @@ meta:
          ...':
        'fun $fn($arg, ...):
          for:
-           each $this: _system._entities
+           each $this :~ entity.Entity : _system._entities
            system_defs($this, $components, [$body, ...])'  
     | 'fun $fn $arg ...:
          $body

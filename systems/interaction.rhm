@@ -27,21 +27,25 @@ system PlayerSystem(player :: IsPlayer, position :: Position) with this:
 system InteractionSystem(
     position :: Position,
     interactable :: Interactable
-  ):
+  ) with this:
 
- method update_internal(player_pos :: Vector2):
+ method update_internal(player_interacting :: Boolean, player_pos :: Vector2):
    def dx: (position.value.x - player_pos.x)
    def dy: (position.value.y - player_pos.y)
    // println(["comparing ", ((dx * dx) + (dy * dy)), " to ", to_string(interaction_distance_squared)])
    if ((dx * dx) + (dy * dy) < interaction_distance_squared)
    | interactable.enabled := #true
+     when (player_interacting && !this.has_component(IsActiveInteraction)):
+       this.add_component(IsActiveInteraction())
    | interactable.enabled := #false
 
  fun update():
+   def player_interacting: raylib.IsKeyReleased(raylib.KEY_Q)
+
    PlayerSystem.for_each(
        fun (player :: entity.Entity):
          def player_pos :: Position = player.get_component(Position)
-         update_internal(player_pos.value)
+         update_internal(player_interacting, player_pos.value)
    )
      
 

@@ -43,7 +43,7 @@ def_texture blacksmith_image : "./resources/images/soldier.png"
 def HUMANOID_FRAMES : 9
 
 instance Player:
-  component player :~ IsPlayer = IsPlayer(0)
+  component player :~ IsPlayer = IsPlayer()
   component position :~ Position = Vector2(320.,320.)
   component collision_box :~ CollisionBox = CollisionBox(Rectangle(-16.,16., 32., 16.),0)
   component velocity :~ Velocity = Vector2(0.,0.)
@@ -124,20 +124,7 @@ while (!raylib.WindowShouldClose()):
 
       InteractionSystem.draw()
 
-      // raylib.DrawTexturePro(
-      //    ui_texture.inner(),
-      //    // Rectangle(758.,82.,32.,32.).inner(),
-      //    // Rectangle(802.,480.,47.,47.).inner(),
-      //    Rectangle(96.,104.,16.,16.).inner(),
-      //    Rectangle(304.,254.,32.,32.).inner(),
-      //    Vector2(0.,0.).inner(),
-      //    0.,
-      //    raylib.WHITE
-      // )
-
     // dialog_box.draw()
-
-
 
     def msg:
       racket.format("Nothing to show....")

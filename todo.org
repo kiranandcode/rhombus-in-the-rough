@@ -30,7 +30,8 @@ CLOSED: [2023-05-06 Sat 13:23]
 CLOSED: [2023-05-06 Sat 13:23]
 ** DONE Sort drawing by y-order
 CLOSED: [2023-05-06 Sat 13:23]
-** TODO Add interactable component
+** DONE Add interactable component
+CLOSED: [2023-05-08 Mon 04:25]
 *** Has value representing action
 ** TODO Add interaction system
 *** TODO for entity with interaction and position, if distance from player is less than n, show interaction dialog

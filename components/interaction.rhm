@@ -11,7 +11,7 @@ export:
   Interactable
   IsActiveInteraction
 
-component IsPlayer(dummy :: Integral)
+component IsPlayer()
 
 component Interactable(
   icon :: icons.Icon,
