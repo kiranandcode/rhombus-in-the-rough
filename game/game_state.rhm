@@ -7,6 +7,7 @@ export:
   push
   draw
   update
+  init
 
 interface State:
 
@@ -14,7 +15,7 @@ interface State:
 
   abstract method update()
 
-  abstract method should_pop() :: Boolean
+  method should_pop() :: Boolean: #false
 
 def mutable state_stack :: List.of(State): []
 def mutable current_state :~ State : #false
@@ -29,9 +30,16 @@ fun pop():
   state_stack := tl
   
 fun draw():
+  for:
+    each state : state_stack.reverse()
+    state.draw()
   current_state.draw()
 
 fun update():
   when (current_state.should_pop()):
     pop()
   current_state.update()
+
+
+fun init(s :: State):
+  current_state := s
