@@ -1,0 +1,37 @@
+#lang rhombus
+import:
+  "../lib/lang.rhm" open
+
+export:
+  State
+  push
+  draw
+  update
+
+interface State:
+
+  abstract method draw()
+
+  abstract method update()
+
+  abstract method should_pop() :: Boolean
+
+def mutable state_stack :: List.of(State): []
+def mutable current_state :~ State : #false
+
+fun push(s :: State):
+  state_stack := List.cons(current_state, state_stack)
+  current_state := s
+
+fun pop():
+  def List.cons(hd, tl) : state_stack
+  current_state := hd
+  state_stack := tl
+  
+fun draw():
+  current_state.draw()
+
+fun update():
+  when (current_state.should_pop()):
+    pop()
+  current_state.update()
