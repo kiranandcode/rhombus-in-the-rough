@@ -2,7 +2,6 @@
 
 import:
   rhombus/meta open
-  lib("racket/main.rkt") as racket
   lib("data/gvector.rkt") as gvector
 
 export: GVector
@@ -105,23 +104,12 @@ namespace GVector:
 dot.macro
 | 'gvector_dot_provider $left $dot $right':
     match right
-    | 'get ($ind)': 'GVector.get($left, $ind)'
     | 'get': 'fun (ind): GVector.get($left, ind)'
-    | 'set ($ind,$vl)': 'GVector.set($left, $ind, $vl)'
     | 'set': 'fun (ind,vl): GVector.get($left, ind, vl)'
-    | 'remove ($ind)': 'GVector.remove($left, $ind)'
     | 'remove': 'fun (ind): GVector.remove($left, ind)'
-    | 'remove_last ()': 'GVector.remove_last($left)'
     | 'remove_last': 'fun (): GVector.remove_last($left)'
-    | 'add ($vl,...)': 'GVector.add($left,$vl,...)'
     | 'add': 'fun (vl,$('...')): GVector.add($left, vl,$('...'))'
-    | 'count ()': 'GVector.count($left)'
     | 'count': 'fun (): GVector.count($left)'
-    | 'to_vector ()': 'GVector.to_vector($left)'
     | 'to_vector': 'fun (): GVector.to_vector($left)'
-
-    | 'sort ($arg,...)': 'GVector.sort($left, $arg, ...)'
     | 'sort': 'fun (vl,$('...')): GVector.sort($left,vl,$('...'))'
-
-    | 'elements ()': 'GVector.elements($left)'
     | 'elements': 'fun (): GVector.elements($left)'
