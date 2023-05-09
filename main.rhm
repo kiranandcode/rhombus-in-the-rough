@@ -87,16 +87,6 @@ def blacksmith_2 :: entity.Entity : NPC.create()
 def posn :: Position = blacksmith_2.get_component(Position)
 posn.value.x := 100.
     
-// constants
-def screen_width: 800
-def screen_height: 450
-
-def view : View()
-def map : game_map.Map(100,100, terrain.rock)
-
-def_texture ui_texture: "./resources/images/ui_big_pieces.png"
-def_texture inspect_icon: "./resources/images/icons/inspect_small.png"
-
 
 class WorldState(
     view :: View,
@@ -120,7 +110,17 @@ class WorldState(
    CollisionSystem.update()
    InteractionSystem.update()
 
-   #void
+
+// constants
+def screen_width: 800
+def screen_height: 450
+
+game_state.init(
+  WorldState(
+    View(),
+    game_map.Map(100,100, terrain.rock)
+  )
+)
 
 
 raylib.InitWindow(screen_width,screen_height, "Game")
@@ -129,26 +129,12 @@ raylib.SetTargetFPS(60);
 
 while (!raylib.WindowShouldClose()):
 
-  view.update()
-  UserControlSystem.update()
-  AnimationSystem.update()
-  MovementSystem.update()
-  CollisionSystem.update()
-  InteractionSystem.update()
+  game_state.update()
 
   draw_block:
     raylib.ClearBackground(raylib.RAYWHITE)
 
-    draw_2d view:
-
-      map.draw_base(view)
-      // CollisionSystem.draw()
-      CharacterDrawingSystem.draw()
-
-      ordered_drawing.draw()
-
-      InteractionSystem.draw()
-
+    game_state.draw()
     // dialog_box.draw()
 
     def msg:
