@@ -58,7 +58,7 @@ decl.macro
                       ('«annot.macro '$('$') (' $('$') ') oname': '$('$')$name'
                          bind.macro '$('$') (' $('$') ') oname($('$') (' $('$') ') ('$('$') (' $('$') ')') $field, ...)': '$('$')$name($('$') (' $('$') ') ('$('$') (' $('$') ')') $field, ...)'
                          fun $('$') (' $('$') ') oname ($field :: $ty, ...): $('$')$name($field, ...)»')
-                    message_defs[$name_vl] := [$fields_field, ..., $tys_ty, ..., defn]
+                    message_defs[$name_vl] := [[$fields_field, ...], [$tys_ty, ...], defn]
                    $decl'
                 result
 

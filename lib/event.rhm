@@ -2,34 +2,177 @@
 
 import:
   rhombus/meta open
+  lib("racket/main.rkt") as racket
   "message.rhm"
   "gvector.rhm"
 
 export:
   send
+  update
   handle
+  scoped
+  MessageBuffer
 
 use_static
 
-def mutable message_queue :: gvector.GVector: gvector.GVector.make()
+
+class _MessageBuffer(buffer :: gvector.GVector, mutable message_queue_index :: Integral):
+  constructor ():
+    super(gvector.GVector.make(), 0)
+
+  method send_message(m :: message.Message):
+    if message_queue_index < buffer.count()
+    | buffer[message_queue_index] := m
+    | buffer.add(m)
+    message_queue_index := message_queue_index + 1
+
+  method update(handlers):
+    for:
+      each:
+        i : 0 .. message_queue_index
+        msg : buffer
+      each handler :: Function: handlers
+      handler(msg)
+    message_queue_index := 0
+
+namespace MessageBuffer:
+  export: create
+  fun create(): _MessageBuffer()
+fun MessageBuffer(): _MessageBuffer()
+annot.macro 'MessageBuffer': '_MessageBuffer'
+  
+def message_queue: _MessageBuffer()
+def handlers: gvector.GVector.make()
+
+def current_message_queue: racket.#{make-parameter}(message_queue, fun (x): x is_a _MessageBuffer && x)
+
 
 fun send(m :: message.Message):
-  gvector.GVector.add(message_queue, m)
+  def message_queue :~ _MessageBuffer = current_message_queue()
+  message_queue.send_message(m)
 
-fun retrieve() :: Array.of(message.Message):
-  def result :: Array.of(message.Message) : gvector.GVector.to_vector(message_queue)
-  message_queue := if result.length() > 0 | gvector.GVector.make(result.length()) | gvector.GVector.make()
-  result
+fun update():
+  def message_queue :~ _MessageBuffer = current_message_queue()
+  message_queue.update(handlers)
+
+fun add_handler(f):
+  handlers.add(f)
+
+expr.macro
+| 'scoped:
+     $body
+     ...
+     ~handling
+      | $case ...: $case_body ...
+      | ...':
+    'block:
+       def queue :: _MessageBuffer: _MessageBuffer()
+       parameterize {current_message_queue: queue}:
+         $body
+         ...
+       queue.update([
+         fun (m :: message.Message):
+           match m
+           | $case ...: $case_body ...
+           | ...
+           | ~else: #void
+       ])'
+| 'scoped $buf ...:
+     $body
+     ...
+     ~handling
+      | $case ...: $case_body ...
+      | ...':
+    'block:
+       def queue :: _MessageBuffer: $buf ...
+       parameterize {current_message_queue: queue}:
+         $body
+         ...
+       queue.update([
+         fun (m :: message.Message):
+           match m
+           | $case ...: $case_body ...
+           | ...
+           | ~else: #void
+       ])'
+
 
 expr.macro
 | 'handle
    | $case ...: $body ...
    | ...':
 
-    'block:
-      def messages: retrieve()
-      for:
-        each msg: messages
+    'add_handler(
+      fun (msg :: message.Message):
         match msg
         | $case ...: $body ...
-        | ...'
+        | ...
+        | ~else: #void
+     )'
+
+
+submodule test:
+
+  message.message Foo(x :: Integral)
+  message.message Bar(y :: Integral)
+  message.message Baz(z :: Integral)
+
+  check:
+    def mutable result: #false
+    handle
+    | Foo(x): result := x
+
+    send(Foo(1))
+
+    update()
+    
+    result
+    ~is 1
+
+  check:
+    def mutable result: #false
+    handle
+    | Foo(x): result := x
+
+    send(Bar(1))
+
+    update()
+    
+    result
+    ~is #false
+
+    
+  check:
+    def mutable result: []
+    handle
+    | Foo(x): result := List.cons(x, result)
+
+    send(Foo(1))
+    send(Foo(2))
+    send(Foo(3))
+    send(Foo(4))
+
+    update()
+
+    send(Foo(5))
+    send(Foo(6))
+    send(Foo(7))
+    send(Foo(8))
+
+    update()
+    
+    result
+    ~is [8,7,6,5,4,3,2,1]
+
+  check:
+    def mutable result: #false
+    fun helper(n):
+      send(Baz(n))
+    helper(3)
+    scoped:
+      helper(1)
+      ~handling
+      | Baz(n): result := n
+    result
+    ~is 1
+
