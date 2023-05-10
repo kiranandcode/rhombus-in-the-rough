@@ -2,7 +2,6 @@
 
 import:
   rhombus/meta open
-  lib("racket/main.rkt") as racket
   meta:
     lib("racket/syntax.rkt") as syntax
 
