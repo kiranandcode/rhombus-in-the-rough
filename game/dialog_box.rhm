@@ -8,15 +8,11 @@ import:
    lib("racket/main.rkt") as racket
    lib("raylib/2d/unsafe.rkt") as raylib
 export:
-  draw
-  draw_character_left
-  draw_character_right
-  draw_text
+  DialogBox
 
 use_static
 
 def_texture ui_texture: "./resources/images/ui_big_pieces.png"
-
 
 fun cell(x :: Real, y :: Real) :: Rectangle:
   Rectangle(x,y,16.,16.)
@@ -48,7 +44,7 @@ def height_cells: 5
 def width_pixels: (width_cells * 32.)
 def height_pixels: (height_cells * 32.)
 
-fun draw_cell(cell :: Rectangle, x :: Real, y :: Real):
+fun draw_cell(cell :: Rectangle, x :: Real, y :: Real, color :: Color):
   dest_box.x := math.inexact(x)
   dest_box.y := math.inexact(y)
   raylib.DrawTexturePro(
@@ -57,7 +53,7 @@ fun draw_cell(cell :: Rectangle, x :: Real, y :: Real):
     dest_box.inner(),
     origin.inner(),
     0.,
-    raylib.WHITE
+    color.inner()
   )
 
 
@@ -68,83 +64,107 @@ def character_dest_rect: Rectangle(0.,0.,character_size,character_size)
 def font_size: 20.
 def text_pos : Vector2(0.,0.) 
 
-
-fun draw_character_left(sprite :: Texture):
-  def width: raylib.GetScreenWidth()
-  def height: raylib.GetScreenHeight()
-  def offset_width: (width - width_pixels) / 2. - character_size / 2
-  def offset_height: height - character_size
-  character_dest_rect.x := offset_width
-  character_dest_rect.y := offset_height
-  raylib.DrawTexturePro(
-    sprite.inner(),
-    character_sprite_rect.inner(),
-    character_dest_rect.inner(),
-    origin.inner(),
-    0.,
-    raylib.WHITE
-  )
-  
-fun draw_character_right(sprite :: Texture):
-  def width: raylib.GetScreenWidth()
-  def height: raylib.GetScreenHeight()
-  def offset_width: (width - width_pixels) / 2. + width_pixels - character_size / 2
-  def offset_height: height - character_size
-  character_dest_rect.x := offset_width
-  character_dest_rect.y := offset_height
-  raylib.DrawTexturePro(
-    sprite.inner(),
-    character_sprite_rect.inner(),
-    character_dest_rect.inner(),
-    origin.inner(),
-    0.,
-    raylib.WHITE
-  )
-
-fun draw_text(text :: String):
-
-  def width: raylib.GetScreenWidth()
-  def height: raylib.GetScreenHeight()
-
-  def offset_width: (width - width_pixels) / 2.
-  def offset_height: height - height_pixels
-
-  def text_width: raylib.MeasureText(text, math.exact(font_size))
-
-  text_pos.x := offset_width + 30
-  text_pos.y := offset_height + 30
-
-  raylib.DrawTextPro(
-    raylib.GetFontDefault(),
-    text,
-    text_pos.inner(),
-    origin.inner(),
-    0.,
-    math.floor(font_size),
-    2.0,
-    raylib.WHITE
-  )
+def character_color : Color(255,255,255,0)
+def dialog_color : Color(255,255,255,0)
 
 
-fun draw():
-  def width: raylib.GetScreenWidth()
-  def height: raylib.GetScreenHeight()
-  def offset_width: (width - width_pixels) / 2.
-  def offset_height: height - height_pixels
+class DialogBox(
+      offset_x :: Real,
+      offset_y :: Real,
+      opacity :: Real,
+      character_opacity :: Real
+    ):
 
-  for:
-    each i: 0 .. width_cells
-    each j: 0 .. height_cells
-    def cell:
-      cond
-      | i == 0 && j == 0                             : TOP_CORNER_LEFT
-      | i == width_cells - 1 && j == 0               : TOP_CORNER_RIGHT
-      | i == 0 && j == height_cells - 1              : BOTTOM_CORNER_LEFT
-      | i == width_cells - 1 && j == height_cells - 1: BOTTOM_CORNER_RIGHT
-      | i == 0                                       : LEFT_EDGE
-      | j == 0                                       : TOP_MIDDLE
-      | i == width_cells - 1                         : RIGHT_EDGE
-      | j == height_cells - 1                        : BOTTOM_MIDDLE
-      | ~else                                        : MIDDLE
+  constructor():  super(0.,0.,100.,100.)
 
-    draw_cell(cell, offset_width + 32. * i, offset_height + 32. * j)
+  private method set_color():
+    character_color.a := math.exact(math.floor((character_opacity / 100.) * 255))
+    dialog_color.a := math.exact(math.floor((character_opacity / 100.) * 255))
+
+  method draw_character_left(sprite :: Texture):
+    set_color()
+    def width: raylib.GetScreenWidth()
+    def height: raylib.GetScreenHeight()
+    def offset_width: (width - width_pixels) / 2. - character_size / 2
+    def offset_height: height - character_size
+    character_dest_rect.x := offset_x + offset_width
+    character_dest_rect.y := offset_y + offset_height
+    raylib.DrawTexturePro(
+      sprite.inner(),
+      character_sprite_rect.inner(),
+      character_dest_rect.inner(),
+      origin.inner(),
+      0.,
+      character_color.inner()
+    )
+    
+  method draw_character_right(sprite :: Texture):
+    set_color()
+    def width: raylib.GetScreenWidth()
+    def height: raylib.GetScreenHeight()
+    def offset_width: (width - width_pixels) / 2. + width_pixels - character_size / 2
+    def offset_height: height - character_size
+    character_dest_rect.x := offset_x + offset_width
+    character_dest_rect.y := offset_y + offset_height
+    raylib.DrawTexturePro(
+      sprite.inner(),
+      character_sprite_rect.inner(),
+      character_dest_rect.inner(),
+      origin.inner(),
+      0.,
+      character_color.inner()
+    )
+
+  method draw_text(text :: String):
+    set_color()
+    def width: raylib.GetScreenWidth()
+    def height: raylib.GetScreenHeight()
+
+    def offset_width: (width - width_pixels) / 2.
+    def offset_height: height - height_pixels
+
+    def text_width: raylib.MeasureText(text, math.exact(font_size))
+
+    text_pos.x := offset_x + offset_width + 30
+    text_pos.y := offset_y + offset_height + 30
+
+    raylib.DrawTextPro(
+      raylib.GetFontDefault(),
+      text,
+      text_pos.inner(),
+      origin.inner(),
+      0.,
+      math.floor(font_size),
+      2.0,
+      dialog_color.inner()
+    )
+
+  method draw():
+    set_color()
+    def width: raylib.GetScreenWidth()
+    def height: raylib.GetScreenHeight()
+    def offset_width: (width - width_pixels) / 2.
+    def offset_height: height - height_pixels
+
+    for:
+      each i: 0 .. width_cells
+      each j: 0 .. height_cells
+      def cell:
+        cond
+        | i == 0 && j == 0                             : TOP_CORNER_LEFT
+        | i == width_cells - 1 && j == 0               : TOP_CORNER_RIGHT
+        | i == 0 && j == height_cells - 1              : BOTTOM_CORNER_LEFT
+        | i == width_cells - 1 && j == height_cells - 1: BOTTOM_CORNER_RIGHT
+        | i == 0                                       : LEFT_EDGE
+        | j == 0                                       : TOP_MIDDLE
+        | i == width_cells - 1                         : RIGHT_EDGE
+        | j == height_cells - 1                        : BOTTOM_MIDDLE
+        | ~else                                        : MIDDLE
+
+      draw_cell(
+        cell,
+        offset_x + offset_width + 32. * i,
+        offset_y + offset_height + 32. * j,
+        dialog_color
+      )
+

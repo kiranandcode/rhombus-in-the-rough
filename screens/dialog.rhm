@@ -29,11 +29,12 @@ def dialog_color : Color(255,255,255,0)
 
 class DialogScreen(
      dialog_item :: dialog.Dialog,
+     dialog_box :: dialog_box.DialogBox,
      mutable state :: State
    ):
   implements game_state.Screen
 
-  constructor (dialog_item): super(dialog_item, RenderingCompleted())
+  constructor (dialog_item): super(dialog_item, dialog_box.DialogBox(), RenderingCompleted())
 
   override method draw():
     adt.ematch state
