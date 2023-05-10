@@ -1,0 +1,111 @@
+#    -*- mode: org -*-
+
+
+Archived entries from file /home/kirang/Documents/code/racket/murder-on-the-rhombus/todo.org
+
+
+* DONE Writing a contextual action button
+CLOSED: [2023-05-10 Wed 05:37]
+:PROPERTIES:
+:ARCHIVE_TIME: 2023-05-10 Wed 05:37
+:ARCHIVE_FILE: ~/Documents/code/racket/murder-on-the-rhombus/todo.org
+:ARCHIVE_CATEGORY: todo
+:ARCHIVE_TODO: DONE
+:END:
+** Add a interactable component that has a sprite, and offset
+** Add an interaction system, that iterates through entities with interactable, and if user nearby, shows the interaction sprite
+** If the user is nearby and user presses action, then add ActiveInteraction() component to entity
+** For each interaction that you want to support, add a component with extra details and add system to handle entities with ActiveInteraction
+** For example, to have a basic dialog system to NPCs (we'll extend later), add ConversationContent(sprite,text) component, and system, when given activeinteraction and conversation text, changes the game state to dialog mode with the text
+
+
+* DONE Look up how to render tilemap in Raylib
+CLOSED: [2023-04-27 Thu 10:46]
+:PROPERTIES:
+:ARCHIVE_TIME: 2023-05-10 Wed 05:37
+:ARCHIVE_FILE: ~/Documents/code/racket/murder-on-the-rhombus/todo.org
+:ARCHIVE_CATEGORY: todo
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE Load tilemap and draw it
+CLOSED: [2023-04-29 Sat 08:15]
+:PROPERTIES:
+:ARCHIVE_TIME: 2023-05-10 Wed 05:37
+:ARCHIVE_FILE: ~/Documents/code/racket/murder-on-the-rhombus/todo.org
+:ARCHIVE_CATEGORY: todo
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE Fix tilemap so it shows up on screen
+CLOSED: [2023-04-29 Sat 08:50]
+:PROPERTIES:
+:ARCHIVE_TIME: 2023-05-10 Wed 05:37
+:ARCHIVE_FILE: ~/Documents/code/racket/murder-on-the-rhombus/todo.org
+:ARCHIVE_CATEGORY: todo
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE Update camera to follow player
+CLOSED: [2023-04-30 Sun 07:09]
+:PROPERTIES:
+:ARCHIVE_TIME: 2023-05-10 Wed 05:37
+:ARCHIVE_FILE: ~/Documents/code/racket/murder-on-the-rhombus/todo.org
+:ARCHIVE_CATEGORY: todo
+:ARCHIVE_TODO: DONE
+:END:
+
+* DONE Implement systems
+CLOSED: [2023-05-03 Wed 18:19]
+:PROPERTIES:
+:ARCHIVE_TIME: 2023-05-10 Wed 05:37
+:ARCHIVE_FILE: ~/Documents/code/racket/murder-on-the-rhombus/todo.org
+:ARCHIVE_CATEGORY: todo
+:ARCHIVE_TODO: DONE
+:END:
+** Add System
+*** for each component, add self to component
+*** select entities in first component
+**** filter entities that occur in all other components
+*** add entities to system
+** Add component to entity
+*** for each system interested in the component,
+*** add entity to system (if entity has all other fields)
+** Remove component from entity
+*** for each system interested in the component
+*** remove entity from system
+
+
+* DONE Draw Characters
+CLOSED: [2023-05-03 Wed 18:19]
+:PROPERTIES:
+:ARCHIVE_TIME: 2023-05-10 Wed 05:37
+:ARCHIVE_FILE: ~/Documents/code/racket/murder-on-the-rhombus/todo.org
+:ARCHIVE_CATEGORY: todo
+:ARCHIVE_TODO: DONE
+:END:
+
+
+* Minor steps
+:PROPERTIES:
+:ARCHIVE_TIME: 2023-05-10 Wed 05:38
+:ARCHIVE_FILE: ~/Documents/code/racket/murder-on-the-rhombus/todo.org
+:ARCHIVE_CATEGORY: todo
+:END:
+** DONE Lookup examples of component designs
+CLOSED: [2023-05-06 Sat 13:23]
+** DONE Refactor Components
+CLOSED: [2023-05-10 Wed 05:37]
+** DONE Add a second character
+CLOSED: [2023-05-06 Sat 13:23]
+** DONE Sort drawing by y-order
+CLOSED: [2023-05-06 Sat 13:23]
+** DONE Add interactable component
+CLOSED: [2023-05-08 Mon 04:25]
+*** Has value representing action
+** DONE Add interaction system
+CLOSED: [2023-05-10 Wed 05:37]
+*** DONE for entity with interaction and position, if distance from player is less than n, show interaction dialog
+CLOSED: [2023-05-10 Wed 05:37]
+** DONE Add dialog box (non ECS)
+CLOSED: [2023-05-10 Wed 05:37]
