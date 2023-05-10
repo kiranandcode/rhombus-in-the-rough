@@ -65,6 +65,10 @@ def character_size: 350.
 def character_sprite_rect: Rectangle(0.,0.,2048.,2048.)
 def character_dest_rect: Rectangle(0.,0.,character_size,character_size)
 
+def font_size: 20.
+def text_pos : Vector2(0.,0.) 
+
+
 fun draw_character_left(sprite :: Texture):
   def width: raylib.GetScreenWidth()
   def height: raylib.GetScreenHeight()
@@ -97,9 +101,6 @@ fun draw_character_right(sprite :: Texture):
     raylib.WHITE
   )
 
-def font_size: 20.
-
-def text_pos : Vector2(0.,0.) 
 fun draw_text(text :: String):
 
   def width: raylib.GetScreenWidth()

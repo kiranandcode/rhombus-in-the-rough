@@ -21,16 +21,19 @@ def origin: Vector2(0.,0.)
 adt.datatype State
 | FadeIn(ratio :: Real, color :: Color)
 | RenderingText(offset :: Integral, faster :: Boolean)
+| RenderingCompleted()
 | Completed()
+
+def character_color : Color(255,255,255,0)
+def dialog_color : Color(255,255,255,0)
 
 class DialogScreen(
      dialog_item :: dialog.Dialog,
-     mutable is_completed :: Boolean,
      mutable state :: State
    ):
   implements game_state.Screen
 
-  constructor (dialog_item): super(dialog_item, #false, Completed())
+  constructor (dialog_item): super(dialog_item, RenderingCompleted())
 
   override method draw():
     adt.ematch state
@@ -38,15 +41,22 @@ class DialogScreen(
         #void
     | RenderingText(offset, faster):
         #void
-    | Completed():
+    | RenderingCompleted():
         dialog_box.draw_character_left(dialog_item.character_sprite)
         dialog_box.draw()
         dialog_box.draw_text(dialog_item.text)
+    | Completed():
+        #void
 
   override method update():
     handle_inputs (raylib.IsKeyReleased)
     | raylib.KEY_Q
-      is_completed := #true
+      state := Completed()
 
 
-  override method should_pop(): is_completed
+  override method should_pop():
+    adt.ematch state
+    | FadeIn(_, _): #false
+    | RenderingText(_, _): #false
+    | RenderingCompleted(): #false
+    | Completed(): #true
