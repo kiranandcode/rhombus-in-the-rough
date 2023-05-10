@@ -1,0 +1,26 @@
+#lang rhombus
+
+import:
+  rhombus/meta open
+  lib("racket/safe.rkt") as racket
+
+expr.macro
+| 'ematch $expr ...
+   | $case ...:
+       $arg
+       ...
+   | ...':
+     ''
+
+defn.macro
+| 'datatype $name
+   | $constructor($arg ..., ...)
+   | ...':
+
+   '«class Super():
+       nonfinal
+     annot.macro '$name': 'Super'
+     class $constructor($arg ..., ...):
+       extends Super
+    »'
+ 
