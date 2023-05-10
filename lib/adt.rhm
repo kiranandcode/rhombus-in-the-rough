@@ -2,25 +2,88 @@
 
 import:
   rhombus/meta open
-  lib("racket/safe.rkt") as racket
+  lib("racket/main.rkt") as racket
+  meta:
+    lib("racket/syntax.rkt") as syntax
+
+export:
+  datatype
+  ematch
+  
+
+def adt_information: #false
+
+meta:
+  fun
+  | ensure_constructor_exists(constr, no_args, '[]'):
+      error("Inexhaustive match: Constructor " ++ to_string(constr) ++ " not present")
+  | ensure_constructor_exists(constr, no_args, '[[$oconstr ... ($arg, ...)], $rest, ...]'):
+      cond 
+      | to_string(constr) != to_string('$oconstr ...'):
+          ensure_constructor_exists(constr, no_args, '[$rest, ...]')
+      | [arg, ...].length() != no_args:
+          error("Number of arguments does not match: " ++ to_string('$oconstr ... ($arg, ...)' ++ " should have " ++ to_string(no_args) ++ " arguments"))
+      | ~else: #void
 
 expr.macro
-| 'ematch $expr ...
+| 'ematch $expr
    | $case ...:
-       $arg
+       $body
        ...
    | ...':
-     ''
+    'block:
+       def expr: $expr
+       ematch_inner expr [$expr]
+       | $case ...:
+           $body
+           ...
+       | ...'     
+
+expr.macro
+| 'ematch_inner $expr [$oexpr]
+   | $case ...:
+       $body
+       ...
+   | ...':
+     def data: statinfo_meta.lookup('$expr', 'adt_information')
+     match data
+     | #false: error("Insufficient static information on \"" ++ to_string(oexpr) ++ "\" in ematch")
+     | '[[$scons, $scons_args], ...]':
+         for:
+           each [cons, cons_args]: [[scons,scons_args], ...]
+           def no_args: match cons_args | '[$arg, ...]': [arg, ...].length()
+           ensure_constructor_exists(
+               cons, no_args,
+               '[[$case ...], ...]'
+           )
+           
+         'match $expr
+          | $case ...:
+             $body
+             ...
+          | ...'
 
 defn.macro
 | 'datatype $name
-   | $constructor($arg ..., ...)
+   | $constructor ($arg ..., ...)
    | ...':
-
-   '«class Super():
+   def name_stx: Syntax.make('$name')
+   def super_name:
+     Syntax.make(
+       syntax.#{format-id}(
+         name_stx,
+         "~a_super",
+         name
+       )
+     ).relocate(name)
+   '«class $super_name ():
        nonfinal
-     annot.macro '$name': 'Super'
-     class $constructor($arg ..., ...):
-       extends Super
+
+       static_info:
+         '((adt_information, [[$constructor, [$arg ..., ...]], ...]))'
+
+     annot.macro '$name': '$super_name'
+     class $constructor ($arg ..., ...):
+       extends $super_name
+     ...
     »'
- 
