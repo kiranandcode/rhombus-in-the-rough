@@ -46,6 +46,7 @@ use_static
 def_texture main_character_image : "./resources/images/male_walkcycle.png"
 def_texture blacksmith_image : "./resources/images/soldier.png"
 def_texture blacksmith_character_sprite : "./resources/images/soldier_2_segmented.png"
+def_texture blacksmith_original_character_sprite : "./resources/images/soldier-sprite-segmented.png"
 
 def HUMANOID_FRAMES : 9
 
@@ -97,6 +98,14 @@ blacksmith.add_component(
     "Hi there!"
   ))
 )
+
+blacksmith_2.add_component(
+  DialogItem(dialog.Dialog(
+    blacksmith_original_character_sprite,
+    "Hi there... Nice to meet you. Have you spoken to my brother?..."
+  ))
+)
+
 
 // constants
 def screen_width: 800

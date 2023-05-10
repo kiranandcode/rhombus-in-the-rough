@@ -1,6 +1,10 @@
 #lang rhombus
 
 import:
+  lib("raylib/2d/unsafe.rkt") as raylib
+
+  "../lib/datatypes.rhm" open
+
   "../game/game_state.rhm"
   "../game/dialog_box.rhm"
   "../game/dialog.rhm"
@@ -8,12 +12,17 @@ import:
 export:
   DialogScreen
 
+def sprite_rect: Rectangle(0.,0.,2048.,2048.)
+def dest_rect: Rectangle(0.,0.,320.,320.)
+def origin: Vector2(0.,0.)
+
 class DialogScreen(
-     dialog :: dialog.Dialog
+     dialog_item :: dialog.Dialog
    ):
   implements game_state.Screen
 
   override method draw():
+    dialog_box.draw_character_left(dialog_item.character_sprite)
     dialog_box.draw()
 
   override method update():

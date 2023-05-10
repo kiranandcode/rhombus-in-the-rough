@@ -4,11 +4,13 @@ import:
    rhombus/meta open
    "../lib/datatypes.rhm" open
    "../lib/lang.rhm" open
-   "../lib/resources.rhm" expose: def_texture
+   "../lib/resources.rhm" expose: def_texture Texture
    lib("racket/main.rkt") as racket
    lib("raylib/2d/unsafe.rkt") as raylib
 export:
   draw
+  draw_character_left
+  draw_character_right
 
 use_static
 
@@ -56,6 +58,44 @@ fun draw_cell(cell :: Rectangle, x :: Real, y :: Real):
     0.,
     raylib.WHITE
   )
+
+
+def character_size: 350.
+def character_sprite_rect: Rectangle(0.,0.,2048.,2048.)
+def character_dest_rect: Rectangle(0.,0.,character_size,character_size)
+
+fun draw_character_left(sprite :: Texture):
+  def width: raylib.GetScreenWidth()
+  def height: raylib.GetScreenHeight()
+  def offset_width: (width - width_pixels) / 2. - character_size / 2
+  def offset_height: height - character_size
+  character_dest_rect.x := offset_width
+  character_dest_rect.y := offset_height
+  raylib.DrawTexturePro(
+    sprite.inner(),
+    character_sprite_rect.inner(),
+    character_dest_rect.inner(),
+    origin.inner(),
+    0.,
+    raylib.WHITE
+  )
+  
+fun draw_character_right(sprite :: Texture):
+  def width: raylib.GetScreenWidth()
+  def height: raylib.GetScreenHeight()
+  def offset_width: (width - width_pixels) / 2. + width_pixels - character_size / 2
+  def offset_height: height - character_size
+  character_dest_rect.x := offset_width
+  character_dest_rect.y := offset_height
+  raylib.DrawTexturePro(
+    sprite.inner(),
+    character_sprite_rect.inner(),
+    character_dest_rect.inner(),
+    origin.inner(),
+    0.,
+    raylib.WHITE
+  )
+
 
 fun draw():
   def width: raylib.GetScreenWidth()
