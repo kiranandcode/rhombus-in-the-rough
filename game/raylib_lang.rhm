@@ -42,7 +42,7 @@ expr.macro
       ...'
 | 'handle_input_any_body([$key, [$body, ...]], $rest, ...)':
     'handle_input_any_body($rest, ...)'
-| 'handle_input_any_body([])': '#void'
+| 'handle_input_any_body()': '#void'
 
 expr.macro
 | 'generate_input_case($fn, ~any, [$body, ...], $any_body)':

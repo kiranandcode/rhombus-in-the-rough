@@ -102,7 +102,7 @@ blacksmith.add_component(
 blacksmith_2.add_component(
   DialogItem(dialog.Dialog(
     blacksmith_original_character_sprite,
-    "Hi there... Nice to meet you. Have you spoken to my brother?..."
+    "Hi there... Nice to meet you. Have you spoken to my\nbrother?..."
   ))
 )
 

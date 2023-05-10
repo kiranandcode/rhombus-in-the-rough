@@ -11,6 +11,7 @@ export:
   draw
   draw_character_left
   draw_character_right
+  draw_text
 
 use_static
 
@@ -93,6 +94,33 @@ fun draw_character_right(sprite :: Texture):
     character_dest_rect.inner(),
     origin.inner(),
     0.,
+    raylib.WHITE
+  )
+
+def font_size: 20.
+
+def text_pos : Vector2(0.,0.) 
+fun draw_text(text :: String):
+
+  def width: raylib.GetScreenWidth()
+  def height: raylib.GetScreenHeight()
+
+  def offset_width: (width - width_pixels) / 2.
+  def offset_height: height - height_pixels
+
+  def text_width: raylib.MeasureText(text, math.exact(font_size))
+
+  text_pos.x := offset_width + 30
+  text_pos.y := offset_height + 30
+
+  raylib.DrawTextPro(
+    raylib.GetFontDefault(),
+    text,
+    text_pos.inner(),
+    origin.inner(),
+    0.,
+    math.floor(font_size),
+    2.0,
     raylib.WHITE
   )
 
