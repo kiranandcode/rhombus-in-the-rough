@@ -16,14 +16,18 @@ import:
    "game/view.rhm" open
    "game/game_map.rhm"
    "game/dialog_box.rhm"
+   "game/dialog.rhm"
    "game/icons.rhm"
    "game/terrain.rhm"
    "game/game_state.rhm"
+
+   "screens/world_screen.rhm"
 
    "components/movement.rhm" open
    "components/graphics.rhm" open
    "components/input.rhm" open
    "components/interaction.rhm" open
+   "components/dialog.rhm" open
 
    "systems/movement.rhm" open
    "systems/user_control.rhm" open
@@ -40,6 +44,7 @@ use_static
 
 def_texture main_character_image : "./resources/images/male_walkcycle.png"
 def_texture blacksmith_image : "./resources/images/soldier.png"
+def_texture blacksmith_character_sprite : "./resources/images/soldier_2_segmented.png"
 
 def HUMANOID_FRAMES : 9
 
@@ -79,49 +84,29 @@ instance NPC:
       HUMANOID_FRAMES
     )
 
-
-  
 def character: Player.create()
 def blacksmith: NPC.create()
 def blacksmith_2 :: entity.Entity : NPC.create()
 def posn :: Position = blacksmith_2.get_component(Position)
 posn.value.x := 100.
     
-
-class WorldState(
-    view :: View,
-    map :: game_map.Map
-  ):
- implements game_state.State
-
- override method draw():
-    draw_2d view:
-      map.draw_base(view)
-      // CollisionSystem.draw()
-      CharacterDrawingSystem.draw()
-      ordered_drawing.draw()
-      InteractionSystem.draw()
-
- override method update():
-   view.update()
-   UserControlSystem.update()
-   AnimationSystem.update()
-   MovementSystem.update()
-   CollisionSystem.update()
-   InteractionSystem.update()
-
+blacksmith.add_component(
+  DialogItem(dialog.Dialog(
+    blacksmith_character_sprite,
+    "Hi there!"
+  ))
+)
 
 // constants
 def screen_width: 800
 def screen_height: 450
 
 game_state.init(
-  WorldState(
+  world_screen.WorldScreen(
     View(),
     game_map.Map(100,100, terrain.rock)
   )
 )
-
 
 raylib.InitWindow(screen_width,screen_height, "Game")
 resources.init()

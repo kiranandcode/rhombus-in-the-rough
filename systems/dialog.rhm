@@ -9,17 +9,18 @@ import:
   "../game/game_state.rhm"
 
   "../components/interaction.rhm" open
+  "../components/dialog.rhm" open
 
 export:
-  AnimationSystem
+  DialogSystem
 
 use_static
 
-// system DialogSystem(
-//     active_interaction :: IsActiveInteraction
-    
-//   ):
+system DialogSystem(
+    active_interaction :: IsActiveInteraction,
+    dialog_item :: DialogItem
+  ):
 
-//   fun update():
-//     game_state.push()
+  method update():
+    game_state.push(#false)
     
