@@ -47,6 +47,11 @@ namespace entity:
       def comp :: Component : comps[0]
       comp.get_data_opt(this)
 
+    method remove_component(fn):
+      def comps :: List = fn()
+      def comp :: Component : comps[0]
+      comp.remove_component(this)
+
     method destroy():
       if destroyed
       | error("Attempt to destroy an invalid entity")

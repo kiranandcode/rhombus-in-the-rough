@@ -10,6 +10,7 @@ import:
    "lib/lang.rhm" open
    "lib/resources.rhm" expose: def_texture
    "lib/ecs.rhm" open
+   "lib/event.rhm"
    "lib/ordered_drawing.rhm"
 
    "game/raylib_lang.rhm" open
@@ -21,7 +22,7 @@ import:
    "game/terrain.rhm"
    "game/game_state.rhm"
 
-   "screens/world_screen.rhm"
+   "screens/world.rhm"
 
    "components/movement.rhm" open
    "components/graphics.rhm" open
@@ -102,7 +103,7 @@ def screen_width: 800
 def screen_height: 450
 
 game_state.init(
-  world_screen.WorldScreen(
+  world.WorldScreen(
     View(),
     game_map.Map(100,100, terrain.rock)
   )
@@ -115,6 +116,7 @@ raylib.SetTargetFPS(60);
 while (!raylib.WindowShouldClose()):
 
   game_state.update()
+  event.update()
 
   draw_block:
     raylib.ClearBackground(raylib.RAYWHITE)

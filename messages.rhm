@@ -1,0 +1,18 @@
+#lang rhombus
+
+import:
+  "lib/ecs.rhm" open
+  "lib/event.rhm"
+  "lib/message.rhm" open
+
+export:
+  RemoveComponent AddComponent DestroyEntity
+
+message RemoveComponent(ent :: entity.Entity, comp :: Function)
+message AddComponent(ent :: entity.Entity, comp :: Function)
+message DestroyEntity(ent :: entity.Entity)
+
+event.handle
+| RemoveComponent(ent, comp): ent.remove_component(comp)
+| AddComponent(ent, comp): ent.add_component(comp)
+| DestroyEntity(ent): ent.destroy()

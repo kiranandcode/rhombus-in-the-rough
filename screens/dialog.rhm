@@ -1,0 +1,21 @@
+#lang rhombus
+
+import:
+  "../game/game_state.rhm"
+  "../game/dialog_box.rhm"
+  "../game/dialog.rhm"
+
+export:
+  DialogScreen
+
+class DialogScreen(
+     dialog :: dialog.Dialog
+   ):
+  implements game_state.Screen
+
+  override method draw():
+    dialog_box.draw()
+
+  override method update():
+    #void
+
