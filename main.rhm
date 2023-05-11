@@ -55,7 +55,7 @@ instance Player:
   component position :~ Position = Vector2(320.,320.)
   component collision_box :~ CollisionBox = CollisionBox(Rectangle(-16.,16., 32., 16.),0)
   component velocity :~ Velocity = Vector2(0.,0.)
-  component orientation :~ Orientation = direction.DOWN
+  component orientation :~ Orientation = Direction.DOWN
   component sprite :~ AnimatedSprite = AnimatedSprite(
       main_character_image,
       #false,
@@ -70,7 +70,7 @@ instance NPC:
   component position :~ Position = Vector2(320.,320.)
   // component velocity :~ Velocity = Vector2(0.,0.)
   component collision_box :~ CollisionBox = CollisionBox(Rectangle(-16.,16., 32., 16.),0)
-  component orientation :~ Orientation = direction.DOWN
+  component orientation :~ Orientation = Direction.DOWN
   component interactable :~ Interactable = Interactable(
       icons.TALK,
       -16.,

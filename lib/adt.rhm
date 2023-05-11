@@ -7,6 +7,7 @@ import:
 
 export:
   datatype
+  enum
   ematch
   
 
@@ -24,6 +25,13 @@ meta:
       | [arg, ...].length() != no_args:
           error("Number of arguments does not match: " ++ to_string('$oconstr ... ($arg, ...)') ++ " should have " ++ to_string(no_args) ++ " arguments")
       | ~else: #void
+
+  | ensure_constructor_exists(constr, no_args, '[[$oconstr ...], $rest, ...]'):
+      cond 
+      | to_string(constr) != to_string('$oconstr ...'):
+          ensure_constructor_exists(constr, no_args, '[$rest, ...]')
+      | ~else: #void
+
 
 expr.macro
 | 'ematch $expr_term ...
@@ -75,3 +83,57 @@ defn.macro
        extends $super_name
      ...
     »'
+
+meta:
+
+    fun
+    | case_to_names(name, []): []
+    | case_to_names(name, [case, rest, ...]):
+        def case_stx: Syntax.make('$case')
+        def case_id: Syntax.make(
+          syntax.#{format-id}(case_stx, "~a.~a", name.unwrap(), case.unwrap())
+        ).relocate(case)
+        def rest_cases: case_to_names(name, [rest, ...])
+        List.cons([case, case_id], rest_cases)
+
+    fun
+    | build_enum_constructors(_, [], _): []
+    | build_enum_constructors(super_name, [constructor_name, rest, ...], n):
+        def stx:
+          'class $constructor_name():
+               extends $super_name
+               override property ind :: Integral: $n'
+        List.cons(stx, build_enum_constructors(super_name, [rest, ...], n + 1))
+
+defn.macro
+| 'enum $name
+   | $case ...
+   | ...':
+    def name_stx: Syntax.make('$name')
+    def super_name:
+      Syntax.make(
+        syntax.#{format-id}(name_stx, "~a_super", name)
+      ).relocate(name)
+    match case_to_names(name, ['$case ...', ...])
+    | [[case, constructor_name], ...]:
+        def [constr, ...]: build_enum_constructors(super_name, [constructor_name, ...], 0)
+        '«namespace $name:
+            export: $name $case ...
+
+            class $super_name ():
+               nonfinal
+               abstract property ind :: Integral
+               static_info:
+                 '((adt_information, [[$case,[]], ...]))'
+
+            annot.macro '$name': '$super_name'
+
+            $constr
+            ...
+
+            bind.macro '$case': '$constructor_name ()'
+            ...
+            expr.macro '$case': '$constructor_name ()'
+            ...
+          annot.macro '$name': '$name . $name'
+          »'

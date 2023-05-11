@@ -13,7 +13,6 @@ export:
   Color
   Rectangle
   Camera2D
-  direction
 
 meta:
   fun handle_update_vector(left,ty,get,set,tail):
@@ -281,13 +280,3 @@ class Camera2D(self):
     ~tail : tail
     handle_update_vector('$left', '_Camera2D', 'raylib.#{Camera2D-zoom}', 'raylib.#{set-Camera2D-zoom!}', tail)
 
-
-namespace direction:
-  export: Direction UP LEFT RIGHT DOWN 
-  class Direction(ind::Integral):
-    constructor (ind): super(ind)
-
-  def UP: Direction(0)
-  def LEFT: Direction(1)
-  def DOWN: Direction(2)
-  def RIGHT: Direction(3)

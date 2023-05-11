@@ -31,16 +31,16 @@ system UserControlSystem(
     
     handle_inputs (raylib.IsKeyDown)
     | raylib.KEY_D
-      new_direction := direction.RIGHT
+      new_direction := Direction.RIGHT
       velocity.value.x += 1.
     | raylib.KEY_A
-      new_direction := direction.LEFT
+      new_direction := Direction.LEFT
       velocity.value.x -= 1.
     | raylib.KEY_W
-      new_direction := direction.UP
+      new_direction := Direction.UP
       velocity.value.y -= 1.
     | raylib.KEY_S
-      new_direction := direction.DOWN
+      new_direction := Direction.DOWN
       velocity.value.y += 1.
     | ~any
       any_input := #true
