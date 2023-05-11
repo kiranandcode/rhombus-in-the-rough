@@ -62,8 +62,7 @@ class DialogScreen(
         dialog_box.draw_character_left(dialog_item.character_sprite)
         dialog_box.draw()
         dialog_box.draw_text(dialog_item.text)
-    | Completed():
-        #void
+    | Completed(): #void
 
   override method update():
     adt.ematch state
@@ -80,9 +79,7 @@ class DialogScreen(
         if index >= dialog_item.text.length()
         | state := RenderingCompleted()
         | state := RenderingText(start_time, index)
-    | RenderingCompleted(): #void
-    | Completed(): #void
-    
+    | ~else: #void
 
     handle_inputs (raylib.IsKeyReleased)
     | raylib.KEY_Q
@@ -95,8 +92,5 @@ class DialogScreen(
 
   override method should_pop():
     adt.ematch state
-    | Init(): #false
-    | FadeIn(_, _): #false
-    | RenderingText(_, _): #false
-    | RenderingCompleted(): #false
     | Completed(): #true
+    | ~else: #false
