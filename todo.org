@@ -7,9 +7,12 @@
  * TODO Add enemies description lang
  * TODO Add quest description lang
 * Minor steps
-** Refactor dialog box into class -- has display_sprites, list of sprites, text, proportion --- just does drawing
-** Update dialog screen with animations on start and exit --- move dialog box from bottom to final position
-** Make text display gradual -- gradually reveal characters - if player presses Q, then skip to end.
+** DONE Refactor dialog box into class -- has display_sprites, list of sprites, text, proportion --- just does drawing
+CLOSED: [2023-05-11 Thu 04:53]
+** DONE Update dialog screen with animations on start and exit --- move dialog box from bottom to final position
+CLOSED: [2023-05-11 Thu 04:53]
+** DONE Make text display gradual -- gradually reveal characters - if player presses Q, then skip to end.
+CLOSED: [2023-05-11 Thu 04:53]
 ** Don't want to implement dialog system till we have an inventory, so we can test conditionals etc.
 * TODO Implement camera properly
 * TODO Populate map 
