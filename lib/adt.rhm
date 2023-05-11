@@ -16,6 +16,7 @@ meta:
   fun
   | ensure_constructor_exists(constr, no_args, '[]'):
       error("Inexhaustive match: Constructor " ++ to_string(constr) ++ " not present")
+  | ensure_constructor_exists(constr, no_args, '[[~else], $rest, ...]'): #void
   | ensure_constructor_exists(constr, no_args, '[[$oconstr ... ($arg, ...)], $rest, ...]'):
       cond 
       | to_string(constr) != to_string('$oconstr ...'):
