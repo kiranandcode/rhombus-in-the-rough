@@ -17,6 +17,7 @@ import:
   "../systems/collision.rhm" open
   "../systems/interaction.rhm" open
   "../systems/dialog.rhm" open
+  "../systems/hud.rhm" open
 
 export:
   WorldScreen
@@ -36,6 +37,7 @@ class WorldScreen(
       CharacterDrawingSystem.draw()
       ordered_drawing.draw()
       InteractionSystem.draw()
+      HUDDrawingSystem.draw()
 
  override method update():
    view.update()

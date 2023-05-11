@@ -1,0 +1,95 @@
+#lang rhombus
+
+import:
+  rhombus/meta open
+  lib("raylib/2d/unsafe.rkt") as raylib
+
+  "../lib/datatypes.rhm" open
+  "../lib/ecs.rhm" open
+  "../lib/lang.rhm" open
+  "../lib/resources.rhm" expose: def_texture
+  "../game/raylib_lang.rhm" open
+
+  "../components/interaction.rhm" open
+  "../components/health.rhm" open
+
+export:
+  HUDDrawingSystem
+
+use_static
+
+meta:
+
+  fun
+  | parse_opts([], acc): acc
+  | parse_opts(['~offset: [$x ..., $y ...]', rest, ...], acc):
+     parse_opts([rest, ...], {"offset_x": '$x ...', "offset_y": '$y ...', & acc})
+  | parse_opts(['~offset_x: $x ...', rest, ...], acc):
+     parse_opts([rest, ...], {"offset_x": '$x ...', & acc})
+  | parse_opts(['~offset_y: $y ...', rest, ...], acc):
+     parse_opts([rest, ...], {"offset_y": '$y ...', & acc})
+  | parse_opts(['~spacing: [$x ..., $y ...]', rest, ...], acc):
+     parse_opts([rest, ...], {"spacing_x": '$x ...', "spacing_y": '$y ...', & acc})
+  | parse_opts(['~spacing_x: $x ...', rest, ...], acc):
+     parse_opts([rest, ...], {"spacing_x": '$x ...', & acc})
+  | parse_opts(['~spacing_y: $y ...', rest, ...], acc):
+     parse_opts([rest, ...], {"spacing_y": '$y ...', & acc})
+  | parse_opts(['~horizontal_spacing: $y ...', rest, ...], acc):
+     parse_opts([rest, ...], {"spacing_y": '$y ...', & acc})
+  | parse_opts(['~vertical_spacing: $x ...', rest, ...], acc):
+     parse_opts([rest, ...], {"spacing_x": '$x ...', & acc})
+  | parse_opts(['~size: [$x ...,$y ...]', rest, ...], acc):
+     parse_opts([rest, ...], {"size_x": '$x ...', "size_y": '$y ...', & acc})
+  | parse_opts(['~size_x: $x ...', rest, ...], acc):
+     parse_opts([rest, ...], {"size_x": '$x ...', & acc})
+  | parse_opts(['~size_y: $y ...', rest, ...], acc):
+     parse_opts([rest, ...], {"size_y": '$y ...', & acc})
+
+  fun
+  | parse_tiles(opts, data):
+      println(opts)
+      println(data)
+
+defn.macro
+| 'spritesheet $(name :: Identifier):
+      opts:
+        $opt
+        ...
+      $tile ...
+      ...':
+   def opts:
+     parse_opts([opt, ...], Map{})
+   def tiles: parse_tiles(opts, ['$tile ...', ...])
+   ''
+
+| 'spritesheet $(name :: Identifier) $opt ...:
+      $tile ...
+      ...':
+   def opts: parse_opts('$opt ...', Map{})
+   def tiles: parse_tiles(opts, ['$tile ...', ...])
+   ''
+     
+spritesheet HealthBarSprite:
+  opts:
+    ~spacing_x: 1.0
+    ~spacing_y: 2.0
+  Left
+
+
+def_texture ui_texture: "./resources/images/ui_big_pieces.png"
+
+system HUDDrawingSystem(
+    player :: IsPlayer,
+    health :: Health
+  ) with this:
+
+    method draw():
+      raylib.DrawTexturePro(
+        ui_texture.inner(),
+        Rectangle(0.,0.,32.,32.).inner(),
+        Rectangle(0.,0.,128.,128.).inner(),
+        Vector2(0.,0.).inner(),
+        0.,
+        raylib.WHITE
+      )
+

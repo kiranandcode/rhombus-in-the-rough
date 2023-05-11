@@ -1,0 +1,11 @@
+#lang rhombus
+
+import:
+  "../lib/datatypes.rhm" open
+  "../lib/ecs.rhm" open
+  "../lib/resources.rhm"
+
+export:
+  Health
+
+component Health(value :: Integral)
