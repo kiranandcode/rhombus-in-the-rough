@@ -19,13 +19,17 @@ def dest_rect: Rectangle(0.,0.,320.,320.)
 def origin: Vector2(0.,0.)
 
 adt.datatype State
-| FadeIn(ratio :: Real, color :: Color)
-| RenderingText(offset :: Integral, faster :: Boolean)
+| Init()
+| FadeIn(start_time :: Real, ratio :: Real)
+| RenderingText(start_time :: Real, offset :: Integral)
 | RenderingCompleted()
 | Completed()
 
 def character_color : Color(255,255,255,0)
 def dialog_color : Color(255,255,255,0)
+
+def FADE_IN_DURATION: 0.5
+def CHAR_PER_MS: 50.0
 
 class DialogScreen(
      dialog_item :: dialog.Dialog,
@@ -34,14 +38,26 @@ class DialogScreen(
    ):
   implements game_state.Screen
 
-  constructor (dialog_item): super(dialog_item, dialog_box.DialogBox(), RenderingCompleted())
+  constructor (dialog_item):
+    super(dialog_item, dialog_box.DialogBox(), Init())
+
+  method configure_dialog_box(render_ratio :: Real):
+    dialog_box.offset_x := 30. * (1. - render_ratio) * (1. - render_ratio)
+    dialog_box.offset_y := 10. * (1. - render_ratio) * (1. - render_ratio) * (1. - render_ratio)
+    dialog_box.opacity := 100. * render_ratio
+    dialog_box.character_opacity := 100. * render_ratio
 
   override method draw():
     adt.ematch state
-    | FadeIn(ratio, color):
-        #void
-    | RenderingText(offset, faster):
-        #void
+    | Init(): #void
+    | FadeIn(_, render_ratio):
+       configure_dialog_box(render_ratio)
+       dialog_box.draw_character_left(dialog_item.character_sprite)
+       dialog_box.draw()
+    | RenderingText(_, offset):
+        dialog_box.draw_character_left(dialog_item.character_sprite)
+        dialog_box.draw()
+        dialog_box.draw_text(dialog_item.text.substring(0, offset))
     | RenderingCompleted():
         dialog_box.draw_character_left(dialog_item.character_sprite)
         dialog_box.draw()
@@ -50,13 +66,36 @@ class DialogScreen(
         #void
 
   override method update():
+    adt.ematch state
+    | Init(): state := FadeIn(raylib.GetTime(), 0.)
+    | FadeIn(start_time, _):
+        def current_time: raylib.GetTime()
+        def ratio: (current_time - start_time) / FADE_IN_DURATION
+        if ratio >= 1.0
+        | state := RenderingText(current_time, 0)
+        | state := FadeIn(start_time, ratio)
+    | RenderingText(start_time, _): 
+        def current_time: raylib.GetTime()
+        def index : math.exact(math.floor((current_time - start_time) * CHAR_PER_MS))
+        if index >= dialog_item.text.length()
+        | state := RenderingCompleted()
+        | state := RenderingText(start_time, index)
+    | RenderingCompleted(): #void
+    | Completed(): #void
+    
+
     handle_inputs (raylib.IsKeyReleased)
     | raylib.KEY_Q
-      state := Completed()
-
+      adt.ematch state
+      | Init(): state := FadeIn(raylib.GetTime(), 0.)
+      | FadeIn(_,_): state := RenderingCompleted()
+      | RenderingText(_, _): state := RenderingCompleted()
+      | RenderingCompleted(): state := Completed()
+      | Completed(): #void
 
   override method should_pop():
     adt.ematch state
+    | Init(): #false
     | FadeIn(_, _): #false
     | RenderingText(_, _): #false
     | RenderingCompleted(): #false

@@ -69,10 +69,10 @@ def dialog_color : Color(255,255,255,0)
 
 
 class DialogBox(
-      offset_x :: Real,
-      offset_y :: Real,
-      opacity :: Real,
-      character_opacity :: Real
+      mutable offset_x :: Real,
+      mutable offset_y :: Real,
+      mutable opacity :: Real,
+      mutable character_opacity :: Real
     ):
 
   constructor():  super(0.,0.,100.,100.)
