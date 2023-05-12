@@ -80,11 +80,11 @@ class Vector2(self):
   method inner(): self
 
   dot '$left . x' :
-    ~tail : tail
+    ~tail : '$tail'
     handle_update_vector('$left', '_Vector2', 'raylib.#{Vector2-x}', 'raylib.#{set-Vector2-x!}', tail)
 
   dot '$left . y' :
-    ~tail : tail
+    ~tail : '$tail'
     handle_update_vector('$left', '_Vector2', 'raylib.#{Vector2-y}', 'raylib.#{set-Vector2-y!}', tail)
 
 
@@ -119,15 +119,15 @@ class Vector3(self):
   method inner(): self
 
   dot '$left . x' :
-    ~tail : tail
+    ~tail : '$tail'
     handle_update_vector('$left', '_Vector3', 'raylib.#{Vector3-x}', 'raylib.#{set-Vector3-x!}', tail)
 
   dot '$left . y' :
-    ~tail : tail
+    ~tail : '$tail'
     handle_update_vector('$left', '_Vector3', 'raylib.#{Vector3-y}', 'raylib.#{set-Vector3-y!}', tail)
 
   dot '$left . z' :
-    ~tail : tail
+    ~tail : '$tail'
     handle_update_vector('$left', '_Vector3', 'raylib.#{Vector3-z}', 'raylib.#{set-Vector3-z!}', tail)
 
 class Vector4(self):
@@ -150,19 +150,19 @@ class Vector4(self):
   method inner(): self
 
   dot '$left . x' :
-    ~tail : tail
+    ~tail : '$tail'
     handle_update_vector('$left', '_Vector4', 'raylib.#{Vector4-x}', 'raylib.#{set-Vector4-x!}', tail)
 
   dot '$left . y' :
-    ~tail : tail
+    ~tail : '$tail'
     handle_update_vector('$left', '_Vector4', 'raylib.#{Vector4-y}', 'raylib.#{set-Vector4-y!}', tail)
 
   dot '$left . z' :
-    ~tail : tail
+    ~tail : '$tail'
     handle_update_vector('$left', '_Vector4', 'raylib.#{Vector4-z}', 'raylib.#{set-Vector4-z!}', tail)
 
   dot '$left . w' :
-    ~tail : tail
+    ~tail : '$tail'
     handle_update_vector('$left', '_Vector4', 'raylib.#{Vector4-w}', 'raylib.#{set-Vector4-w!}', tail)
 
 
@@ -181,19 +181,19 @@ class Color(self):
   method inner(): self
 
   dot '$left . r' :
-    ~tail : tail
+    ~tail : '$tail'
     handle_update_vector('$left', '_Color', 'raylib.#{Color-r}', 'raylib.#{set-Color-r!}', tail)
 
   dot '$left . g' :
-    ~tail : tail
+    ~tail : '$tail'
     handle_update_vector('$left', '_Color', 'raylib.#{Color-g}', 'raylib.#{set-Color-g!}', tail)
 
   dot '$left . b' :
-    ~tail : tail
+    ~tail : '$tail'
     handle_update_vector('$left', '_Color', 'raylib.#{Color-b}', 'raylib.#{set-Color-b!}', tail)
 
   dot '$left . a' :
-    ~tail : tail
+    ~tail : '$tail'
     handle_update_vector('$left', '_Color', 'raylib.#{Color-a}', 'raylib.#{set-Color-a!}', tail)
 
 
@@ -226,19 +226,19 @@ class Rectangle(self):
 
 
   dot '$left . x' :
-    ~tail : tail
+    ~tail : '$tail'
     handle_update_vector('$left', '_Rectangle', 'raylib.#{Rectangle-x}', 'raylib.#{set-Rectangle-x!}', tail)
 
   dot '$left . y' :
-    ~tail : tail
+    ~tail : '$tail'
     handle_update_vector('$left', '_Rectangle', 'raylib.#{Rectangle-y}', 'raylib.#{set-Rectangle-y!}', tail)
 
   dot '$left . width' :
-    ~tail : tail
+    ~tail : '$tail'
     handle_update_vector('$left', '_Rectangle', 'raylib.#{Rectangle-width}', 'raylib.#{set-Rectangle-width!}', tail)
 
   dot '$left . height' :
-    ~tail : tail
+    ~tail : '$tail'
     handle_update_vector('$left', '_Rectangle', 'raylib.#{Rectangle-height}', 'raylib.#{set-Rectangle-height!}', tail)
 
 fun Rectangle.check_collision(left :: Rectangle, right :: Rectangle) :: Boolean :
@@ -265,18 +265,18 @@ class Camera2D(self):
   method inner(): self
 
   dot '$left . offset' :
-    ~tail: tail
+    ~tail: '$tail'
     handle_update_nested('$left', '_Camera2D', 'Vector2', 'raylib.#{Camera2D-offset}', 'raylib.#{set-Camera2D-offset}', tail)
 
   dot '$left . target' :
-    ~tail: tail
+    ~tail: '$tail'
     handle_update_nested('$left', '_Camera2D', 'Vector2', 'raylib.#{Camera2D-target}', 'raylib.#{set-Camera2D-target!}', tail)
 
   dot '$left . rotation' :
-    ~tail : tail
+    ~tail : '$tail'
     handle_update_vector('$left', '_Camera2D', 'raylib.#{Camera2D-rotation}', 'raylib.#{set-Camera2D-rotation!}', tail)
 
   dot '$left . zoom' :
-    ~tail : tail
+    ~tail : '$tail'
     handle_update_vector('$left', '_Camera2D', 'raylib.#{Camera2D-zoom}', 'raylib.#{set-Camera2D-zoom!}', tail)
 
