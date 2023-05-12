@@ -74,7 +74,11 @@ meta:
      parse_opts([rest, ...], {"size_x": '$x ...', "size_y": '$y ...', & acc})
   | parse_opts(['~size_x: $x ...', rest, ...], acc):
      parse_opts([rest, ...], {"size_x": '$x ...', & acc})
+  | parse_opts(['~width: $x ...', rest, ...], acc):
+     parse_opts([rest, ...], {"size_x": '$x ...', & acc})
   | parse_opts(['~size_y: $y ...', rest, ...], acc):
+     parse_opts([rest, ...], {"size_y": '$y ...', & acc})
+  | parse_opts(['~height: $y ...', rest, ...], acc):
      parse_opts([rest, ...], {"size_y": '$y ...', & acc})
   | parse_opts(['~size: $y ...', rest, ...], acc):
      parse_opts([rest, ...], {"size": '$y ...', "size_x": '$y ...', "size_y": '$y ...', & acc})

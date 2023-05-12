@@ -17,20 +17,56 @@ import:
 
   "../components/interaction.rhm" open
   "../components/health.rhm" open
+  lib("pict/main.rkt") as pict
+  lib("racket/class.rkt"):
+    expose: send
+    rename: send as rkt_send
 
 export:
   HUDDrawingSystem
 
 use_static
 
-spritesheet HealthBarSprite:
+
+expr.macro 'send $target ... . $(method :: Identifier)($(kw :: Keyword): $kw_arg, ..., $arg, ...)':
+  expr_meta.pack_s_exp(['rkt_send',
+                        expr_meta.pack_expr('$target ...'),
+                        method,
+                        &(for List:
+                            each p: [[kw, expr_meta.pack_expr(kw_arg)], ...]
+                            each i: p
+                            i),
+                        expr_meta.pack_expr(arg), ...])
+
+spritesheet UIBarSprite:
+  options:
+    ~spacing_x: 1.0
+    ~offset_x: 259.0
+    ~offset_y: 40.0
+    ~width: 24.0
+    ~height: 20.0
+    ~shared
+  Start Mid(~width:23.0) End(~width:25.0)
+
+spritesheet UIBarCell:
   options:
     ~spacing_x: 1.0
     ~spacing_y: 2.0
+
+    ~offset_x: 341.0
+    ~offset_y: 40.0
+
+    ~width: 8.0
+    ~height: 14.0
+
     ~shared
-  Left Right Middle
+  HealthS HealthM(~width:7.0)  HealthE(~spacing_x: 4.0)  EnergyS EnergyM(~width:7.0) EnergyE(~spacing_x: 4.0)  
+  ManaS    ManaM(~width:7.0)   ManaE(~spacing_x: 4.0)    PowerS  PowerM(~width:7.0)  PowerE(~spacing_x: 4.0)  
+  SpiritS  SpiritM(~width:7.0) SpiritE(~spacing_x: 4.0)  KiS     KiM(~width:7.0)     KiE(~spacing_x: 4.0)  
 
 def_texture ui_texture: "../resources/images/ui_big_pieces.png"
+
+def picture: spritesheet.render(UIBarSprite.tiles ++ UIBarCell.tiles, ui_texture)
 
 system HUDDrawingSystem(
     player :: IsPlayer,
@@ -47,3 +83,4 @@ system HUDDrawingSystem(
         raylib.WHITE
       )
 
+picture
