@@ -10,9 +10,9 @@ export:
   def_texture
   Texture
 
-class Texture(mutable self):
+class Texture(mutable self, resource :: String):
 
-  constructor(): super(#false)
+  constructor(name): super(#false, name)
 
   method initialize(value):
     self := value
@@ -48,7 +48,7 @@ fun init():
 
 
 defn.macro 'def_texture $name : $(resource :: String)':
-  'def $name: Texture()
+  'def $name: Texture($resource)
    declare_texture(
      $resource,
      fun (vl):
