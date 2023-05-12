@@ -1,0 +1,255 @@
+#lang rhombus
+
+import:
+  rhombus/meta open
+
+  meta:
+    lib("racket/syntax.rkt") as syntax
+
+  "datatypes.rhm" open
+  "resources.rhm" expose: Texture
+  lib("pict/main.rkt") as pict
+  lib("racket/random.rkt") as random
+
+
+export:
+  only_space annot: Sprite
+  spritesheet
+  render
+
+use_static
+
+fun random_color():
+  random.#{random-ref}(["Orange Red", "Dark Red", "Red", "Crimson", "Green", "Lime", "Dark Green", "Cyan", "Teal", "Sky Blue", "Cadet Blue", "Medium Blue", "Navy", "Magenta", "Violet"])
+
+
+class Sprite(name :: String, row :: Integral, col :: Integral):
+  nonfinal
+  abstract property sprite_rect :: Rectangle
+  
+class UniqueSprite(unique_sprite_rect :: Rectangle):
+  extends Sprite
+  override property sprite_rect: unique_sprite_rect
+  constructor (name, sprite_rect, row, col): super(name, row, col)(sprite_rect)
+
+class SharedSprite(shared_sprite_rect :: Rectangle, x :: Real, y :: Real):
+  extends Sprite
+  override property sprite_rect:
+    shared_sprite_rect.x := x
+    shared_sprite_rect.y := y
+    shared_sprite_rect
+  constructor(name, sprite_rect, row, col, x, y): super(name, row, col)(sprite_rect, x, y)
+
+
+meta:
+
+  syntax_class Float
+  | '$(n :: Term)': match_when n.unwrap() is_a Flonum
+
+  fun
+  | parse_opts([], acc): acc
+  | parse_opts(['~shared', rest, ...], acc):
+     parse_opts([rest, ...], {"shared" : #true, & acc})
+  | parse_opts(['~unique', rest, ...], acc):
+     parse_opts([rest, ...], {"unique" : #true, & acc})
+  | parse_opts(['~offset: [$x ..., $y ...]', rest, ...], acc):
+     parse_opts([rest, ...], {"offset_x": '$x ...', "offset_y": '$y ...', & acc})
+  | parse_opts(['~offset: $x ...', rest, ...], acc):
+     parse_opts([rest, ...], {"offset": '$x ...', "offset_x": '$x ...', "offset_y": '$x ...', & acc})
+  | parse_opts(['~offset_x: $x ...', rest, ...], acc):
+     parse_opts([rest, ...], {"offset_x": '$x ...', & acc})
+  | parse_opts(['~offset_y: $y ...', rest, ...], acc):
+     parse_opts([rest, ...], {"offset_y": '$y ...', & acc})
+  | parse_opts(['~spacing: [$x ..., $y ...]', rest, ...], acc):
+     parse_opts([rest, ...], {"spacing_x": '$x ...', "spacing_y": '$y ...', & acc})
+  | parse_opts(['~spacing_x: $x ...', rest, ...], acc):
+     parse_opts([rest, ...], {"spacing_x": '$x ...', & acc})
+  | parse_opts(['~spacing_y: $y ...', rest, ...], acc):
+     parse_opts([rest, ...], {"spacing_y": '$y ...', & acc})
+  | parse_opts(['~horizontal_spacing: $y ...', rest, ...], acc):
+     parse_opts([rest, ...], {"spacing_y": '$y ...', & acc})
+  | parse_opts(['~vertical_spacing: $x ...', rest, ...], acc):
+     parse_opts([rest, ...], {"spacing_x": '$x ...', & acc})
+  | parse_opts(['~size: [$x ...,$y ...]', rest, ...], acc):
+     parse_opts([rest, ...], {"size_x": '$x ...', "size_y": '$y ...', & acc})
+  | parse_opts(['~size_x: $x ...', rest, ...], acc):
+     parse_opts([rest, ...], {"size_x": '$x ...', & acc})
+  | parse_opts(['~size_y: $y ...', rest, ...], acc):
+     parse_opts([rest, ...], {"size_y": '$y ...', & acc})
+  | parse_opts(['~size: $y ...', rest, ...], acc):
+     parse_opts([rest, ...], {"size": '$y ...', "size_x": '$y ...', "size_y": '$y ...', & acc})
+
+  fun
+  | extract_float('$(fl :: Float)'): fl.unwrap()
+  | extract_float('$(n :: Int)'): math.inexact(n.unwrap())
+  | extract_float(n :: Integral): math.inexact(n)
+  | extract_float(n :: Number): n
+  | extract_float(_): #false
+
+  fun build_shared_sprite([shared_sprite_map :: MutableMap, dynamic_map], data, name, x, y, w, h, row, col):
+    match [extract_float(w), extract_float(h)]
+    | [w :: Number, h :: Number]:
+        def sprite_rect:
+          if Map.has_key(shared_sprite_map, [w,h])
+          | def [var, _]: shared_sprite_map[[w,h]]
+            var
+          | def var: Syntax.make(syntax.#{format-id}(dynamic_map, "sprite_rect_~a", Map.length(shared_sprite_map)))
+            def stx: 'def $var: Rectangle(0., 0., $w, $h)'
+            shared_sprite_map[[w,h]] := [var, stx]
+            var
+        'def $data: SharedSprite(
+           $name,
+           $sprite_rect,
+           $row, $col,
+           $x, $y
+         )'
+    | _:
+        'def $data:
+          def [w,h]: [$w, $h]
+          def sprite_rect:
+            if Map.has_key($dynamic_map, [w,h])
+            | Map.ref($dynamic_map, [w,h])
+            | def r: Rectangle(0.,0., w, h)
+              $dynamic_map[[w,h]] := r
+              r
+          SharedSprite(
+            $name,
+            sprite_rect,
+            $row, $col,
+            $x, $y
+          )'
+
+  fun
+  | parse_tile_definition(shared_sprite_map, opts, offset_x, '$(data :: Identifier) ($tile_arg, ...) $rest ...', row, col):
+      def rest: '$rest ...'
+      def tile_opts: parse_opts(['$tile_arg', ...], Map{})
+      def x: '$offset_x + $(Map.ref(tile_opts, "offset", 0.))'
+      def w: Map.ref(tile_opts, "size", Map.ref(opts, "size_x", 64.))
+      def y: '$(Map.ref(opts, "offset_y", 0.)) + (($(Map.ref(opts, "size_y", 64.)) + $(Map.ref(opts, "spacing_y", 0.))) * $row)'
+      def h: Map.ref(opts, "size_y", 64.)
+      def end_x: '$x + ($w + $(Map.ref(opts, "spacing_x", 0.)))'
+      def name: to_string(data.unwrap())
+      def stx:
+        if (Map.ref(tile_opts, "shared", #false) || (Map.ref(opts, "shared", #false) && !Map.ref(tile_opts, "unique", #false)))
+        | build_shared_sprite(shared_sprite_map, data, name, x, y, w, h, row, col)
+        | 'def $data: UniqueSprite(
+             $name,
+             Rectangle($x, $y, $w, $h),
+             $row,
+             $col
+           )'
+      values(stx, end_x, rest)
+  | parse_tile_definition(shared_sprite_map, opts, offset_x, '$(data :: Identifier) $rest ...', row, col):
+      def rest: '$rest ...'
+      def x: '$offset_x'
+      def y: '$(Map.ref(opts, "offset_y", 0.)) + (($(Map.ref(opts, "size_y", 64.)) + $(Map.ref(opts, "spacing_y", 0.))) * $row)'
+      def w: Map.ref(opts, "size_x", 64.)
+      def h: Map.ref(opts, "size_y", 64.)
+      def end_x: '$x + ($w + $(Map.ref(opts, "spacing_x", 0.)))'
+      def name: to_string(data.unwrap())
+      def stx:
+        if Map.ref(opts, "shared", #false)
+        | build_shared_sprite(shared_sprite_map, data, name, x, y, w, h, row, col)
+        | 'def $data: UniqueSprite(
+              $name,
+              Rectangle($x, $y, $w, $h),
+              $row,
+              $col
+           )'
+      values(stx, end_x, rest)
+
+  fun
+  | parse_tile_cols(_, _, _, '', _, _): []
+  | parse_tile_cols(shared_sprite_map, opts, offset_x, data, row, col):
+      def values(head, end_of_last_tile_x, rest): parse_tile_definition(shared_sprite_map, opts, offset_x, data, row, col)
+      def tile_rest : parse_tile_cols(shared_sprite_map, opts, end_of_last_tile_x, rest, row, col + 1)
+      List.cons(head, tile_rest)
+
+  fun
+  | parse_tiles(_,_, [], _): []
+  | parse_tiles(shared_sprite_map, opts, [hd, tl, ...], row):
+      def start_offset_x: Map.ref(opts, "offset_x", 0.)
+      def tile_row : parse_tile_cols(shared_sprite_map, opts, start_offset_x, hd, row, 0)
+
+      def tile_rest : parse_tiles(shared_sprite_map, opts, [tl,...], row + 1)
+      tile_row ++ tile_rest
+
+  fun
+  | extract_exports([]): []
+  | extract_exports(['', otile, ...]): extract_exports([otile, ...])
+  | extract_exports(['$tile ($arg, ...) $rest ...', otile, ...]):
+      List.cons('$tile', extract_exports(['$rest ...', otile, ...]))
+  | extract_exports(['$tile $rest ...', otile, ...]):
+      List.cons('$tile', extract_exports(['$rest ...', otile, ...]))
+
+defn.macro
+| 'spritesheet $(name :: Identifier):
+      options:
+        $opt
+        ...
+      $tile ...
+      ...':
+   def opts: parse_opts([opt, ...], Map{})
+   def shared_map: 'shared_map'
+   def shared_sprite_map: [MutableMap{}, shared_map]
+   def [tile_def, ...]: parse_tiles(shared_sprite_map, opts, ['$tile ...', ...], 0)
+   def [exprt, ...]: extract_exports(['$tile ...', ...])
+   def MapView{[k1, k2]: [defn_name, defn], ...}: shared_sprite_map[0]
+   'namespace $name:
+     export:
+       tiles
+       $exprt ...
+     $defn
+     ...
+     def $shared_map: MutableMap{
+        [$k1, $k2]: $defn_name, ...
+     }
+
+     $tile_def
+     ...
+     def tiles: [$exprt, ...]'
+| 'spritesheet $(name :: Identifier):
+      $tile ...
+      ...':
+   def opts: Map{}
+   def shared_map: 'shared_map'
+   def shared_sprite_map: [MutableMap{}, shared_map]
+   def [tile_def, ...]: parse_tiles(shared_sprite_map, opts, ['$tile ...', ...], 0)
+   def [exprt, ...]: extract_exports(['$tile ...', ...])
+   def MapView{[k1, k2]: [defn_name, defn], ...}: shared_sprite_map[0]
+   'namespace $name:
+     export:
+       tiles
+       $exprt ...
+     $defn
+     ...
+     def $shared_map: MutableMap{
+        [$k1, $k2]: $defn_name, ...
+     }
+
+     $tile_def
+     ...
+     def tiles: [$exprt, ...]'
+
+
+fun render(tiles :: List.of(Sprite), texture :: Texture):
+  def texture_image: pict.bitmap(texture.resource)
+  def items:
+    for List:
+      each tile: tiles
+      def color: random_color()
+      def position: tile.sprite_rect
+      def name: tile.name
+      pict.inset(
+        pict.#{lt-superimpose}(
+          pict.#{rectangle}(position.width, position.height, #{#:border-color}: color),
+          pict.colorize(pict.text(name), color)
+        ),
+        position.x, position.y
+      )
+  match items
+  | [item, ...]:
+      pict.#{lt-superimpose}(
+         texture_image,
+         item, ...
+      )
