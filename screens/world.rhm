@@ -1,6 +1,8 @@
 #lang rhombus
 
 import:
+  lib("raylib/2d/unsafe.rkt") as raylib
+
   "../lib/lang.rhm" open
 
   "../game/raylib_lang.rhm" open
@@ -18,6 +20,7 @@ import:
   "../systems/interaction.rhm" open
   "../systems/dialog.rhm" open
   "../systems/hud.rhm" open
+  "inventory.rhm" open
 
 export:
   WorldScreen
@@ -47,4 +50,8 @@ class WorldScreen(
    CollisionSystem.update()
    InteractionSystem.update()
    DialogSystem.update()
+
+   handle_inputs (raylib.IsKeyPressed)
+   | raylib.KEY_I
+     game_state.push(InventoryScreen())
 

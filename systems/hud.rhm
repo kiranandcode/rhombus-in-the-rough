@@ -27,17 +27,6 @@ export:
 
 use_static
 
-
-expr.macro 'send $target ... . $(method :: Identifier)($(kw :: Keyword): $kw_arg, ..., $arg, ...)':
-  expr_meta.pack_s_exp(['rkt_send',
-                        expr_meta.pack_expr('$target ...'),
-                        method,
-                        &(for List:
-                            each p: [[kw, expr_meta.pack_expr(kw_arg)], ...]
-                            each i: p
-                            i),
-                        expr_meta.pack_expr(arg), ...])
-
 spritesheet UIBarSprite:
   options:
     ~spacing_x: 1.0
@@ -45,7 +34,6 @@ spritesheet UIBarSprite:
     ~offset_y: 40.0
     ~width: 24.0
     ~height: 20.0
-    ~shared
   Start Mid(~width:23.0) End(~width:25.0)
 
 spritesheet UIBarCell:
@@ -64,9 +52,56 @@ spritesheet UIBarCell:
   ManaS    ManaM(~width:7.0)   ManaE(~spacing_x: 4.0)    PowerS  PowerM(~width:7.0)  PowerE(~spacing_x: 4.0)  
   SpiritS  SpiritM(~width:7.0) SpiritE(~spacing_x: 4.0)  KiS     KiM(~width:7.0)     KiE(~spacing_x: 4.0)  
 
-def_texture ui_texture: "../resources/images/ui_big_pieces.png"
+def_texture ui_texture: "./resources/images/ui_big_pieces.png"
 
-def picture: spritesheet.render(UIBarSprite.tiles ++ UIBarCell.tiles, ui_texture)
+def dest_rect: Rectangle(0., 0., 32., 32.)
+def origin: Vector2(0.,0.)
+
+fun draw_texture(s :: spritesheet.Sprite, x :: Real, y :: Real, w :: Real, h :: Real):
+  dest_rect.x := x
+  dest_rect.y := y
+  dest_rect.width := w
+  dest_rect.height := h
+  raylib.DrawTexturePro(
+      ui_texture.inner(),
+      s.sprite_rect.inner(),
+      dest_rect.inner(),
+      origin.inner(),
+      0.,
+      raylib.WHITE
+    )
+
+fun draw_bar(offset_x, offset_y, value, max, [S, M, E] :: List.of(spritesheet.Sprite)):
+  let scaling: 1.0
+  let width: scaling * max
+  let offset_0: offset_x
+  let offset_1: offset_0 + 20.0
+  let mid_width: width - 15. - 16.
+  let offset_2: offset_1 + mid_width
+
+
+  draw_texture(UIBarSprite.Start, offset_0, offset_y, 24.0, 20.)
+  draw_texture(UIBarSprite.Mid,   offset_1, offset_y, mid_width, 20.)
+  draw_texture(UIBarSprite.End,   offset_2, offset_y, 25.0, 20.)  
+
+  let width: scaling * value
+  let contents_offset_y: offset_y + 3.0
+  let offset_0: offset_0 + 9.0
+  let offset_1: offset_0 + 8.0
+  let mid_width: width - 8.0 - 8.0 - 4.
+  let offset_2: offset_1 + mid_width
+  if mid_width > 0.
+  | when (value > 0.):
+      draw_texture(S, offset_0, contents_offset_y, 8.0, 14.)  
+    when (mid_width > 0.):
+      draw_texture(M, offset_1, contents_offset_y, mid_width, 14.)  
+    when (value > 0.):
+      draw_texture(E, offset_2, contents_offset_y, 8.0, 14.)  
+  | let end_pos: offset_0 + width
+    let mid_width_1: math.floor(width / 2.0)
+    let mid_width_2: end_pos - mid_width_1 - offset_0
+    draw_texture(S, offset_0, contents_offset_y, mid_width_1, 14.0)
+    draw_texture(E, offset_0 + mid_width_1, contents_offset_y, mid_width_2, 14.0)
 
 system HUDDrawingSystem(
     player :: IsPlayer,
@@ -74,13 +109,5 @@ system HUDDrawingSystem(
   ) with this:
 
     method draw():
-      raylib.DrawTexturePro(
-        ui_texture.inner(),
-        Rectangle(0.,0.,32.,32.).inner(),
-        Rectangle(0.,0.,128.,128.).inner(),
-        Vector2(0.,0.).inner(),
-        0.,
-        raylib.WHITE
-      )
+      draw_bar(20.,20., health.value, health.max, [UIBarCell.HealthS,UIBarCell.HealthM,UIBarCell.HealthE])
 
-picture

@@ -1,0 +1,52 @@
+#lang rhombus
+
+import:
+  lib("raylib/2d/unsafe.rkt") as raylib
+
+  "../lib/lang.rhm" open
+  "../lib/datatypes.rhm" open
+  "../game/raylib_lang.rhm" open
+  "../lib/ordered_drawing.rhm"
+
+  "../game/view.rhm" open
+  "../game/game_map.rhm"
+  "../game/game_state.rhm"
+  "../game/inventory.rhm"
+
+  "../lib/spritesheet.rhm" expose: spritesheet Sprite
+  "../lib/resources.rhm" expose: def_texture
+
+
+
+export:
+  InventoryScreen
+
+def_texture ui_texture: "./resources/images/ui_big_pieces.png"
+
+
+def INVENTORY_ROWS: 5.0
+def INVENTORY_COLS: 8.0
+def origin: Vector2(0.,0.)
+def SIZE: 80.0
+
+class InventoryScreen(mutable completed :: Boolean):
+  implements game_state.Screen
+  constructor (): super(#false)
+
+  override method draw():
+    inventory.draw()
+
+  override method update():
+    handle_inputs (raylib.IsKeyPressed)
+    | raylib.KEY_A
+      inventory.select_left()
+    | raylib.KEY_D
+      inventory.select_right()
+    | raylib.KEY_W
+      inventory.select_up()
+    | raylib.KEY_S
+      inventory.select_down()
+    | raylib.KEY_I
+      completed := #true
+
+  override method should_pop(): completed

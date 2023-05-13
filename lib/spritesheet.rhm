@@ -82,6 +82,8 @@ meta:
      parse_opts([rest, ...], {"size_y": '$y ...', & acc})
   | parse_opts(['~size: $y ...', rest, ...], acc):
      parse_opts([rest, ...], {"size": '$y ...', "size_x": '$y ...', "size_y": '$y ...', & acc})
+  | parse_opts([opt, rest, ...], acc):
+     error("unsupported option " ++ to_string(opt))
 
   fun
   | extract_float('$(fl :: Float)'): fl.unwrap()
@@ -124,14 +126,22 @@ meta:
           )'
 
   fun
-  | parse_tile_definition(shared_sprite_map, opts, offset_x, '$(data :: Identifier) ($tile_arg, ...) $rest ...', row, col):
+  | parse_tile_definition(shared_sprite_map, opts, offset_y, offset_x, '$(data :: Identifier) ($tile_arg, ...) $rest ...', row, col):
       def rest: '$rest ...'
       def tile_opts: parse_opts(['$tile_arg', ...], Map{})
       def x: '$offset_x + $(Map.ref(tile_opts, "offset", 0.))'
-      def w: Map.ref(tile_opts, "size", Map.ref(opts, "size_x", 64.))
-      def y: '$(Map.ref(opts, "offset_y", 0.)) + (($(Map.ref(opts, "size_y", 64.)) + $(Map.ref(opts, "spacing_y", 0.))) * $row)'
-      def h: Map.ref(opts, "size_y", 64.)
-      def end_x: '$x + ($w + $(Map.ref(opts, "spacing_x", 0.)))'
+
+      def size_y:
+        def user_input: Map.ref(opts, "size_y", 64.)
+        match user_input
+        | '[$arg, ...]': ([arg, ...])[row]
+        | ~else        : user_input
+
+      def w: Map.ref(tile_opts, "size", Map.ref(tile_opts, "size_x", Map.ref(opts, "size_x", 64.)))
+      def y: '$offset_y'
+      def h: '$size_y'
+      def spacing_x: Map.ref(tile_opts, "spacing_x", Map.ref(opts, "spacing_x", 0.))
+      def end_x: '$x + ($w + $spacing_x)'
       def name: to_string(data.unwrap())
       def stx:
         if (Map.ref(tile_opts, "shared", #false) || (Map.ref(opts, "shared", #false) && !Map.ref(tile_opts, "unique", #false)))
@@ -142,13 +152,20 @@ meta:
              $row,
              $col
            )'
-      values(stx, end_x, rest)
-  | parse_tile_definition(shared_sprite_map, opts, offset_x, '$(data :: Identifier) $rest ...', row, col):
+      values(stx, h, end_x, rest)
+  | parse_tile_definition(shared_sprite_map, opts, offset_y, offset_x, '$(data :: Identifier) $rest ...', row, col):
       def rest: '$rest ...'
       def x: '$offset_x'
-      def y: '$(Map.ref(opts, "offset_y", 0.)) + (($(Map.ref(opts, "size_y", 64.)) + $(Map.ref(opts, "spacing_y", 0.))) * $row)'
+
+      def size_y:
+        def user_input: Map.ref(opts, "size_y", 64.)
+        match user_input
+        | '[$arg, ...]': ([arg, ...])[row]
+        | ~else        : user_input
+
+      def y: '$offset_y'
       def w: Map.ref(opts, "size_x", 64.)
-      def h: Map.ref(opts, "size_y", 64.)
+      def h: '$size_y'
       def end_x: '$x + ($w + $(Map.ref(opts, "spacing_x", 0.)))'
       def name: to_string(data.unwrap())
       def stx:
@@ -160,22 +177,33 @@ meta:
               $row,
               $col
            )'
-      values(stx, end_x, rest)
+      values(stx, h, end_x, rest)
 
   fun
-  | parse_tile_cols(_, _, _, '', _, _): []
-  | parse_tile_cols(shared_sprite_map, opts, offset_x, data, row, col):
-      def values(head, end_of_last_tile_x, rest): parse_tile_definition(shared_sprite_map, opts, offset_x, data, row, col)
-      def tile_rest : parse_tile_cols(shared_sprite_map, opts, end_of_last_tile_x, rest, row, col + 1)
-      List.cons(head, tile_rest)
+  | parse_tile_cols(_,                 _,    _,        _,       '',    _,   _): values([], #false)
+  | parse_tile_cols(shared_sprite_map, opts, offset_y, offset_x, data, row, col):
+
+      def values(head, max_y, end_of_last_tile_x, rest):
+          parse_tile_definition(shared_sprite_map, opts, offset_y, offset_x, data, row, col)
+
+      def values(tile_rest, max_y_rest) :
+        parse_tile_cols(shared_sprite_map, opts, offset_y, end_of_last_tile_x, rest, row, col + 1)
+
+      def new_max_y:
+        if max_y_rest
+        | match [extract_float(max_y), extract_float(max_y_rest)]
+          | [max_y :: Number, max_y_rest :: Number]: math.max(max_y, max_y_rest)
+          | _: 'math.max($max_y, $max_y_rest)'
+        | max_y
+      values(List.cons(head, tile_rest), new_max_y)
 
   fun
-  | parse_tiles(_,_, [], _): []
-  | parse_tiles(shared_sprite_map, opts, [hd, tl, ...], row):
+  | parse_tiles(_,_,_, [], _): []
+  | parse_tiles(shared_sprite_map, opts, start_offset_y, [hd, tl, ...], row):
       def start_offset_x: Map.ref(opts, "offset_x", 0.)
-      def tile_row : parse_tile_cols(shared_sprite_map, opts, start_offset_x, hd, row, 0)
-
-      def tile_rest : parse_tiles(shared_sprite_map, opts, [tl,...], row + 1)
+      def values(tile_row, max_y) : parse_tile_cols(shared_sprite_map, opts, start_offset_y, start_offset_x, hd, row, 0)
+      def new_offset_y: '$start_offset_y + $max_y + $(Map.ref(opts, "spacing_y", 0.))'
+      def tile_rest : parse_tiles(shared_sprite_map, opts, new_offset_y, [tl,...], row + 1)
       tile_row ++ tile_rest
 
   fun
@@ -196,7 +224,8 @@ defn.macro
    def opts: parse_opts([opt, ...], Map{})
    def shared_map: 'shared_map'
    def shared_sprite_map: [MutableMap{}, shared_map]
-   def [tile_def, ...]: parse_tiles(shared_sprite_map, opts, ['$tile ...', ...], 0)
+   def start_offset_y: Map.ref(opts, "offset_y", 0.)
+   def [tile_def, ...]: parse_tiles(shared_sprite_map, opts, start_offset_y, ['$tile ...', ...], 0)
    def [exprt, ...]: extract_exports(['$tile ...', ...])
    def MapView{[k1, k2]: [defn_name, defn], ...}: shared_sprite_map[0]
    'namespace $name:
@@ -218,7 +247,8 @@ defn.macro
    def opts: Map{}
    def shared_map: 'shared_map'
    def shared_sprite_map: [MutableMap{}, shared_map]
-   def [tile_def, ...]: parse_tiles(shared_sprite_map, opts, ['$tile ...', ...], 0)
+   def start_offset_y: Map.ref(opts, "offset_y", 0.)
+   def [tile_def, ...]: parse_tiles(shared_sprite_map, opts, start_offset_y, ['$tile ...', ...], 0)
    def [exprt, ...]: extract_exports(['$tile ...', ...])
    def MapView{[k1, k2]: [defn_name, defn], ...}: shared_sprite_map[0]
    'namespace $name:

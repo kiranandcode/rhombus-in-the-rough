@@ -14,6 +14,7 @@ CLOSED: [2023-05-11 Thu 04:53]
 ** DONE Make text display gradual -- gradually reveal characters - if player presses Q, then skip to end.
 CLOSED: [2023-05-11 Thu 04:53]
 ** Don't want to implement dialog system till we have an inventory, so we can test conditionals etc.
+** TODO Draw Inventory
 * TODO Implement camera properly
 * TODO Populate map 
 ** Populate map with buildings etc.

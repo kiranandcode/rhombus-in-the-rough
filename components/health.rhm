@@ -8,4 +8,4 @@ import:
 export:
   Health
 
-component Health(value :: Integral)
+component Health(value :: Integral, max :: Integral)

@@ -29,6 +29,7 @@ import:
    "components/input.rhm" open
    "components/interaction.rhm" open
    "components/dialog.rhm" open
+   "components/health.rhm" open
 
    "systems/movement.rhm" open
    "systems/user_control.rhm" open
@@ -61,6 +62,7 @@ def HUMANOID_FRAMES : 9
 
 instance Player:
   component player :~ IsPlayer = IsPlayer()
+  component health :~ Health = Health(100, 100)
   component position :~ Position = Vector2(320.,320.)
   component collision_box :~ CollisionBox = CollisionBox(Rectangle(-16.,16., 32., 16.),0)
   component velocity :~ Velocity = Vector2(0.,0.)
@@ -243,9 +245,9 @@ while (!raylib.WindowShouldClose()):
     game_state.draw()
     // dialog_box.draw()
 
-    def msg:
-      racket.format("Nothing to show....")
-    raylib.DrawText(msg, 10, 10, 20, raylib.DARKGRAY)
+    // def msg:
+    //   racket.format("Nothing to show....")
+    // raylib.DrawText(msg, 10, 10, 20, raylib.DARKGRAY)
     raylib.DrawFPS(0,0)
 
 raylib.CloseWindow()
