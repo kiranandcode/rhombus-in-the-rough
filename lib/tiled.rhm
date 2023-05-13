@@ -1,0 +1,107 @@
+#lang rhombus
+
+import:
+  lib("xml/main.rkt") as xml
+  lib("racket/main.rkt") as racket
+
+class Tileset(
+  tile_width :: Integral,
+  tile_height :: Integral,
+  tile_count :: Integral,
+  columns :: Integral,
+  image :: String,
+)
+
+class CollisionBox(
+   x :: Real,
+   y :: Real,
+   width :: Real,
+   height :: Real
+)
+
+class ObjectGroup(
+  name :: String,
+  elements :: List.of(CollisionBox)
+)
+
+class Layer(data :: List.of(List.of(Integral)))
+
+fun load_tileset(fname):
+  def [#'tileset, meta_data, data, ...]: read_map_data(fname)
+  def tile_data: [data, ...]
+
+  def tile_width: racket.#{string->number}(lookup(meta_data, #'tilewidth))
+  def tile_height: racket.#{string->number}(lookup(meta_data, #'tileheight))
+  def tilecount: racket.#{string->number}(lookup(meta_data, #'tilecount))
+  def columns: racket.#{string->number}(lookup(meta_data, #'columns))
+
+  def image: lookup(tile_data, #'image)
+  def source: lookup(image, #'source)
+  Tileset(tile_width, tile_height, tilecount, columns, source)
+
+fun read_map_data(fname):
+  def data: xml.#{read-xml}(racket.#{open-input-file}(fname))
+
+  xml.#{xml->xexpr}(
+    xml.#{eliminate-whitespace}([#'map, #'layer, #'objectgroup, #'tileset, #'wangsets, #'wangset])(
+      xml.#{document-element}(data)
+    )
+  )
+
+fun
+| lookup([], id): error((to_string(id) :~ String) ++ " not found")
+| lookup([[key, vl], tl, ...], id):
+    if key == id | vl | lookup([tl,...], id)
+| lookup([[key, vl, ...], tl, ...], id):
+    if key == id | [vl, ...] | lookup([tl,...], id)
+
+def map_data: read_map_data("../maps/map1.tmx")
+
+
+def [#'map, meta_data, data, ...]: map_data
+
+def tile_height: racket.#{string->number}(lookup(meta_data, #'tileheight))
+def tile_width: racket.#{string->number}(lookup(meta_data, #'tilewidth))
+def width: racket.#{string->number}(lookup(meta_data, #'width))
+def height: racket.#{string->number}(lookup(meta_data, #'height))
+
+fun read_object(object):
+  match object
+  | [#'object, meta_data]:
+      def x: racket.#{string->number}(lookup(meta_data, #'x))
+      def y: racket.#{string->number}(lookup(meta_data, #'y))
+      def height: racket.#{string->number}(lookup(meta_data, #'height))
+      def width: racket.#{string->number}(lookup(meta_data, #'width))
+      CollisionBox(x,y,width,height)
+
+
+fun read_layer_data(data :: String):
+  def rows:
+    racket.#{string-split}(
+      racket.#{string-trim}(data),
+      "\n"
+    )
+  for List:
+    each row: rows
+    def row_trimmed: racket.#{string-trim}(row)
+    def cols: racket.#{string-split}(row_trimmed, ",")
+    for List:
+      each col: cols
+      racket.#{string->number}(col)
+
+for List:
+  each element: [data, ...]
+  match element
+  | [#'tileset, tileset_data]:
+      lookup(tileset_data, #'source)
+  | [#'layer, meta_data, layer_data, ...]:
+      def [encoding, data]: lookup([layer_data, ...], #'data)
+      def layer_data: read_layer_data(to_string(data))
+      Layer(layer_data)
+  | [#'objectgroup, meta_data, object, ...]:
+      def name: to_string(lookup(meta_data, #'name))
+      def objects: [read_object(object), ...]
+      ObjectGroup(name, objects)
+
+          
+     

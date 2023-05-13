@@ -14,7 +14,13 @@ CLOSED: [2023-05-11 Thu 04:53]
 ** DONE Make text display gradual -- gradually reveal characters - if player presses Q, then skip to end.
 CLOSED: [2023-05-11 Thu 04:53]
 ** Don't want to implement dialog system till we have an inventory, so we can test conditionals etc.
-** TODO Draw Inventory
+** DONE Draw Inventory
+CLOSED: [2023-05-13 Sat 09:11]
+** TODO Find attack sprite for person
+** TODO Implement system to switch to attack animation
+** DONE Find more LPC map element sprites  
+CLOSED: [2023-05-13 Sat 10:08]
+** TODO Extend Map with more elements --- add collisions with players 
 * TODO Implement camera properly
 * TODO Populate map 
 ** Populate map with buildings etc.
