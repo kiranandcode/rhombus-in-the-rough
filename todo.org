@@ -36,6 +36,15 @@ CLOSED: [2023-05-13 Sat 10:08]
 * TODO Make enemy drop items
 * TODO Add Quest system
 * Refactoring Map Interface
-** Define fields of new map interface
-** Refactor ordered drawing to sort by custom height
-** Update map drawing 
+** DONE Define fields of new map interface
+CLOSED: [2023-05-14 Sun 10:36]
+** DONE Update map drawing 
+CLOSED: [2023-05-14 Sun 10:36]
+** DONE Refactor ordered drawing to sort by custom height
+CLOSED: [2023-05-14 Sun 10:40]
+** DONE Update collision system to prevent collisions with world
+CLOSED: [2023-05-14 Sun 11:42]
+** TODO Implement attack system
+** TODO Implement damage
+** TODO Drop items on death
+

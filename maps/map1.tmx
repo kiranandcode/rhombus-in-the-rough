@@ -124,7 +124,7 @@
  </layer>
  <layer id="6" name="well-layer" width="30" height="20">
   <properties>
-   <property name="base-y" value="13"/>
+   <property name="base-y" value="12"/>
   </properties>
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -151,7 +151,7 @@
  </layer>
  <layer id="7" name="well-layer-2" width="30" height="20">
   <properties>
-   <property name="base-y" value="13"/>
+   <property name="base-y" value="12"/>
   </properties>
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -177,8 +177,8 @@
 </data>
  </layer>
  <objectgroup id="8" name="collision-layer">
-  <object id="1" x="491.196" y="39.7193" width="202.569" height="144.976"/>
-  <object id="4" x="58.2179" y="420.793" width="75.307" height="28.035"/>
+  <object id="1" x="481.618" y="24.6687" width="220.356" height="166.867"/>
+  <object id="4" x="58.2179" y="415.32" width="75.307" height="33.508"/>
   <object id="6" x="676.02" y="196.902" width="23.0215" height="26.2716"/>
  </objectgroup>
 </map>
