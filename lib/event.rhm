@@ -111,7 +111,7 @@ expr.macro
      )'
 
 
-submodule test:
+module test:
 
   message.message Foo(x :: Integral)
   message.message Bar(y :: Integral)
