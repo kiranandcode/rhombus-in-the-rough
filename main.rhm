@@ -49,6 +49,7 @@ use_static
 
 def_texture main_character_image : "./resources/images/male_walkcycle.png"
 def_texture main_character_attack : "./resources/images/male_slash.png"
+def_texture dagger_slash : "./resources/images/WEAPON_dagger.png"
 
 def_texture blacksmith_image : "./resources/images/soldier.png"
 def_texture bat_image : "./resources/images/enemies/bat.png"
@@ -68,11 +69,12 @@ def HUMANOID_FRAMES : 9
 instance Player:
   component player :~ IsPlayer = IsPlayer()
   component state :~ HasState = State.Idle
-  component weapon_animation :~ WeaponActionAnimation = WeaponActionAnimation(
+  component weapon_action :~ WeaponActionAnimation = WeaponActionAnimation(
       #false, 0., main_character_attack,
       0.075, 6,
       main_character_attack, 0., 0
   )
+  component weapon_animation :~ WeaponAnimation = dagger_slash
   component health :~ Health = Health(100, 100)
   component position :~ Position = Vector2(320.,320.)
   component collision_box :~ CollisionBox = CollisionBox(Rectangle(-16.,16., 32., 16.),0)

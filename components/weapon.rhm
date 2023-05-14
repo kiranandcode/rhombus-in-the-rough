@@ -8,7 +8,7 @@ import:
 
 export:
   WeaponActionAnimation
-
+  WeaponAnimation
 
 
 component WeaponActionAnimation(
@@ -21,6 +21,11 @@ component WeaponActionAnimation(
    old_frame_update_speed :: Real,
    old_frames :: Integral,
 )
+
+component WeaponAnimation(
+   texture :: resources.Texture
+)
+
 // relative to position
 
 

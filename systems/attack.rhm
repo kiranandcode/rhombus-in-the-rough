@@ -6,15 +6,44 @@ import:
   "../lib/datatypes.rhm" open
   "../lib/ecs.rhm" open
   "../lib/lang.rhm" open
+  "../lib/ordered_drawing.rhm"
 
   "../components/graphics.rhm" open
   "../components/character_state.rhm" open
   "../components/weapon.rhm" open
+  "../components/movement.rhm" open
 
 export:
   AttackSystem
+  WeaponAnimationSystem
 
 use_static
+
+system WeaponAnimationSystem(
+    entity_state :: HasState,
+    position :: Position,
+    weapon_animation :: WeaponAnimation,
+    anim :: AnimatedSprite,
+    orientation :: Orientation
+  ):
+
+   method draw():
+     match entity_state.state
+     | State.Idle: #void
+     | State.Attacking:
+         ordered_drawing.queue_draw(
+           weapon_animation.texture,
+           math.inexact(position.value.x - 32.),
+           math.inexact(position.value.y - 32.),
+           64.,
+           64.,
+           math.inexact(64. * anim.frame_counter),
+           math.inexact(64. * orientation.facing_direction.ind),
+           64.,
+           64.,
+           0.,
+           0.
+         )
 
 system AttackSystem(
      entity_state :: HasState,

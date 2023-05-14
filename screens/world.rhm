@@ -39,6 +39,7 @@ class WorldScreen(
       map.draw(view)
       // CollisionSystem.draw()
       CharacterDrawingSystem.draw()
+      WeaponAnimationSystem.draw()
       ordered_drawing.draw()
       InteractionSystem.draw()
       HUDDrawingSystem.draw()
