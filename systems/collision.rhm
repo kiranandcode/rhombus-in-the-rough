@@ -7,6 +7,7 @@ import:
   "../lib/ecs.rhm" open
   "../lib/lang.rhm" open
   "../game/raylib_lang.rhm" open
+  "../game/game_map.rhm"
 
   "../lib/ordered_drawing.rhm"
 
@@ -25,14 +26,14 @@ fun start_update_cycle():
   | 0: update_count := 1
   | ~else: update_count := 0
 
-fun resolve_static_collision(area :: Rectangle, c1_pos :: Position, c2_pos :: Position):
+fun resolve_static_collision(area :: Rectangle, c1_pos :: Position, c2_pos :: Vector2):
   def change_x: area.width < area.height
   cond
-  | change_x && c1_pos.value.x < c2_pos.value.x:
+  | change_x && c1_pos.value.x < c2_pos.x:
       c1_pos.value.x := c1_pos.value.x - area.width            
   | change_x:
       c1_pos.value.x := c1_pos.value.x + area.width
-  | c1_pos.value.y < c2_pos.value.y:
+  | c1_pos.value.y < c2_pos.y:
       c1_pos.value.y := c1_pos.value.y - area.height
   | ~else:
       c1_pos.value.y := c1_pos.value.y + area.height  
@@ -47,11 +48,22 @@ system CollisionSystem(
     def c2_pos :: Position = c2.get_component(Position)
     cond
     | c1.has_component(Velocity) && !c2.has_component(Velocity):
-        resolve_static_collision(area, c1_pos, c2_pos)
+        resolve_static_collision(area, c1_pos, c2_pos.value)
     | !c1.has_component(Velocity) && c2.has_component(Velocity):
-        resolve_static_collision(area, c2_pos, c1_pos)
+        resolve_static_collision(area, c2_pos, c1_pos.value)
     | c1.has_component(Velocity) && c2.has_component(Velocity): #void
     | ~else: #void
+
+  fun check_map_collisions(entity :: entity.Entity, area :: Rectangle, map :: game_map.TileMap):
+    def e_pos :: Position = entity.get_component(Position)
+    def area_pos: Vector2(0.,0.)
+    for:
+      each box: map.collision_boxes
+      when (Rectangle.check_collision(box, area)):
+        def collision :: Rectangle : Rectangle.get_collision_rect(box, area)
+        area_pos.x := box.x
+        area_pos.y := box.y
+        resolve_static_collision(collision, e_pos, area_pos)
 
   method check_collisions_with(o_entity :: entity.Entity, o_area :: Rectangle):
     when (o_entity != this && collision_area.collision_update_count != update_count):
@@ -63,7 +75,7 @@ system CollisionSystem(
         def collision :: Rectangle : Rectangle.get_collision_rect(collision_box, o_area)
         handle_collision_between(this, o_entity, collision)
 
-  method update_internal():
+  method update_internal(map :: game_map.TileMap):
     collision_area.collision_update_count := update_count
     def area: Rectangle(
       position.value.x + collision_area.area.x,
@@ -72,9 +84,11 @@ system CollisionSystem(
       collision_area.area.height
     )
     check_collisions_with(this, area)
-  fun update():
+    check_map_collisions(this, area, map)
+
+  fun update(map :: game_map.TileMap):
     start_update_cycle()
-    update_internal()
+    update_internal(map)
 
   method draw():
     collision_box.x := position.value.x + collision_area.area.x

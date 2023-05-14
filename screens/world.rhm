@@ -47,7 +47,7 @@ class WorldScreen(
    UserControlSystem.update()
    AnimationSystem.update()
    MovementSystem.update()
-   CollisionSystem.update()
+   CollisionSystem.update(map)
    InteractionSystem.update()
    DialogSystem.update()
 
