@@ -226,7 +226,7 @@ def screen_height: 450
 game_state.init(
   world.WorldScreen(
     View(),
-    game_map.Map(100,100, terrain.rock)
+    game_map.Map()
   )
 )
 
