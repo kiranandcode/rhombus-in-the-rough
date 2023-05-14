@@ -29,6 +29,8 @@ def_texture default_texture: "./resources/images/terrain.png"
 
 
 float_struct DrawFloatData(
+  draw_order,
+
   bounding_box_x,
   bounding_box_y,
   bounding_box_w,
@@ -75,8 +77,8 @@ class DrawData(
 
 fun draw_order_less_than(d1 :: DrawData, d2 :: DrawData):
   unsafe_ops.#{unsafe-fl<}(
-    DrawFloatData.bounding_box_y(d1.float_data),
-    DrawFloatData.bounding_box_y(d2.float_data)
+    DrawFloatData.draw_order(d1.float_data),
+    DrawFloatData.draw_order(d2.float_data)
   )
   
   
@@ -92,17 +94,18 @@ for:
 
 fun queue_draw(
    texture :: Texture,
-   bounding_box_x,
-   bounding_box_y,
-   bounding_box_w,
-   bounding_box_h,
-   sprite_box_x,
-   sprite_box_y,
-   sprite_box_w,
-   sprite_box_h,
-   origin_x,
-   origin_y,
-   color = #false
+   bounding_box_x :: Inexact,
+   bounding_box_y :: Inexact,
+   bounding_box_w :: Inexact,
+   bounding_box_h :: Inexact,
+   sprite_box_x :: Inexact,
+   sprite_box_y :: Inexact,
+   sprite_box_w :: Inexact,
+   sprite_box_h :: Inexact,
+   origin_x :: Inexact,
+   origin_y :: Inexact,
+   color = #false,
+   draw_order = #false
   ):
     when (queued_draws >= allocated_elements):
       buffer.add(DrawData())
@@ -110,6 +113,11 @@ fun queue_draw(
     def draw_data :: DrawData: buffer[queued_draws]
     def draw_float_data :: DrawFloatData: draw_data.float_data
     draw_data.texture := texture
+
+    if draw_order
+    | DrawFloatData.set_draw_order(draw_float_data, draw_order)
+    | DrawFloatData.set_draw_order(draw_float_data, bounding_box_y)
+
     DrawFloatData.set_bounding_box_x(draw_float_data, bounding_box_x)
     DrawFloatData.set_bounding_box_y(draw_float_data, bounding_box_y)
     DrawFloatData.set_bounding_box_w(draw_float_data, bounding_box_w)
