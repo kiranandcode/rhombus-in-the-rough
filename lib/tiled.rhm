@@ -33,7 +33,11 @@ class ObjectGroup(
   elements :: List.of(CollisionBox)
 )
 
-class Layer(data :: List.of(List.of(Integral)))
+class Layer(
+   name :: String,
+   properties :: Map.of(String, Integral),
+   data :: List.of(List.of(Integral))
+ )
 
 class TiledMap(
    width :: Integral, height :: Integral,
@@ -44,17 +48,20 @@ class TiledMap(
  )
 
 fun
-| lookup([], id): error((to_string(id) :~ String) ++ " not found")
-| lookup([[key, vl], tl, ...], id):
-    if key == id | vl | lookup([tl,...], id)
-| lookup([[key, vl, ...], tl, ...], id):
-    if key == id | [vl, ...] | lookup([tl,...], id)
+| lookup(data, key):
+    lookup(data,key,fun (): error((to_string(key) :~ String) ++ " not found"))
+| lookup([], id, default :: Function): default()
+| lookup([], id, default): default
+| lookup([[key, vl], tl, ...], id, default):
+    if key == id | vl | lookup([tl,...], id, default)
+| lookup([[key, vl, ...], tl, ...], id, default):
+    if key == id | [vl, ...] | lookup([tl,...], id, default)
 
 fun read_map_data(fname):
   def data: xml.#{read-xml}(racket.#{open-input-file}(fname))
 
   xml.#{xml->xexpr}(
-    xml.#{eliminate-whitespace}([#'map, #'layer, #'objectgroup, #'tileset, #'wangsets, #'wangset])(
+    xml.#{eliminate-whitespace}([#'map, #'layer, #'objectgroup, #'tileset, #'wangsets, #'wangset,  #'properties, #'property])(
       xml.#{document-element}(data)
     )
   )
@@ -83,6 +90,9 @@ fun read_layer_data(data :: String):
       racket.#{string->number}(col)
 
 fun load_tileset(fname):
+  def path: Path(fname)
+  def values(tileset_root_dir, _, _): racket.#{split-path}(path)
+
   def [#'tileset, meta_data, data, ...]: read_map_data(fname)
   def tile_data: [data, ...]
 
@@ -92,8 +102,18 @@ fun load_tileset(fname):
   def columns: racket.#{string->number}(lookup(meta_data, #'columns))
 
   def image: lookup(tile_data, #'image)
-  def source: lookup(image, #'source)
-  Tileset(tile_width, tile_height, tilecount, columns, to_string(source))
+  def source: to_string(lookup(image, #'source))
+  def source_path: racket.#{build-path}(tileset_root_dir, source)
+  Tileset(tile_width, tile_height, tilecount, columns, (source_path.string()))
+
+fun read_properties(properties):
+  for Map:
+    each data: properties
+    match data
+    | [#'property, fields]:
+        def name: to_string(lookup(fields, #'name))
+        def value: racket.#{string->number}(lookup(fields, #'value))
+        values(name, value)
 
 fun load_map(fname):
   def path: Path(fname)
@@ -117,9 +137,16 @@ fun load_map(fname):
           let tilesets: List.cons(Pair(first_gid, load_tileset(source_path.string())), tilesets)
           values(tilesets, layers, objects)
       | [#'layer, meta_data, layer_data, ...]:
+          def name: to_string(lookup(meta_data, #'name))
+          def property_data: lookup([layer_data, ...], #'properties, #false)
+          def properties:
+            if property_data
+            | def [_, property, ...]: property_data
+              read_properties([property, ...])
+            | Map{}
           def [encoding, data]: lookup([layer_data, ...], #'data)
           def layer_data: read_layer_data(to_string(data))
-          let layers: List.cons(Layer(layer_data), layers)
+          let layers: List.cons(Layer(name, properties, layer_data), layers)
           values(tilesets, layers, objects)
       | [#'objectgroup, meta_data, object, ...]:
           def name: to_string(lookup(meta_data, #'name))
@@ -133,3 +160,4 @@ fun load_map(fname):
     layers.reverse(),
     objects.reverse()
   )
+
