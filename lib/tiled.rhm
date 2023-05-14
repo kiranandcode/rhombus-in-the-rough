@@ -4,6 +4,15 @@ import:
   lib("xml/main.rkt") as xml
   lib("racket/main.rkt") as racket
 
+export:
+  Tileset
+  CollisionBox
+  ObjectGroup
+  Layer
+  rename: TiledMap as Map
+  load_map
+  load_tileset
+
 class Tileset(
   tile_width :: Integral,
   tile_height :: Integral,
@@ -26,18 +35,20 @@ class ObjectGroup(
 
 class Layer(data :: List.of(List.of(Integral)))
 
-fun load_tileset(fname):
-  def [#'tileset, meta_data, data, ...]: read_map_data(fname)
-  def tile_data: [data, ...]
+class TiledMap(
+   width :: Integral, height :: Integral,
+   tile_width :: Integral, tile_height :: Integral,
+   tilesets :: List.of(Pair.of(Integral, Tileset)),
+   layers :: List.of(Layer),
+   objects :: List.of(ObjectGroup)
+ )
 
-  def tile_width: racket.#{string->number}(lookup(meta_data, #'tilewidth))
-  def tile_height: racket.#{string->number}(lookup(meta_data, #'tileheight))
-  def tilecount: racket.#{string->number}(lookup(meta_data, #'tilecount))
-  def columns: racket.#{string->number}(lookup(meta_data, #'columns))
-
-  def image: lookup(tile_data, #'image)
-  def source: lookup(image, #'source)
-  Tileset(tile_width, tile_height, tilecount, columns, source)
+fun
+| lookup([], id): error((to_string(id) :~ String) ++ " not found")
+| lookup([[key, vl], tl, ...], id):
+    if key == id | vl | lookup([tl,...], id)
+| lookup([[key, vl, ...], tl, ...], id):
+    if key == id | [vl, ...] | lookup([tl,...], id)
 
 fun read_map_data(fname):
   def data: xml.#{read-xml}(racket.#{open-input-file}(fname))
@@ -48,23 +59,6 @@ fun read_map_data(fname):
     )
   )
 
-fun
-| lookup([], id): error((to_string(id) :~ String) ++ " not found")
-| lookup([[key, vl], tl, ...], id):
-    if key == id | vl | lookup([tl,...], id)
-| lookup([[key, vl, ...], tl, ...], id):
-    if key == id | [vl, ...] | lookup([tl,...], id)
-
-def map_data: read_map_data("../maps/map1.tmx")
-
-
-def [#'map, meta_data, data, ...]: map_data
-
-def tile_height: racket.#{string->number}(lookup(meta_data, #'tileheight))
-def tile_width: racket.#{string->number}(lookup(meta_data, #'tilewidth))
-def width: racket.#{string->number}(lookup(meta_data, #'width))
-def height: racket.#{string->number}(lookup(meta_data, #'height))
-
 fun read_object(object):
   match object
   | [#'object, meta_data]:
@@ -73,7 +67,6 @@ fun read_object(object):
       def height: racket.#{string->number}(lookup(meta_data, #'height))
       def width: racket.#{string->number}(lookup(meta_data, #'width))
       CollisionBox(x,y,width,height)
-
 
 fun read_layer_data(data :: String):
   def rows:
@@ -89,19 +82,54 @@ fun read_layer_data(data :: String):
       each col: cols
       racket.#{string->number}(col)
 
-for List:
-  each element: [data, ...]
-  match element
-  | [#'tileset, tileset_data]:
-      lookup(tileset_data, #'source)
-  | [#'layer, meta_data, layer_data, ...]:
-      def [encoding, data]: lookup([layer_data, ...], #'data)
-      def layer_data: read_layer_data(to_string(data))
-      Layer(layer_data)
-  | [#'objectgroup, meta_data, object, ...]:
-      def name: to_string(lookup(meta_data, #'name))
-      def objects: [read_object(object), ...]
-      ObjectGroup(name, objects)
+fun load_tileset(fname):
+  def [#'tileset, meta_data, data, ...]: read_map_data(fname)
+  def tile_data: [data, ...]
 
-          
-     
+  def tile_width: racket.#{string->number}(lookup(meta_data, #'tilewidth))
+  def tile_height: racket.#{string->number}(lookup(meta_data, #'tileheight))
+  def tilecount: racket.#{string->number}(lookup(meta_data, #'tilecount))
+  def columns: racket.#{string->number}(lookup(meta_data, #'columns))
+
+  def image: lookup(tile_data, #'image)
+  def source: lookup(image, #'source)
+  Tileset(tile_width, tile_height, tilecount, columns, to_string(source))
+
+fun load_map(fname):
+  def path: Path(fname)
+  def values(map_root_dir, _, _): racket.#{split-path}(path)
+  def map_data: read_map_data(path.string())
+  def [#'map, meta_data, data, ...]: map_data
+
+  def tile_height: racket.#{string->number}(lookup(meta_data, #'tileheight))
+  def tile_width: racket.#{string->number}(lookup(meta_data, #'tilewidth))
+  def width: racket.#{string->number}(lookup(meta_data, #'width))
+  def height: racket.#{string->number}(lookup(meta_data, #'height))
+
+  def values(tilesets, layers, objects):
+    for values(tilesets=[],layers=[],objects=[]):
+      each element: [data, ...]
+      match element
+      | [#'tileset, tileset_data]:
+          def source: lookup(tileset_data, #'source)
+          def first_gid: racket.#{string->number}(lookup(tileset_data, #'firstgid))
+          def source_path: racket.#{build-path}(map_root_dir, source)
+          let tilesets: List.cons(Pair(first_gid, load_tileset(source_path.string())), tilesets)
+          values(tilesets, layers, objects)
+      | [#'layer, meta_data, layer_data, ...]:
+          def [encoding, data]: lookup([layer_data, ...], #'data)
+          def layer_data: read_layer_data(to_string(data))
+          let layers: List.cons(Layer(layer_data), layers)
+          values(tilesets, layers, objects)
+      | [#'objectgroup, meta_data, object, ...]:
+          def name: to_string(lookup(meta_data, #'name))
+          def collision_objects: [read_object(object), ...]
+          let objects: List.cons(ObjectGroup(name, collision_objects), objects)
+          values(tilesets, layers, objects)
+  TiledMap(
+    width, height,
+    tile_width, tile_height,
+    tilesets.reverse(),
+    layers.reverse(),
+    objects.reverse()
+  )
