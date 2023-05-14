@@ -35,3 +35,7 @@ CLOSED: [2023-05-13 Sat 10:08]
 * TODO Add Enemy, make it killable
 * TODO Make enemy drop items
 * TODO Add Quest system
+* Refactoring Map Interface
+** Define fields of new map interface
+** Refactor ordered drawing to sort by custom height
+** Update map drawing 
