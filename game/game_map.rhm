@@ -6,6 +6,7 @@ import:
    "../lib/lang.rhm" open
    "../lib/resources.rhm" expose: Texture
    "../lib/tiled.rhm"
+   "../lib/ordered_drawing.rhm"
    "raylib_lang.rhm" open
    "view.rhm" open
    "terrain.rhm"
@@ -20,10 +21,11 @@ def tile_size: Vector2(32.,32.)
 def draw_sprite_pos : Vector2(0.,0.)
 def origin: Vector2(0.,0.)
 
+use_static
 
 class Tile(texture :: Texture, offset_x:: Integral, offset_y :: Integral)
 
-class TileLayer(width :: Integral, height :: Integral, elements :: Array.of(Integral)):
+class TileLayer(width :: Integral, height :: Integral, elements :: Array.of(Integral), base_y):
   implements Callable
 
   override method call(x :: Integral,y :: Integral) :: Integral:
@@ -56,7 +58,7 @@ class TileMap(
     def stop_y: math.min(math.ceiling((view_rect.y + view_rect.height) / tile_rect.height), height)
     values(start_x, stop_x, start_y, stop_y)
 
-  method draw_layer(layer :: TileLayer, x, y, ~base_y: base_y = #false):
+  method draw_layer(layer :: TileLayer, x, y, base_y = #false):
     def maybe_tile: Map.ref(tile_map, layer(x,y), #false)
     when maybe_tile:
       def tile :: Tile = maybe_tile
@@ -64,13 +66,13 @@ class TileMap(
       tile_rect.y := math.inexact(tile.offset_y)
       update_dest_rect(x,y)
       if base_y
-      | raylib.DrawTexturePro(
-          tile.texture.inner(),
-          tile_rect.inner(),
-          dest_rect.inner(),
-          origin.inner(),
-          0.,
-          raylib.WHITE
+      | ordered_drawing.queue_draw(
+          tile.texture,
+          dest_rect.x,dest_rect.y, dest_rect.width, dest_rect.height,
+          tile_rect.x, tile_rect.y, tile_rect.width, tile_rect.height,
+          0.,0.,
+          #false,
+          math.inexact(base_y * tile_rect.height)
         )
       | raylib.DrawTexturePro(
           tile.texture.inner(),
@@ -92,10 +94,10 @@ class TileMap(
          draw_layer(base_layer, x, y)
 
        for:
-         each layer: layers
+         each layer :: TileLayer : layers
          each x : start_x .. stop_x
          each y : start_y .. stop_y
-         draw_layer(layer, x, y)
+         draw_layer(layer, x, y, layer.base_y)
 
 
 fun load_from_tiled(map :: tiled.Map):
@@ -114,9 +116,9 @@ fun load_from_tiled(map :: tiled.Map):
       each row: layer.data
       each id: row
       id
-  fun resolve_id(id):
+  fun resolve_id(id) :: Pair.of(tiled.Tileset, Integral):
     for values(result=#false):
-      each Pair(first_gid, tset): map.tilesets
+      each Pair(first_gid, tset :~ tiled.Tileset): map.tilesets
       skip_when (!(first_gid <= id && id <= first_gid + tset.tile_count))
       Pair(tset, id - first_gid)
 
@@ -125,7 +127,7 @@ fun load_from_tiled(map :: tiled.Map):
     for Map:
       each tile: tile_list
       skip_when (tile <= 0)
-      def Pair(tileset, id): resolve_id(tile)
+      def Pair((tileset :~ tiled.Tileset), id): resolve_id(tile)
       def x : id mod tileset.columns
       def y : math.floor((id - x) / tileset.columns)
       def texture:
@@ -143,7 +145,8 @@ fun load_from_tiled(map :: tiled.Map):
           each row: layer.data
           each ind: row
           ind
-      TileLayer(width, height, elements)
+      def base_y: Map.ref(layer.properties, "base-y", #false)
+      TileLayer(width, height, elements, base_y)
   TileMap(
     width, height,
     tile_rect, dest_rect,
