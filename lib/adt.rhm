@@ -8,7 +8,7 @@ import:
 export:
   datatype
   enum
-  ematch
+  rename: ematch as match
   
 
 def adt_information: #false

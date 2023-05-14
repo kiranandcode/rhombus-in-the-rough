@@ -1,0 +1,26 @@
+#lang rhombus
+
+import:
+  "../lib/datatypes.rhm" open
+  "../lib/ecs.rhm" open
+  "../lib/adt.rhm"
+  "../lib/resources.rhm"
+
+export:
+  WeaponActionAnimation
+
+
+
+component WeaponActionAnimation(
+   animation_started :: Boolean,
+   animation_start_time :: Real,
+   texture :: resources.Texture,
+   frame_update_speed :: Real,
+   frames :: Integral,
+   old_texture :: resources.Texture,
+   old_frame_update_speed :: Real,
+   old_frames :: Integral,
+)
+// relative to position
+
+

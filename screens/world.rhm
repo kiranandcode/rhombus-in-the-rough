@@ -20,6 +20,7 @@ import:
   "../systems/interaction.rhm" open
   "../systems/dialog.rhm" open
   "../systems/hud.rhm" open
+  "../systems/attack.rhm" open
   "inventory.rhm" open
 
 export:
@@ -45,6 +46,7 @@ class WorldScreen(
  override method update():
    view.update()
    UserControlSystem.update()
+   AttackSystem.update()
    AnimationSystem.update()
    MovementSystem.update()
    CollisionSystem.update(map)

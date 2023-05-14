@@ -14,7 +14,7 @@ export:
 
 use_static
 
-system AnimationSystem(anim :: AnimatedSprite):
+system AnimationSystem(anim :: AnimatedSprite) with this:
   method update():
     when (anim.moving):
       def current_time : raylib.GetTime()

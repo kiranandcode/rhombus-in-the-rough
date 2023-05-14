@@ -7,35 +7,37 @@ import:
   "../lib/ecs.rhm" open
   "../lib/lang.rhm" open
   "../game/raylib_lang.rhm" open
+  "../lib/adt.rhm"
 
   "../lib/ordered_drawing.rhm"
 
   "../components/movement.rhm" open
   "../components/graphics.rhm" open
+  "../components/character_state.rhm" open
 
 export:
   CharacterDrawingSystem
 
 use_static
 
+
 system CharacterDrawingSystem(
     position :: Position,
     anim :: AnimatedSprite,
-    orientation :: Orientation,
+    orientation :: Orientation
   ) with this:
 
     method draw():
       ordered_drawing.queue_draw(
-        anim.texture,
-        math.inexact(position.value.x - 32.),
-        math.inexact(position.value.y - 32.),
-        64.,
-        64.,
-        math.inexact(64. * anim.frame_counter),
-        math.inexact(64. * orientation.facing_direction.ind),
-        64.,
-        64.,
-        0.,
-        0.
-      )
-
+         anim.texture,
+         math.inexact(position.value.x - 32.),
+         math.inexact(position.value.y - 32.),
+         64.,
+         64.,
+         math.inexact(64. * anim.frame_counter),
+         math.inexact(64. * orientation.facing_direction.ind),
+         64.,
+         64.,
+         0.,
+         0.
+       )

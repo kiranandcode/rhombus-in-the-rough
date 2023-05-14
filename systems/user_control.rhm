@@ -8,10 +8,12 @@ import:
   "../lib/lang.rhm" open
   "../game/raylib_lang.rhm" open
   "../game/game_state.rhm"
+  "../lib/adt.rhm"
 
   "../components/movement.rhm" open
   "../components/graphics.rhm" open
   "../components/input.rhm" open
+  "../components/character_state.rhm" open
 
   "../screens/inventory.rhm" open
 
@@ -24,38 +26,51 @@ system UserControlSystem(
     anim :: AnimatedSprite,
     orientation :: Orientation,
     velocity :: Velocity,
-    control :: UserController 
+    control :: UserController,
+    has_state :: HasState
   ):
 
   method update():
-    def mutable new_direction : orientation.facing_direction
-    def mutable any_input : #false
-    velocity.value.x := 0.; velocity.value.y := 0.
-    
-    handle_inputs (raylib.IsKeyDown)
-    | raylib.KEY_D
-      new_direction := Direction.RIGHT
-      velocity.value.x += 1.
-    | raylib.KEY_A
-      new_direction := Direction.LEFT
-      velocity.value.x -= 1.
-    | raylib.KEY_W
-      new_direction := Direction.UP
-      velocity.value.y -= 1.
-    | raylib.KEY_S
-      new_direction := Direction.DOWN
-      velocity.value.y += 1.
-    | ~any
-      any_input := #true
+    println(has_state.state)
+    match has_state.state
+    | State.Attacking: #void
+    | State.Idle:
 
-    if any_input
-    | velocity.value := velocity.value.normalize()
-      velocity.value := velocity.value.scale(control.speed)
-      when (orientation.facing_direction != new_direction || ! anim.moving):
-        orientation.facing_direction := new_direction
-        anim.last_frame_update_time := raylib.GetTime()
-        anim.frame_counter := 0
-      anim.moving := #true
-    | anim.frame_counter := 0
-      anim.moving := #false
+        def mutable new_direction : orientation.facing_direction
+        def mutable any_input : #false
+        def mutable attacking : #false
+        velocity.value.x := 0.; velocity.value.y := 0.
+
+        handle_inputs (raylib.IsKeyDown)
+        | raylib.KEY_SPACE
+          attacking := #true
+        | raylib.KEY_D
+          new_direction := Direction.RIGHT
+          velocity.value.x += 1.
+        | raylib.KEY_A
+          new_direction := Direction.LEFT
+          velocity.value.x -= 1.
+        | raylib.KEY_W
+          new_direction := Direction.UP
+          velocity.value.y -= 1.
+        | raylib.KEY_S
+          new_direction := Direction.DOWN
+          velocity.value.y += 1.
+        | ~any
+          any_input := #true
+
+        cond
+        | attacking:
+            has_state.state := State.Attacking
+        | any_input:
+            velocity.value := velocity.value.normalize()
+            velocity.value := velocity.value.scale(control.speed)
+            when (orientation.facing_direction != new_direction || ! anim.moving):
+              orientation.facing_direction := new_direction
+              anim.last_frame_update_time := raylib.GetTime()
+              anim.frame_counter := 0
+            anim.moving := #true
+        | ~else:
+            anim.frame_counter := 0
+            anim.moving := #false
 

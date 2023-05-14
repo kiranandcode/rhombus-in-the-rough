@@ -1,0 +1,50 @@
+#lang rhombus
+
+import:
+  lib("raylib/2d/unsafe.rkt") as raylib
+
+  "../lib/datatypes.rhm" open
+  "../lib/ecs.rhm" open
+  "../lib/lang.rhm" open
+
+  "../components/graphics.rhm" open
+  "../components/character_state.rhm" open
+  "../components/weapon.rhm" open
+
+export:
+  AttackSystem
+
+use_static
+
+system AttackSystem(
+     entity_state :: HasState,
+     weapon :: WeaponActionAnimation,
+     animation :: AnimatedSprite
+  ):
+
+  method update():
+    cond
+    | entity_state.state == State.Attacking && !weapon.animation_started:
+        weapon.animation_started := #true
+        weapon.animation_start_time := raylib.GetTime()
+
+        weapon.old_texture := animation.texture
+        weapon.old_frame_update_speed := animation.frame_update_speed
+        weapon.old_frames := animation.frames
+        animation.moving := #true
+        animation.frame_counter := 0.
+        animation.texture := weapon.texture
+        animation.frame_update_speed := weapon.frame_update_speed
+        animation.frames := weapon.frames
+    | entity_state.state == State.Attacking && weapon.animation_started && (
+         (raylib.GetTime() - weapon.animation_start_time) >= (
+          weapon.frame_update_speed * weapon.frames
+         )):
+         entity_state.state := State.Idle
+         weapon.animation_started := #false
+         animation.texture := weapon.old_texture
+         animation.frame_counter := 0.
+         animation.frame_update_speed := weapon.old_frame_update_speed
+         animation.frames := weapon.old_frames
+         animation.moving := #false
+    | ~else: #void
