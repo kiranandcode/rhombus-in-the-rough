@@ -8,7 +8,8 @@ import:
 export:
   init
   def_texture
-  Texture
+  only_space annot: Texture
+  rename: build_texture as load_texture
 
 class Texture(mutable self, resource :: String):
 
@@ -46,6 +47,14 @@ fun init():
     on_load(texture)
   texture_requests := MutableMap()
 
+fun build_texture(resource :: String) :: Texture:
+  def texture : Texture(resource)
+  declare_texture(
+       resource,
+       fun (vl):
+         (texture :~ Texture).initialize(vl)
+  )
+  texture
 
 defn.macro 'def_texture $name : $(resource :: String)':
   'def $name: Texture($resource)
