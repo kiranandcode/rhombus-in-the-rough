@@ -12,6 +12,7 @@ import:
    "lib/ecs.rhm" open
    "lib/event.rhm"
    "lib/ordered_drawing.rhm"
+   "lib/tiled.rhm"
 
    "game/raylib_lang.rhm" open
    "game/view.rhm" open
@@ -203,6 +204,7 @@ def snake :: entity.Entity : Snake.create()
 
 def posn :: Position = blacksmith_2.get_component(Position)
 posn.value.x := 100.
+posn.value.y := 200.
     
 blacksmith.add_component(
   DialogItem(dialog.Dialog(
@@ -223,10 +225,14 @@ blacksmith_2.add_component(
 def screen_width: 800
 def screen_height: 450
 
+def tmap: tiled.load_map("./maps/map1.tmx")
+
+
+
 game_state.init(
   world.WorldScreen(
     View(),
-    game_map.Map()
+    game_map.load_from_tiled(tmap)
   )
 )
 
@@ -240,7 +246,7 @@ while (!raylib.WindowShouldClose()):
   event.update()
 
   draw_block:
-    raylib.ClearBackground(raylib.RAYWHITE)
+    raylib.ClearBackground(raylib.BLACK)
 
     game_state.draw()
     // dialog_box.draw()

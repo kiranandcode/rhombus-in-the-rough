@@ -29,13 +29,13 @@ use_static
 
 class WorldScreen(
     view :: View,
-    map :: game_map.Map
+    map :: game_map.TileMap
   ):
  implements game_state.Screen
 
  override method draw():
     draw_2d view:
-      map.draw_base(view)
+      map.draw(view)
       // CollisionSystem.draw()
       CharacterDrawingSystem.draw()
       ordered_drawing.draw()

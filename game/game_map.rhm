@@ -4,6 +4,8 @@ import:
    rhombus/meta open
    "../lib/datatypes.rhm" open
    "../lib/lang.rhm" open
+   "../lib/resources.rhm" expose: Texture
+   "../lib/tiled.rhm"
    "raylib_lang.rhm" open
    "view.rhm" open
    "terrain.rhm"
@@ -11,46 +13,141 @@ import:
    lib("raylib/2d/unsafe.rkt") as raylib
 
 export:
-  Map
+  TileMap
+  load_from_tiled
 
 def tile_size: Vector2(32.,32.)
 def draw_sprite_pos : Vector2(0.,0.)
-
-fun set_tile_display_rect(x :: Real, y :: Real, dest_rect::Rectangle):
-  def rect_x :~ Real = x * tile_size.x
-  def rect_y :~ Real = y * tile_size.y
-
-  dest_rect.x := math.inexact(rect_x)
-  dest_rect.y := math.inexact(rect_y)
-  
-fun draw_sprite(id :: terrain.Terrain, x :: Real, y :: Real):
-  draw_sprite_pos.x := math.inexact(x)
-  draw_sprite_pos.y := math.inexact(y)
-  id.draw_tile(terrain.tiles.BASE0, draw_sprite_pos)
+def origin: Vector2(0.,0.)
 
 
-class Map(width :: Integral, height :: Integral, base, elements, dest_rect :: Rectangle):
+class Tile(texture :: Texture, offset_x:: Integral, offset_y :: Integral)
 
+class TileLayer(width :: Integral, height :: Integral, elements :: Array.of(Integral)):
+  implements Callable
 
-  constructor
-  | (width, height, base):
-      super(width, height, base, [], Rectangle(0., 0., tile_size.x, tile_size.y))
-  | ():
-      Map(100,100, terrain.rock)
+  override method call(x :: Integral,y :: Integral) :: Integral:
+    elements[math.exact(width * y + x)]
+
+class TileMap(
+    width :: Integral, height :: Integral,
+    tile_rect :: Rectangle, dest_rect :: Rectangle,
+    collision_boxes :: List.of(Rectangle),
+    tile_map :: Map.of(Integral, Tile),
+    layers :: List.of(TileLayer),
+  ):
+
+  // constructor():
+  //   super(30, 20, Rectangle(0.,0.,32.,32.), Rectangle(0.,0.,32.,32.), [], Map{}, [])
+
+  method update_dest_rect(x :: Real, y :: Real):
+    def rect_x :~ Real = x * tile_rect.width
+    def rect_y :~ Real = y * tile_rect.height
+
+    dest_rect.x := math.inexact(rect_x)
+    dest_rect.y := math.inexact(rect_y)
+
 
   method calculate_iteration_bounds(view :: View):
     def view_rect :~ Rectangle = view.view_rect
-    def start_x: math.max(math.floor(view_rect.x / tile_size.x),0)
-    def stop_x: math.min(math.ceiling((view_rect.x + view_rect.width) / tile_size.x), width)
-    def start_y: math.max(math.floor(view_rect.y / tile_size.y), 0)
-    def stop_y: math.min(math.ceiling((view_rect.y + view_rect.height) / tile_size.y), height)
+    def start_x: math.max(math.floor(view_rect.x / tile_rect.width),0)
+    def stop_x: math.min(math.ceiling((view_rect.x + view_rect.width) / tile_rect.width), width)
+    def start_y: math.max(math.floor(view_rect.y / tile_rect.height), 0)
+    def stop_y: math.min(math.ceiling((view_rect.y + view_rect.height) / tile_rect.height), height)
     values(start_x, stop_x, start_y, stop_y)
 
-  method draw_base(view :: View):
+  method draw_layer(layer :: TileLayer, x, y, ~base_y: base_y = #false):
+    def maybe_tile: Map.ref(tile_map, layer(x,y), #false)
+    when maybe_tile:
+      def tile :: Tile = maybe_tile
+      tile_rect.x := math.inexact(tile.offset_x)
+      tile_rect.y := math.inexact(tile.offset_y)
+      update_dest_rect(x,y)
+      if base_y
+      | raylib.DrawTexturePro(
+          tile.texture.inner(),
+          tile_rect.inner(),
+          dest_rect.inner(),
+          origin.inner(),
+          0.,
+          raylib.WHITE
+        )
+      | raylib.DrawTexturePro(
+          tile.texture.inner(),
+          tile_rect.inner(),
+          dest_rect.inner(),
+          origin.inner(),
+          0.,
+          raylib.WHITE
+        )
+
+  method draw(view :: View):
     def values(start_x, stop_x, start_y, stop_y): calculate_iteration_bounds(view)
-    for:
-      each x : start_x .. stop_x
-      each y : start_y .. stop_y
-      set_tile_display_rect(x,y,dest_rect)
-      draw_sprite(base, dest_rect.x, dest_rect.y)
-      
+    match layers
+    | []: #void
+    | List.cons(base_layer, layers):
+       for:
+         each x : start_x .. stop_x
+         each y : start_y .. stop_y
+         draw_layer(base_layer, x, y)
+
+       for:
+         each layer: layers
+         each x : start_x .. stop_x
+         each y : start_y .. stop_y
+         draw_layer(layer, x, y)
+
+
+fun load_from_tiled(map :: tiled.Map):
+  def width: map.width
+  def height: map.height
+  def tile_rect: Rectangle(0.,0., map.tile_width, map.tile_height)
+  def dest_rect: Rectangle(0.,0., map.tile_width, map.tile_height)
+  def collision_boxes:
+    for List:
+      each object: map.objects
+      each element: object.elements
+      Rectangle(element.x, element.y, element.width, element.height)
+  def tile_list:
+    for Set:
+      each layer : map.layers
+      each row: layer.data
+      each id: row
+      id
+  fun resolve_id(id):
+    for values(result=#false):
+      each Pair(first_gid, tset): map.tilesets
+      skip_when (!(first_gid <= id && id <= first_gid + tset.tile_count))
+      Pair(tset, id - first_gid)
+
+  def tile_map:
+    def texture_map: MutableMap{}
+    for Map:
+      each tile: tile_list
+      skip_when (tile <= 0)
+      def Pair(tileset, id): resolve_id(tile)
+      def x : id mod tileset.columns
+      def y : math.floor((id - x) / tileset.columns)
+      def texture:
+        if texture_map.has_key(tileset.image)
+        | texture_map[tileset.image]
+        | def texture: resources.load_texture(tileset.image)
+          texture_map[tileset.image] := texture
+          texture
+      values(tile, Tile(texture, x * tileset.tile_width, y * tileset.tile_height))
+  def layers:
+    for List:
+      each layer: map.layers
+      def elements:
+        for Array:
+          each row: layer.data
+          each ind: row
+          ind
+      TileLayer(width, height, elements)
+  TileMap(
+    width, height,
+    tile_rect, dest_rect,
+    collision_boxes,
+    tile_map,
+    layers
+  )
