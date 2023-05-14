@@ -3,8 +3,9 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "",
+    "activeFile": "map1.tmx",
     "expandedProjectPaths": [
+        "."
     ],
     "fileStates": {
         "/home/kirang/Documents/code/racket/murder-on-the-rhombus/resources/images/terrain.tsx": {
@@ -16,11 +17,11 @@
             "scaleInEditor": 1
         },
         "map1.tmx": {
-            "scale": 0.7374,
-            "selectedLayer": 6,
+            "scale": 2.2509,
+            "selectedLayer": 9,
             "viewCenter": {
-                "x": 421.7521019799295,
-                "y": 250.20341741253048
+                "x": 700.1643786929671,
+                "y": 338.7533875338753
             }
         },
         "terrain.tsx": {
@@ -40,13 +41,14 @@
     "last.imagePath": "/home/kirang/Documents/code/racket/murder-on-the-rhombus/resources/images",
     "map.lastUsedFormat": "tmx",
     "openFiles": [
+        "map1.tmx"
     ],
     "project": "project.tiled-project",
     "recentFiles": [
+        "map1.tmx",
         "testing.tmx",
         "Exterior Tiles.tsx",
         "/home/kirang/Documents/code/racket/murder-on-the-rhombus/resources/images/terrain.tsx",
-        "map1.tmx",
         "terrain.tsx"
     ],
     "tileset.lastUsedFilter": "Tiled tileset files (*.tsx *.xml)"

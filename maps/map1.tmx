@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.1" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="32" tileheight="32" infinite="0" nextlayerid="9" nextobjectid="7">
+<map version="1.10" tiledversion="1.10.1" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="32" tileheight="32" infinite="0" nextlayerid="11" nextobjectid="11">
  <tileset firstgid="1" source="terrain.tsx"/>
  <tileset firstgid="1025" source="Exterior Tiles.tsx"/>
  <layer id="1" name="base-layer" width="30" height="20">
@@ -180,5 +180,21 @@
   <object id="1" x="481.618" y="24.6687" width="220.356" height="166.867"/>
   <object id="4" x="58.2179" y="415.32" width="75.307" height="33.508"/>
   <object id="6" x="676.02" y="196.902" width="23.0215" height="26.2716"/>
+ </objectgroup>
+ <objectgroup id="9" name="point-layer">
+  <object id="7" name="in-front-of-house" x="638.967" y="220.286">
+   <point/>
+  </object>
+  <object id="8" name="in-front-of-well" x="94.8645" y="466.569">
+   <point/>
+  </object>
+  <object id="9" name="off-the-path-point" x="838.73" y="551.856">
+   <point/>
+  </object>
+ </objectgroup>
+ <objectgroup id="10" name="path-layer">
+  <object id="10" name="bat-patrol" x="717.047" y="495.802">
+   <polygon points="0,0 209.694,-0.444267 210.582,111.067 -1.3328,112.399"/>
+  </object>
  </objectgroup>
 </map>

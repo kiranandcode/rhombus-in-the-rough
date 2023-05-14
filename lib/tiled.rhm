@@ -21,16 +21,24 @@ class Tileset(
   image :: String,
 )
 
+class Object():
+  nonfinal
 class CollisionBox(
    x :: Real,
    y :: Real,
    width :: Real,
    height :: Real
-)
+):
+  extends Object
+
+class Point(name :: String, x :: Real, y :: Real):
+  extends Object
+class Polygon(name :: String, x :: Real, y :: Real, points :: List.of(Pair.of(Real, Real))):
+  extends Object
 
 class ObjectGroup(
   name :: String,
-  elements :: List.of(CollisionBox)
+  elements :: List.of(Object)
 )
 
 class Layer(
@@ -61,13 +69,29 @@ fun read_map_data(fname):
   def data: xml.#{read-xml}(racket.#{open-input-file}(fname))
 
   xml.#{xml->xexpr}(
-    xml.#{eliminate-whitespace}([#'map, #'layer, #'objectgroup, #'tileset, #'wangsets, #'wangset,  #'properties, #'property])(
+    xml.#{eliminate-whitespace}([#'map, #'layer, #'objectgroup, #'object, #'tileset, #'wangsets, #'wangset, #'properties, #'property])(
       xml.#{document-element}(data)
     )
   )
 
 fun read_object(object):
   match object
+  | [#'object, meta_data, [#'point, []]]:
+      def name: to_string(lookup(meta_data, #'name))
+      def x: racket.#{string->number}(lookup(meta_data, #'x))
+      def y: racket.#{string->number}(lookup(meta_data, #'y))
+      Point(name, x, y)
+  | [#'object, meta_data, [#'polygon, data]]:
+      def name: to_string(lookup(meta_data, #'name))
+      def x: racket.#{string->number}(lookup(meta_data, #'x))
+      def y: racket.#{string->number}(lookup(meta_data, #'y))
+      def points:
+        def elts: racket.#{string-split}(to_string(lookup(data, #'points)), " ")
+        for List:
+          each elt: elts
+          def [px, py]: racket.#{string-split}(elt, ",")
+          Pair(racket.#{string->number}(px), racket.#{string->number}(py))
+      Polygon(name, x, y, points)
   | [#'object, meta_data]:
       def x: racket.#{string->number}(lookup(meta_data, #'x))
       def y: racket.#{string->number}(lookup(meta_data, #'y))
