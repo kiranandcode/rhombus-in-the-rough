@@ -34,6 +34,9 @@ class WorldScreen(
   ):
  implements game_state.Screen
 
+ // method set_map(map :: game_map.TileMap):
+ //   map.init()
+
  override method draw():
     draw_2d view:
       map.draw(view)

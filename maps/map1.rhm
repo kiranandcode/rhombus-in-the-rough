@@ -1,0 +1,22 @@
+#lang rhombus
+
+
+map Map1("./maps/map1.tmx"):
+
+  position "spawn-point":
+    entity p :: Player = Player()
+
+  position "in-front-of-house":
+    entity blacksmith :: Blacksmith = Blacksmith()
+    
+  position "in-front-of-well":
+    entity soldier :: Soldier = Soldier()
+
+  position "off-the-path-point":
+    entity bat :: Bat = Bat()
+
+  path bat_patrol: "bat-patrol"
+
+  init:
+    bat.set_patrol(bat_patrol)
+  

@@ -37,6 +37,7 @@ class TileMap(
     collision_boxes :: List.of(Rectangle),
     tile_map :: Map.of(Integral, Tile),
     layers :: List.of(TileLayer),
+    points :: Map.of(String, Pair.of(Real,Real))
   ):
 
   // constructor():
@@ -109,7 +110,17 @@ fun load_from_tiled(map :: tiled.Map):
     for List:
       each object: map.objects
       each element: object.elements
-      Rectangle(element.x, element.y, element.width, element.height)
+      keep_when element is_a tiled.CollisionBox
+      def elt :~ tiled.CollisionBox = element
+      Rectangle(elt.x, elt.y, elt.width, elt.height)
+  def points:
+    for Map:
+      each object: map.objects
+      each element: object.elements
+      keep_when element is_a tiled.Point
+      def elt :~ tiled.Point = element
+      values(elt.name, Pair(elt.x, elt.y))
+
   def tile_list:
     for Set:
       each layer : map.layers
@@ -152,5 +163,6 @@ fun load_from_tiled(map :: tiled.Map):
     tile_rect, dest_rect,
     collision_boxes,
     tile_map,
-    layers
+    layers,
+    points
   )

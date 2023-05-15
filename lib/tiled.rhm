@@ -1,12 +1,17 @@
 #lang rhombus
 
 import:
+  rhombus/meta open
   lib("xml/main.rkt") as xml
   lib("racket/main.rkt") as racket
 
 export:
+  only_space annot: Object 
+  CollisionBox Point Polygon
+
   Tileset
-  CollisionBox
+
+
   ObjectGroup
   Layer
   rename: TiledMap as Map

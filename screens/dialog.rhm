@@ -48,7 +48,7 @@ class DialogScreen(
     dialog_box.character_opacity := 100. * render_ratio
 
   override method draw():
-    adt.ematch state
+    adt.match state
     | Init(): #void
     | FadeIn(_, render_ratio):
        configure_dialog_box(render_ratio)
@@ -65,7 +65,7 @@ class DialogScreen(
     | Completed(): #void
 
   override method update():
-    adt.ematch state
+    adt.match state
     | Init(): state := FadeIn(raylib.GetTime(), 0.)
     | FadeIn(start_time, _):
         def current_time: raylib.GetTime()
@@ -83,7 +83,7 @@ class DialogScreen(
 
     handle_inputs (raylib.IsKeyReleased)
     | raylib.KEY_Q
-      adt.ematch state
+      adt.match state
       | Init(): state := FadeIn(raylib.GetTime(), 0.)
       | FadeIn(_,_): state := RenderingCompleted()
       | RenderingText(_, _): state := RenderingCompleted()
@@ -91,6 +91,6 @@ class DialogScreen(
       | Completed(): #void
 
   override method should_pop():
-    adt.ematch state
+    adt.match state
     | Completed(): #true
     | ~else: #false
