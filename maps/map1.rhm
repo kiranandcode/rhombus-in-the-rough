@@ -1,10 +1,13 @@
 #lang rhombus
 
+import:
+  "../game/game_map_dsl.rhm" open
 
-map Map1("./maps/map1.tmx"):
+map Map1("pcfmap1.tmx"):
 
   position "spawn-point":
-    entity p :: Player = Player()
+    entity p :: Player:
+      ~position "spawn-point"
 
   position "in-front-of-house":
     entity blacksmith :: Blacksmith = Blacksmith()

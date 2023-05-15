@@ -244,7 +244,7 @@ def tmap: tiled.load_map("./maps/map1.tmx")
 game_state.init(
   world.WorldScreen(
     View(),
-    game_map.load_from_tiled(tmap)
+    game_map.TileMap(tmap)
   )
 )
 

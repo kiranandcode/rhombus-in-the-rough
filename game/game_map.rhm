@@ -12,10 +12,11 @@ import:
    "terrain.rhm"
    lib("racket/main.rkt") as racket
    lib("raylib/2d/unsafe.rkt") as raylib
+   lib("racket/syntax.rkt") as syntax
 
 export:
   TileMap
-  load_from_tiled
+  GameMap
 
 def tile_size: Vector2(32.,32.)
 def draw_sprite_pos : Vector2(0.,0.)
@@ -39,9 +40,6 @@ class TileMap(
     layers :: List.of(TileLayer),
     points :: Map.of(String, Pair.of(Real,Real))
   ):
-
-  // constructor():
-  //   super(30, 20, Rectangle(0.,0.,32.,32.), Rectangle(0.,0.,32.,32.), [], Map{}, [])
 
   method update_dest_rect(x :: Real, y :: Real):
     def rect_x :~ Real = x * tile_rect.width
@@ -100,69 +98,137 @@ class TileMap(
          each y : start_y .. stop_y
          draw_layer(layer, x, y, layer.base_y)
 
+  constructor
+  | (width :: Integral, height :: Integral,
+     tile_rect :: Rectangle, dest_rect :: Rectangle,
+     collision_boxes :: List.of(Rectangle),
+     tile_map :: Map.of(Integral, Tile),
+     layers :: List.of(TileLayer),
+     points :: Map.of(String, Pair.of(Real,Real))):
+       super(width, height, tile_rect, dest_rect, collision_boxes, layers, points)
+  | (map :: tiled.Map):
+      def width: map.width
+      def height: map.height
+      def tile_rect: Rectangle(0.,0., map.tile_width, map.tile_height)
+      def dest_rect: Rectangle(0.,0., map.tile_width, map.tile_height)
+      def collision_boxes:
+        for List:
+          each object: map.objects
+          each element: object.elements
+          keep_when element is_a tiled.CollisionBox
+          def elt :~ tiled.CollisionBox = element
+          Rectangle(elt.x, elt.y, elt.width, elt.height)
+      def points:
+        for Map:
+          each object: map.objects
+          each element: object.elements
+          keep_when element is_a tiled.Point
+          def elt :~ tiled.Point = element
+          values(elt.name, Pair(elt.x, elt.y))
 
-fun load_from_tiled(map :: tiled.Map):
-  def width: map.width
-  def height: map.height
-  def tile_rect: Rectangle(0.,0., map.tile_width, map.tile_height)
-  def dest_rect: Rectangle(0.,0., map.tile_width, map.tile_height)
-  def collision_boxes:
-    for List:
-      each object: map.objects
-      each element: object.elements
-      keep_when element is_a tiled.CollisionBox
-      def elt :~ tiled.CollisionBox = element
-      Rectangle(elt.x, elt.y, elt.width, elt.height)
-  def points:
-    for Map:
-      each object: map.objects
-      each element: object.elements
-      keep_when element is_a tiled.Point
-      def elt :~ tiled.Point = element
-      values(elt.name, Pair(elt.x, elt.y))
-
-  def tile_list:
-    for Set:
-      each layer : map.layers
-      each row: layer.data
-      each id: row
-      id
-  fun resolve_id(id) :: Pair.of(tiled.Tileset, Integral):
-    for values(result=#false):
-      each Pair(first_gid, tset :~ tiled.Tileset): map.tilesets
-      skip_when (!(first_gid <= id && id <= first_gid + tset.tile_count))
-      Pair(tset, id - first_gid)
-
-  def tile_map:
-    def texture_map: MutableMap{}
-    for Map:
-      each tile: tile_list
-      skip_when (tile <= 0)
-      def Pair((tileset :~ tiled.Tileset), id): resolve_id(tile)
-      def x : id mod tileset.columns
-      def y : math.floor((id - x) / tileset.columns)
-      def texture:
-        if texture_map.has_key(tileset.image)
-        | texture_map[tileset.image]
-        | def texture: resources.load_texture(tileset.image)
-          texture_map[tileset.image] := texture
-          texture
-      values(tile, Tile(texture, x * tileset.tile_width, y * tileset.tile_height))
-  def layers:
-    for List:
-      each layer: map.layers
-      def elements:
-        for Array:
+      def tile_list:
+        for Set:
+          each layer : map.layers
           each row: layer.data
-          each ind: row
-          ind
-      def base_y: Map.ref(layer.properties, "base-y", #false)
-      TileLayer(width, height, elements, base_y)
-  TileMap(
-    width, height,
-    tile_rect, dest_rect,
-    collision_boxes,
-    tile_map,
-    layers,
-    points
-  )
+          each id: row
+          id
+      fun resolve_id(id) :: Pair.of(tiled.Tileset, Integral):
+        for values(result=#false):
+          each Pair(first_gid, tset :~ tiled.Tileset): map.tilesets
+          skip_when (!(first_gid <= id && id <= first_gid + tset.tile_count))
+          Pair(tset, id - first_gid)
+
+      def tile_map:
+        def texture_map: MutableMap{}
+        for Map:
+          each tile: tile_list
+          skip_when (tile <= 0)
+          def Pair((tileset :~ tiled.Tileset), id): resolve_id(tile)
+          def x : id mod tileset.columns
+          def y : math.floor((id - x) / tileset.columns)
+          def texture:
+            if texture_map.has_key(tileset.image)
+            | texture_map[tileset.image]
+            | def texture: resources.load_texture(tileset.image)
+              texture_map[tileset.image] := texture
+              texture
+          values(tile, Tile(texture, x * tileset.tile_width, y * tileset.tile_height))
+      def layers:
+        for List:
+          each layer: map.layers
+          def elements:
+            for Array:
+              each row: layer.data
+              each ind: row
+              ind
+          def base_y: Map.ref(layer.properties, "base-y", #false)
+          TileLayer(width, height, elements, base_y)
+      super(
+        width, height,
+        tile_rect, dest_rect,
+        collision_boxes,
+        tile_map,
+        layers,
+        points
+      )
+
+  method to_syntax():
+    def [collision_box, ...]:
+      for List:
+         each rect : collision_boxes
+         'Rectangle($(rect.x), $(rect.y), $(rect.width), $(rect.height))'
+    def mutable texture_defs: []
+    def texture_map: MutableMap{}
+    def [[tmap_key,tmap_vl], ...]: 
+      for List:
+        each values(tmap_key, tmap_vl): tile_map
+        def texture_name:
+          if texture_map.has_key(tmap_vl.texture.resource)
+          | texture_map[tmap_vl.texture.resource]
+          | def next_id: texture_map.length()
+            def texture_name: Syntax.make(syntax.#{format-id}('this', "tile_~a_texture", next_id))
+            def texture_def: 'def_texture $texture_name: $(tmap_vl.texture.resource)'
+            texture_defs := List.cons(texture_def, texture_defs)
+            texture_map[tmap_vl.texture.resource] := texture_name
+            texture_name
+        [tmap_key, 'Tile($texture_name, $(tmap_vl.offset_x), $(tmap_vl.offset_y))']
+    def [layer, ...]:
+      for List:
+        each layer: layers
+        def [elt, ...]:
+          for List:
+            each elt : layer.elements
+            elt
+        // 'TileLayer(width :: Integral, height :: Integral, elements :: Array.of(Integral), base_y)
+        'TileLayer($(layer.width), $(layer.height), Array($elt, ...), $(layer.base_y))'
+    def [[point_key, point_vl], ...]:
+      for List:
+        each values(pname, Pair(pl,pr)): points
+        [pname, 'Pair($pl, $pr)']
+    values(
+      'TileMap(
+         $width, $height,
+         Rectangle($(tile_rect.x),$(tile_rect.y), $(tile_rect.width),$(tile_rect.height)),
+         Rectangle($(dest_rect.x),$(dest_rect.y), $(dest_rect.width),$(dest_rect.height)),
+         [$collision_box, ...],
+         Map { $tmap_key: $tmap_vl, ...},
+         [$layer, ...],
+         Map {$point_key: $point_vl, ...}
+       )',
+      texture_defs
+    )
+
+
+class GameMap(map :: TileMap):
+  nonfinal
+
+  method draw(view :: View):
+    map.draw(view)
+
+  abstract method init()
+  abstract method update()
+  abstract method destroy()
+
+// def map: tiled.load_map("../maps/map1.tmx")
+// def values(tmap, tdefs): TileMap(map).to_syntax()
+// println(tmap)

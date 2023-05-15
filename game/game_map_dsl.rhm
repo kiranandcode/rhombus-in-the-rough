@@ -1,0 +1,21 @@
+#lang rhombus
+
+import:
+  rhombus/meta open
+  meta:
+    "game_map.rhm"
+    "../lib/tiled.rhm"
+
+export:
+  map
+
+defn.macro
+| 'map $(id :: Identifier)($(path :: String)):
+     $body
+     ...':
+    def map_data: tiled.load_map(path.unwrap())
+    def map: game_map.TileMap(map_data)
+    '
+     class $id():
+      extends game_map.GameMap
+      '
