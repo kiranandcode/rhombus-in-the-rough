@@ -3,11 +3,10 @@
 import:
   "../game/game_map_dsl.rhm" open
 
-map Map1("pcfmap1.tmx"):
 
-  position "spawn-point":
-    entity p :: Player:
-      ~position "spawn-point"
+map Map1("./map1.tmx"):
+
+  entity p :: Player
 
   position "in-front-of-house":
     entity blacksmith :: Blacksmith = Blacksmith()
@@ -16,9 +15,8 @@ map Map1("pcfmap1.tmx"):
     entity soldier :: Soldier = Soldier()
 
   position "off-the-path-point":
-    entity bat :: Bat = Bat()
-
-  path bat_patrol: "bat-patrol"
+    entity bat :: Bat:
+      ~with_path "bat-patrol" in patrol
 
   init:
     bat.set_patrol(bat_patrol)

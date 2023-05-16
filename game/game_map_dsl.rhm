@@ -2,12 +2,168 @@
 
 import:
   rhombus/meta open
+  "../lib/datatypes.rhm" open
+  "game_map.rhm"
+  "../lib/resources.rhm" expose: Texture def_texture
+  "../lib/ecs.rhm" open
+  "../components/movement.rhm" open
   meta:
     "game_map.rhm"
     "../lib/tiled.rhm"
+    "../lib/utils.rhm" open
+    lib("racket/syntax.rkt") as syntax
 
 export:
   map
+
+use_static
+
+meta:
+
+  fun tiled_map_to_syntax(map :: game_map.TileMap):
+    def [collision_box, ...]:
+      for List:
+         each rect : map.collision_boxes
+         'Rectangle($(rect.x), $(rect.y), $(rect.width), $(rect.height))'
+    def mutable texture_defs: []
+    def texture_map: MutableMap{}
+    def [[tmap_key,tmap_vl], ...]: 
+      for List:
+        each values(tmap_key, (tmap_vl :: game_map.Tile)): map.tile_map
+        def texture_name:
+          if texture_map.has_key(tmap_vl.texture.resource)
+          | texture_map[tmap_vl.texture.resource]
+          | def next_id: texture_map.length()
+            def texture_name: Syntax.make(syntax.#{format-id}('this', "tile_~a_texture", next_id))
+            def texture_def: 'def_texture $texture_name: $(tmap_vl.texture.resource)'
+            texture_defs := List.cons(texture_def, texture_defs)
+            texture_map[tmap_vl.texture.resource] := texture_name
+            texture_name
+        def tmap_offset_x: tmap_vl.offset_x
+        def tmap_offset_y: tmap_vl.offset_y
+        [tmap_key, 'game_map.Tile(($texture_name :~ Texture), ($tmap_offset_x :~ Integral), ($tmap_offset_y :~ Integral))']
+    def [layer, ...]:
+      for List:
+        each layer: map.layers
+        def [elt, ...]:
+          for List:
+            each elt : layer.elements
+            elt
+        'game_map.TileLayer($(layer.width), $(layer.height), Array($elt, ...), $(layer.base_y))'
+    def [[point_key, point_vl], ...]:
+      for List:
+        each values(pname, Pair(pl,pr)): map.points
+        [pname, 'Pair($pl, $pr)']
+    def [[path_key, path_vl], ...]:
+      for List:
+        each values(pname, paths): map.paths
+        def [Pair(px,py), ...]: paths
+        [pname, '[Pair($px, $py), ...]']
+    values(
+      'game_map.TileMap(
+         $(map.width), $(map.height),
+         Rectangle($(map.tile_rect.x),$(map.tile_rect.y), $(map.tile_rect.width),$(map.tile_rect.height)),
+         Rectangle($(map.dest_rect.x),$(map.dest_rect.y), $(map.dest_rect.width),$(map.dest_rect.height)),
+         [$collision_box, ...],
+         Map { $tmap_key: $tmap_vl, ...},
+         [$layer, ...],
+         Map {$point_key: $point_vl, ...},
+         Map {$path_key: $path_vl, ...}
+       )',
+      texture_defs
+    )
+
+
+  foldfun extract_fields(args)
+  | 'position $arg ...:
+        $body
+        ...' ~acc acc:
+      extract_fields(['$body', ...], acc)
+  | 'entity $(name :: Name) $arg ...': name
+  | ~skip 'init:
+             $arg
+             ...'
+  | ~skip 'update:
+             $arg
+             ...'
+  
+  foldfun build_extra_initialisers(args, name, annot, map)
+  | '~with_position $(pos_id :: String) in $fn':
+      def pos_key: pos_id.unwrap()
+      def position: Map.ref(map.points, pos_key, #false)
+      if !position
+      | Syntax.error("position \"" ++ pos_key ++ "\" not found in map", pos_id)
+      | 'block:
+          def ent :: $annot = $name
+          ent . $fn(Vector2($(Pair.first(position)), $(Pair.rest(position))))'       
+  | '~with_position $(pos_id :: String)':
+      def pos_key: pos_id.unwrap()
+      def position: Map.ref(map.points, pos_key, #false)
+      if !position
+      | Syntax.error("position \"" ++ pos_key ++ "\" not found in map", pos_id)
+      | 'block:
+          def ent :: entity.Entity = $name
+          def pos :: Position = ent.get_component(Position)
+          pos.value.x := $(Pair.first(position))
+          pos.value.y := $(Pair.rest(position))'       
+  | '~with_path $(pos_id :: String) in $fn':
+      def pos_key: pos_id.unwrap()
+      def path: Map.ref(map.paths, pos_key, #false)
+      if !path
+      | Syntax.error("path \"" ++ pos_key ++ "\" not found in map", pos_id)
+      | def [Pair(px, py), ...]: path
+        'block:
+          def ent :: $annot = $name
+          ent . $fn([Vector2($px, $py), ...])'       
+
+  fun wrap_init_with_position(position, name, init, [extra_init, ...]):
+    if position
+    | 'block:
+         $init
+         def ent :: entity.Entity = $name
+         def pos :: Position = ent.get_component(Position)
+         pos.value.x := $(Pair.first(position))
+         pos.value.y := $(Pair.rest(position))
+         $extra_init
+         ...'
+    | 'block:
+         $init
+         $extra_init
+         ...'
+
+  foldfun build_initialisers(args, map :: game_map.TileMap, position)
+  | 'position $(pos :: String):
+        $body
+        ...' ~acc acc:
+      def pos_key :: String : pos.unwrap()
+      if !map.points.has_key(pos_key)
+      | Syntax.error("position \"" ++ pos_key ++ "\" not found in map", pos)
+      | build_initialisers(['$body', ...], map, map.points[pos_key], acc)
+  | 'entity $(name :: Name) :: $arg ...:
+        $body
+        ...':
+      def extra_initialisers: build_extra_initialisers(['$body', ...], name, '$arg ...', map)
+      wrap_init_with_position(position, name, '$name := $arg ... . create()', extra_initialisers)
+  | 'entity $(name :: Name) :: $arg ...':
+      wrap_init_with_position(position, name, '$name := $arg ... . create()', [])
+  | 'entity $(name :: Name) :: $arg ... = $init ...':
+      wrap_init_with_position(position, name, '$name := $init ...', [])
+  | 'init:
+      $arg
+      ...':
+      'block:
+        $arg
+        ...'
+  | ~skip 'update:
+             $arg
+             ...'
+
+  fun build_deinitialisers(fields):
+    for List:
+      each field: fields
+      'block:
+        def ent :: entity.Entity = $field
+        ent.destroy_safe()'
 
 defn.macro
 | 'map $(id :: Identifier)($(path :: String)):
@@ -15,7 +171,34 @@ defn.macro
      ...':
     def map_data: tiled.load_map(path.unwrap())
     def map: game_map.TileMap(map_data)
-    '
-     class $id():
-      extends game_map.GameMap
-      '
+
+    def [field, ...]: extract_fields(['$body', ...])
+
+    def [init, ...]:
+      for List:
+        each _ : [field, ...]
+        #false
+    
+    def values(tmap, texture_defs): tiled_map_to_syntax(map)
+    def [texture_def, ...]: texture_defs
+
+    def [initialiser,...]: build_initialisers(['$body', ...], map, #false)
+    def [field_deinit, ...]: build_deinitialisers([field, ...])
+    def result:
+      'class $id(mutable $field, ...):
+         nonfinal
+         extends game_map.GameMap
+         $texture_def
+         ...
+         constructor():
+           def map_data: $tmap
+           super(map_data)($init, ...)
+         override method init():
+           $initialiser
+           ...
+         override method update(): #void
+         override method destroy():
+           $field_deinit
+           ...'
+    println(result)
+    result
