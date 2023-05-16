@@ -1,0 +1,47 @@
+#lang rhombus
+import:
+  rhombus/meta open
+export:
+  foldfun
+
+meta:
+  
+  fun build_cases(name, [ls, arg, ...], cases):
+    for List:
+      each case: cases
+      match case
+      | '~skip $case ...':
+           '$name([$case ..., rest, $('...')], $arg, ..., acc):
+                $name([rest, $('...')], $arg, ..., acc)'
+      | '$case ... ~acc $acc:
+             $body
+             ...':
+          '$name([$case ..., rest, $('...')], $arg, ..., $acc):
+               def acc:
+                   $body
+                   ...
+               $name([rest, $('...')], $arg, ..., acc)'
+      | '$case ...:
+             $body
+             ...':
+          '$name([$case ..., rest, $('...')], $arg, ..., acc):
+               def result:
+                   $body
+                   ...
+               $name([rest, $('...')], $arg, ..., List.cons(result,acc))'
+
+defn.macro
+| 'foldfun $name($ls, $arg, ...)
+   | $case
+     ...
+   | ...':
+
+    def [new_case, ...]: build_cases(name, [ls, arg, ...], ['$case
+                                                                ...', ...])
+    'fun
+     | $name($ls, $arg, ...): $name($ls, $arg, ..., [])
+     | $name([], $arg, ..., acc): List.reverse(acc)
+     | $new_case
+     | ...'
+
+
