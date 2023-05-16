@@ -12,10 +12,11 @@ import:
    "terrain.rhm"
    lib("racket/main.rkt") as racket
    lib("raylib/2d/unsafe.rkt") as raylib
-   lib("racket/syntax.rkt") as syntax
 
 export:
   TileMap
+  Tile
+  TileLayer
   GameMap
 
 def tile_size: Vector2(32.,32.)
@@ -38,7 +39,8 @@ class TileMap(
     collision_boxes :: List.of(Rectangle),
     tile_map :: Map.of(Integral, Tile),
     layers :: List.of(TileLayer),
-    points :: Map.of(String, Pair.of(Real,Real))
+    points :: Map.of(String, Pair.of(Real,Real)),
+    paths :: Map.of(String, List.of(Pair.of(Real, Real)))
   ):
 
   method update_dest_rect(x :: Real, y :: Real):
@@ -104,8 +106,9 @@ class TileMap(
      collision_boxes :: List.of(Rectangle),
      tile_map :: Map.of(Integral, Tile),
      layers :: List.of(TileLayer),
-     points :: Map.of(String, Pair.of(Real,Real))):
-       super(width, height, tile_rect, dest_rect, collision_boxes, layers, points)
+     points :: Map.of(String, Pair.of(Real,Real)),
+     paths :: Map.of(String, List.of(Pair.of(Real,Real)))):
+       super(width, height, tile_rect, dest_rect, collision_boxes, tile_map, layers, points, paths)
   | (map :: tiled.Map):
       def width: map.width
       def height: map.height
@@ -125,6 +128,14 @@ class TileMap(
           keep_when element is_a tiled.Point
           def elt :~ tiled.Point = element
           values(elt.name, Pair(elt.x, elt.y))
+      def paths:
+        for Map:
+          each object: map.objects
+          each element: object.elements
+          keep_when element is_a tiled.Polygon
+          def elt :~ tiled.Polygon = element
+          def [Pair(px, py), ...]: elt.points
+          values(elt.name, [Pair(elt.x + px, elt.y + py), ...])
 
       def tile_list:
         for Set:
@@ -169,54 +180,9 @@ class TileMap(
         collision_boxes,
         tile_map,
         layers,
-        points
+        points,
+        paths
       )
-
-  method to_syntax():
-    def [collision_box, ...]:
-      for List:
-         each rect : collision_boxes
-         'Rectangle($(rect.x), $(rect.y), $(rect.width), $(rect.height))'
-    def mutable texture_defs: []
-    def texture_map: MutableMap{}
-    def [[tmap_key,tmap_vl], ...]: 
-      for List:
-        each values(tmap_key, tmap_vl): tile_map
-        def texture_name:
-          if texture_map.has_key(tmap_vl.texture.resource)
-          | texture_map[tmap_vl.texture.resource]
-          | def next_id: texture_map.length()
-            def texture_name: Syntax.make(syntax.#{format-id}('this', "tile_~a_texture", next_id))
-            def texture_def: 'def_texture $texture_name: $(tmap_vl.texture.resource)'
-            texture_defs := List.cons(texture_def, texture_defs)
-            texture_map[tmap_vl.texture.resource] := texture_name
-            texture_name
-        [tmap_key, 'Tile($texture_name, $(tmap_vl.offset_x), $(tmap_vl.offset_y))']
-    def [layer, ...]:
-      for List:
-        each layer: layers
-        def [elt, ...]:
-          for List:
-            each elt : layer.elements
-            elt
-        // 'TileLayer(width :: Integral, height :: Integral, elements :: Array.of(Integral), base_y)
-        'TileLayer($(layer.width), $(layer.height), Array($elt, ...), $(layer.base_y))'
-    def [[point_key, point_vl], ...]:
-      for List:
-        each values(pname, Pair(pl,pr)): points
-        [pname, 'Pair($pl, $pr)']
-    values(
-      'TileMap(
-         $width, $height,
-         Rectangle($(tile_rect.x),$(tile_rect.y), $(tile_rect.width),$(tile_rect.height)),
-         Rectangle($(dest_rect.x),$(dest_rect.y), $(dest_rect.width),$(dest_rect.height)),
-         [$collision_box, ...],
-         Map { $tmap_key: $tmap_vl, ...},
-         [$layer, ...],
-         Map {$point_key: $point_vl, ...}
-       )',
-      texture_defs
-    )
 
 
 class GameMap(map :: TileMap):
@@ -230,5 +196,6 @@ class GameMap(map :: TileMap):
   abstract method destroy()
 
 // def map: tiled.load_map("../maps/map1.tmx")
-// def values(tmap, tdefs): TileMap(map).to_syntax()
+// TileMap(map)
+// def values(tmap, tdefs): .to_syntax()
 // println(tmap)
