@@ -45,11 +45,11 @@ meta:
     def [layer, ...]:
       for List:
         each layer: map.layers
-        def [elt, ...]:
-          for List:
-            each elt : layer.elements
-            elt
-        'game_map.TileLayer($(layer.width), $(layer.height), Array($elt, ...), $(layer.base_y))'
+        // def [elt, ...]:
+        //   for List:
+        //     each elt : layer.elements
+        //     elt
+        'game_map.TileLayer($(layer.width), $(layer.height), $(layer.elements), $(layer.base_y))'
     def [[point_key, point_vl], ...]:
       for List:
         each values(pname, Pair(pl,pr)): map.points
@@ -87,7 +87,7 @@ meta:
              $arg
              ...'
   
-  foldfun build_extra_initialisers(args, name, annot, map)
+  foldfun build_extra_initialisers(args, name, annot, map :: game_map.TileMap)
   | '~with_position $(pos_id :: String) in $fn':
       def pos_key: pos_id.unwrap()
       def position: Map.ref(map.points, pos_key, #false)
@@ -108,6 +108,7 @@ meta:
           pos.value.y := $(Pair.rest(position))'       
   | '~with_path $(pos_id :: String) in $fn':
       def pos_key: pos_id.unwrap()
+      println("hello")
       def path: Map.ref(map.paths, pos_key, #false)
       if !path
       | Syntax.error("path \"" ++ pos_key ++ "\" not found in map", pos_id)
@@ -184,8 +185,9 @@ defn.macro
 
     def [initialiser,...]: build_initialisers(['$body', ...], map, #false)
     def [field_deinit, ...]: build_deinitialisers([field, ...])
+    def id_class: Syntax.make(syntax.#{format-id}(id, "~a_class", to_string(id.unwrap()))).relocate(id)
     def result:
-      'class $id(mutable $field, ...):
+      'class $id_class(mutable $field, ...):
          nonfinal
          extends game_map.GameMap
          $texture_def
@@ -199,6 +201,7 @@ defn.macro
          override method update(): #void
          override method destroy():
            $field_deinit
-           ...'
+           ...
+       def $id: $id_class()'
     println(result)
     result

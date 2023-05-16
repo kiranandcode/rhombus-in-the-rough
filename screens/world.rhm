@@ -28,16 +28,26 @@ export:
 
 use_static
 
+
 class WorldScreen(
     view :: View,
-    map :: game_map.TileMap
+    mutable omap :: maybe(game_map.GameMap)
   ):
  implements game_state.Screen
 
- // method set_map(map :: game_map.TileMap):
- //   map.init()
+ constructor(view):
+   super(view, #false)
+
+ method set_map(new_map :: game_map.GameMap):
+   when omap:
+     def map :~ game_map.GameMap = omap
+     map.destroy()
+   omap := new_map
+   def map :~ game_map.GameMap = omap
+   map.init()
 
  override method draw():
+    def map :~ game_map.GameMap = omap
     draw_2d view:
       map.draw(view)
       // CollisionSystem.draw()
@@ -47,13 +57,17 @@ class WorldScreen(
       InteractionSystem.draw()
       HUDDrawingSystem.draw()
 
+
  override method update():
+   def map :~ game_map.GameMap = omap
+   map.update()
+ 
    view.update()
    UserControlSystem.update()
    AttackSystem.update()
    AnimationSystem.update()
    MovementSystem.update()
-   CollisionSystem.update(map)
+   CollisionSystem.update(map.get_map())
    InteractionSystem.update()
    DialogSystem.update()
 

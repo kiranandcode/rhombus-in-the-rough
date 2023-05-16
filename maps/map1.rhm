@@ -2,22 +2,64 @@
 
 import:
   "../game/game_map_dsl.rhm" open
+  "../lib/ecs.rhm" open
+  "../lib/datatypes.rhm" open
+  "../lib/resources.rhm" expose: def_texture
+  "../components/movement.rhm" open
+  "../components/graphics.rhm" open
+  "../components/input.rhm" open
+  "../components/interaction.rhm" open
+  "../components/dialog.rhm" open
+  "../components/health.rhm" open
+  "../components/character_state.rhm" open
+  "../components/weapon.rhm" open
+
+export:
+  Map1
+
+def_texture main_character_image : "./resources/images/male_walkcycle.png"
+def_texture main_character_attack : "./resources/images/male_slash.png"
+def_texture dagger_slash : "./resources/images/WEAPON_dagger.png"
+
+instance Player:
+  component player :~ IsPlayer = IsPlayer()
+  component state :~ HasState = State.Idle
+  component weapon_action :~ WeaponActionAnimation = WeaponActionAnimation(
+      #false, 0., main_character_attack,
+      0.075, 6,
+      main_character_attack, 0., 0
+  )
+  component weapon_animation :~ WeaponAnimation = dagger_slash
+  component health :~ Health = Health(100, 100)
+  component position :~ Position = Vector2(320.,320.)
+  component collision_box :~ CollisionBox = CollisionBox(Rectangle(-16.,16., 32., 16.),0)
+  component velocity :~ Velocity = Vector2(0.,0.)
+  component orientation :~ Orientation = Direction.DOWN
+  component sprite :~ AnimatedSprite = AnimatedSprite(
+      main_character_image,
+      #false,
+      0,
+      0.05,
+      0.,
+      9
+    )
+  component control :~ UserController = 100.0
 
 
-map Map1("./map1.tmx"):
+map Map1("./maps/map1.tmx"):
 
-  entity p :: Player
 
   position "in-front-of-house":
-    entity blacksmith :: Blacksmith = Blacksmith()
+    entity p :: Player
+    // entity blacksmith :: Blacksmith = Blacksmith()
     
-  position "in-front-of-well":
-    entity soldier :: Soldier = Soldier()
+  // position "in-front-of-well":
+  //   entity soldier :: Soldier = Soldier()
 
-  position "off-the-path-point":
-    entity bat :: Bat:
-      ~with_path "bat-patrol" in patrol
+  // position "off-the-path-point":
+  //   entity bat :: Bat:
+  //     ~with_path "bat-patrol" in patrol
 
   init:
-    bat.set_patrol(bat_patrol)
+    #void
   

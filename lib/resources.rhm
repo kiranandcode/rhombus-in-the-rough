@@ -12,13 +12,14 @@ export:
   rename: build_texture as load_texture
 
 class Texture(mutable self, resource :: String):
+  prefab
 
   constructor(name): super(#false, name)
 
-  method initialize(value):
+  final method initialize(value):
     self := value
 
-  method inner(): self
+  final method inner(): self
 
 def mutable initialised: #false
 def textures: MutableMap()

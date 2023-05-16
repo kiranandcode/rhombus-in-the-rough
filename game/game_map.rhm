@@ -187,8 +187,10 @@ class TileMap(
 
 class GameMap(map :: TileMap):
   nonfinal
+  method get_map()::TileMap: map
 
   method draw(view :: View):
+    println("hello")
     map.draw(view)
 
   abstract method init()
