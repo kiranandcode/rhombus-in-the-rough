@@ -65,6 +65,12 @@ namespace entity:
         available_entities := List.cons(id, available_entities)
         destroyed := #true
 
+    method destroy_safe():
+      if destroyed
+      | #void
+      | destroy()
+
+
   fun lookup(id::Integral) :: Entity:
     entities[id]
 
