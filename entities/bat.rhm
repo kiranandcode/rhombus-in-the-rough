@@ -1,0 +1,32 @@
+#lang rhombus
+
+import:
+  "../lib/ecs.rhm" open
+  "../lib/datatypes.rhm" open
+  "../lib/resources.rhm" expose: def_texture
+
+  "../components/movement.rhm" open
+  "../components/graphics.rhm" open
+  "../components/damage.rhm" open
+
+export: Bat
+
+
+def_texture bat_image : "./resources/images/enemies/bat.png"
+
+instance Bat:
+  component position :~ Position = Vector2(280.,350.)
+  component orientation :~ Orientation = Direction.DOWN
+  component sprite :~ AnimatedSprite = AnimatedSprite(
+      bat_image,
+      #true,
+      0,
+      0.1,
+      0.,
+      4
+    )
+  component hurt :~ HurtBox = Rectangle(
+    -16., 0.,
+    32., 32.
+  )
+

@@ -1,0 +1,50 @@
+#lang rhombus
+
+import:
+  "../lib/ecs.rhm" open
+  "../lib/resources.rhm" expose: def_texture
+  "../lib/datatypes.rhm" open
+
+  "../components/interaction.rhm" open
+  "../components/character_state.rhm" open
+  "../components/weapon.rhm" open
+  "../components/health.rhm" open
+  "../components/movement.rhm" open
+  "../components/graphics.rhm" open
+  "../components/input.rhm" open
+
+export: Player
+
+def_texture main_character_image : "./resources/images/male_walkcycle.png"
+def_texture main_character_attack : "./resources/images/male_slash.png"
+def_texture dagger_slash : "./resources/images/WEAPON_dagger.png"
+
+instance Player:
+  component player :~ IsPlayer = IsPlayer()
+  component state :~ HasState = State.Idle
+  component weapon_action :~ WeaponActionAnimation = WeaponActionAnimation(
+      #false, 0., main_character_attack,
+      0.075, 6,
+      main_character_attack, 0., 0
+  )
+  component weapon_animation :~ WeaponAnimation = dagger_slash
+  component weapon_info :~ WeaponInfo = WeaponInfo(
+     Rectangle(-16.,0.,32.,32.),
+     Rectangle(-16.,16.,32.,32.),
+     Rectangle(-32.,0.,32.,32.),
+     Rectangle(0.,0.,32.,32.)
+  )
+  component health :~ Health = Health(100, 100)
+  component position :~ Position = Vector2(320.,320.)
+  component collision_box :~ CollisionBox = CollisionBox(Rectangle(-16.,16., 32., 16.),0)
+  component velocity :~ Velocity = Vector2(0.,0.)
+  component orientation :~ Orientation = Direction.DOWN
+  component sprite :~ AnimatedSprite = AnimatedSprite(
+      main_character_image,
+      #false,
+      0,
+      0.05,
+      0.,
+      9
+    )
+  component control :~ UserController = 100.0
