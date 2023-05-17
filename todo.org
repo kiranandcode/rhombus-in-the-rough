@@ -32,6 +32,12 @@ CLOSED: [2023-05-17 Wed 09:40]
 **** If intersects, decrease health
 ** TODO Implement death system for entities -- for entity with health, if health is zero, emit death event, + if has dropitem component, spawn (i.e give position to) entiites + velocity + friction, bounce
 ** TODO Implement item system
+*** Make items interactable --- PickupSystem on Item + IsActiveInteraction, then remove position, add to inventory
+*** Inventory entities have to have Sprite component, render sprite component, ItemName component, and render name
+** TODO Implement Behaviour Tree DSL
+** TODO Make bat perform patrol
+** TODO Implement Aggro system (same as damage system)
+** TODO Implement Dialog DSL
 * TODO Implement camera properly
 * TODO Populate map 
 ** Populate map with buildings etc.
