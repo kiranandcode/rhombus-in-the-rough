@@ -156,7 +156,7 @@ class.together:
 
     method add_component(entity :: entity.Entity, value):
       if entity_to_index_map[entity.id]
-      | error("attempt to add duplicate components to entity")
+      | data[entity_to_index_map[entity.id]] := value // error("attempt to add duplicate components to entity")
       | def index : next_index
 
         entity_to_index_map[entity.id] := index
