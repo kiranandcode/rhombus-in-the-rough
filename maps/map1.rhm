@@ -46,7 +46,7 @@ instance Player:
   component control :~ UserController = 100.0
 
 
-map Map1("./maps/map1.tmx"):
+map Map1("./map1.tmx"):
 
 
   position "in-front-of-house":

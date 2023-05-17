@@ -12,6 +12,13 @@ import:
     "../lib/tiled.rhm"
     "../lib/utils.rhm" open
     lib("racket/syntax.rkt") as syntax
+    lib("racket/syntax-srcloc.rkt") as syntax_srcloc
+    lib("racket/base.rkt"):
+      expose:
+        #{srcloc-source}
+        #{split-path}
+        #{build-path}
+
 
 export:
   map
@@ -45,10 +52,6 @@ meta:
     def [layer, ...]:
       for List:
         each layer: map.layers
-        // def [elt, ...]:
-        //   for List:
-        //     each elt : layer.elements
-        //     elt
         'game_map.TileLayer($(layer.width), $(layer.height), $(layer.elements), $(layer.base_y))'
     def [[point_key, point_vl], ...]:
       for List:
@@ -170,7 +173,15 @@ defn.macro
 | 'map $(id :: Identifier)($(path :: String)):
      $body
      ...':
-    def map_data: tiled.load_map(path.unwrap())
+    
+    def map_path:
+       def source_loc: syntax_srcloc.#{syntax-srcloc}(Syntax.make(path))
+       def source_path: #{srcloc-source}(source_loc)
+       def values(source_base_path, _, _): #{split-path}(source_path)
+       to_string(#{build-path}(source_base_path, path.unwrap()))
+
+    def map_data:
+      tiled.load_map(map_path)
     def map: game_map.TileMap(map_data)
 
     def [field, ...]: extract_fields(['$body', ...])
@@ -203,5 +214,4 @@ defn.macro
            $field_deinit
            ...
        def $id: $id_class()'
-    println(result)
     result
