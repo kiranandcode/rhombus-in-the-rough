@@ -21,6 +21,8 @@ import:
   "../systems/dialog.rhm" open
   "../systems/hud.rhm" open
   "../systems/attack.rhm" open
+  "../systems/damage.rhm" open
+
   "inventory.rhm" open
 
 export:
@@ -51,11 +53,14 @@ class WorldScreen(
     draw_2d view:
       map.draw(view)
       // CollisionSystem.draw()
+      DamageSystem.draw()
+      HurtSystem.draw()
       CharacterDrawingSystem.draw()
       WeaponAnimationSystem.draw()
       ordered_drawing.draw()
       InteractionSystem.draw()
       HUDDrawingSystem.draw()
+
 
 
  override method update():
@@ -64,6 +69,8 @@ class WorldScreen(
  
    view.update()
    UserControlSystem.update()
+   DamageSystem.update()
+   DamageReceivingSystem.update()
    AttackSystem.update()
    AnimationSystem.update()
    MovementSystem.update()
