@@ -53,8 +53,8 @@ class WorldScreen(
     draw_2d view:
       map.draw(view)
       // CollisionSystem.draw()
-      DamageSystem.draw()
-      HurtSystem.draw()
+      // DamageSystem.draw()
+      // HurtSystem.draw()
       CharacterDrawingSystem.draw()
       WeaponAnimationSystem.draw()
       ordered_drawing.draw()
