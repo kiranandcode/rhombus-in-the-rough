@@ -31,7 +31,6 @@ system UserControlSystem(
   ):
 
   method update():
-    println(has_state.state)
     match has_state.state
     | State.Attacking: #void
     | State.Idle:
