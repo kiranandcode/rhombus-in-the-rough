@@ -9,6 +9,7 @@ import:
 export:
   WeaponActionAnimation
   WeaponAnimation
+  WeaponInfo
 
 
 component WeaponActionAnimation(
@@ -23,7 +24,13 @@ component WeaponActionAnimation(
 )
 
 component WeaponAnimation(
-   texture :: resources.Texture
+   texture :: resources.Texture,
+)
+component WeaponInfo(
+  damage_box_up :: Rectangle,
+  damage_box_down :: Rectangle,
+  damage_box_left :: Rectangle,
+  damage_box_right :: Rectangle
 )
 
 // relative to position
