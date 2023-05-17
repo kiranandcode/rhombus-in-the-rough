@@ -1,0 +1,17 @@
+#lang rhombus
+
+import:
+  "../lib/datatypes.rhm" open
+  "../lib/ecs.rhm" open
+  "../lib/resources.rhm"
+  "../game/icons.rhm"
+
+export:
+  HurtBox
+  DamageBox
+  ReceivingDamageFrom
+
+
+component ReceivingDamageFrom(cycle :: Integral, entity :: entity.Entity)
+component DamageBox(area :: Rectangle)
+component HurtBox(area :: Rectangle)

@@ -14,11 +14,14 @@ import:
   "../components/movement.rhm" open
   "../components/graphics.rhm" open
   "../components/character_state.rhm" open
+  "../components/damage.rhm" open
 
 export:
   CharacterDrawingSystem
 
 use_static
+
+def hurt: Color(200,80,80,255)
 
 
 system CharacterDrawingSystem(
@@ -28,6 +31,10 @@ system CharacterDrawingSystem(
   ) with this:
 
     method draw():
+      def color:
+        if this.has_component(ReceivingDamageFrom)
+        | hurt.inner()
+        | raylib.WHITE
       ordered_drawing.queue_draw(
          anim.texture,
          math.inexact(position.value.x - 32.),
@@ -39,5 +46,6 @@ system CharacterDrawingSystem(
          64.,
          64.,
          0.,
-         0.
+         0.,
+         color
        )

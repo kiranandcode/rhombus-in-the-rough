@@ -1,0 +1,89 @@
+#lang rhombus
+
+import:
+  lib("raylib/2d/unsafe.rkt") as raylib
+
+  "../lib/datatypes.rhm" open
+  "../lib/ecs.rhm" open
+  "../lib/lang.rhm" open
+  "../lib/ordered_drawing.rhm"
+
+  "../lib/event.rhm"
+  "../messages.rhm" open
+
+  "../components/movement.rhm" open
+  "../components/damage.rhm" open
+
+
+
+export:
+  DamageSystem
+  DamageReceivingSystem
+  HurtSystem
+
+def damage_area : Rectangle(0.,0.,0.,0.)
+def hurt_area : Rectangle(0.,0.,0.,0.)
+
+def mutable hurt_cycle: 0
+
+system DamageReceivingSystem(recv :: ReceivingDamageFrom) with this:
+
+  method update():
+    cond
+    | recv.cycle != hurt_cycle:
+        event.send(RemoveComponent(this, ReceivingDamageFrom))
+    | ~else:
+       
+
+system HurtSystem(
+    base_position :: Position,
+    hurt_box :: HurtBox
+  ) with this:
+
+  method check_for_damage_from(oentity :: entity.Entity, area :: Rectangle):
+    hurt_area.x := base_position.value.x + hurt_box.area.x
+    hurt_area.y := base_position.value.y + hurt_box.area.y
+    hurt_area.width := hurt_box.area.width
+    hurt_area.height := hurt_box.area.height
+
+    when (oentity != this && hurt_area.intersects(area)):
+      this.add_component(ReceivingDamageFrom(hurt_cycle, oentity))
+
+  method draw():
+    hurt_area.x := base_position.value.x + hurt_box.area.x
+    hurt_area.y := base_position.value.y + hurt_box.area.y
+    hurt_area.width := hurt_box.area.width
+    hurt_area.height := hurt_box.area.height
+    raylib.DrawRectangleRec(
+       hurt_area.inner(),
+       raylib.GREEN
+    )
+
+
+system DamageSystem(
+    base_position :: Position,
+    damage_box :: DamageBox
+  ) with this:
+
+  method update_internal():
+    damage_area.x := base_position.value.x + damage_box.area.x
+    damage_area.y := base_position.value.y + damage_box.area.y
+    damage_area.width := damage_box.area.width
+    damage_area.height := damage_box.area.height
+
+    HurtSystem.check_for_damage_from(this, damage_area)
+
+  fun update():
+    hurt_cycle := match hurt_cycle | 0: 1 | 1: 0
+    update_internal()
+
+  method draw():
+    damage_area.x := base_position.value.x + damage_box.area.x
+    damage_area.y := base_position.value.y + damage_box.area.y
+    damage_area.width := damage_box.area.width
+    damage_area.height := damage_box.area.height
+    raylib.DrawRectangleRec(
+       damage_area.inner(),
+       raylib.RED
+    )
+
