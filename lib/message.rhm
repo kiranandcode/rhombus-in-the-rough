@@ -12,6 +12,7 @@ export:
 
 class Message():
   nonfinal
+  prefab
 
 
 meta:
@@ -38,7 +39,8 @@ decl.macro
     def fields: extract_fields('[$field, ...]', [])
     def tys: extract_tys('[[$ty ...], ...]', [])
     def decl: 'class $('$')$name($field :: $ty ..., ...):
-                 extends Message'
+                 extends Message
+                 prefab'
     match [tys, fields]
     | [[tys_ty, ...], [fields_field, ...]]:
         '«meta.bridge id:
