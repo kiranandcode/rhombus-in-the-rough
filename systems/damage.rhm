@@ -33,7 +33,7 @@ system DamageReceivingSystem(recv :: ReceivingDamageFrom) with this:
     | recv.cycle != hurt_cycle:
         event.send(RemoveComponent(this, ReceivingDamageFrom))
     | ~else:
-       
+       #void
 
 system HurtSystem(
     base_position :: Position,
