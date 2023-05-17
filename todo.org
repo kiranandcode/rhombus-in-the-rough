@@ -31,6 +31,9 @@ CLOSED: [2023-05-17 Wed 14:44]
 *** add DamageSystem iterates through entities with damage boxes + damage quantity
 **** For each entity with a hurtbox + health, check if intersects
 **** If intersects, decrease health
+*** Maybe add an applying damage to as well....
+*** receiving damage system checks if entity has health
+
 ** TODO Implement death system for entities -- for entity with health, if health is zero, emit death event, + if has dropitem component, spawn (i.e give position to) entiites + velocity + friction, bounce
 ** TODO Implement item system
 *** Make items interactable --- PickupSystem on Item + IsActiveInteraction, then remove position, add to inventory
