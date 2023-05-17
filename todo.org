@@ -16,11 +16,22 @@ CLOSED: [2023-05-11 Thu 04:53]
 ** Don't want to implement dialog system till we have an inventory, so we can test conditionals etc.
 ** DONE Draw Inventory
 CLOSED: [2023-05-13 Sat 09:11]
-** TODO Find attack sprite for person
-** TODO Implement system to switch to attack animation
+** DONE Find attack sprite for person
+CLOSED: [2023-05-17 Wed 09:40]
+** DONE Implement system to switch to attack animation
+CLOSED: [2023-05-17 Wed 09:40]
 ** DONE Find more LPC map element sprites  
 CLOSED: [2023-05-13 Sat 10:08]
-** TODO Extend Map with more elements --- add collisions with players 
+** DONE Extend Map with more elements --- add collisions with players 
+CLOSED: [2023-05-17 Wed 09:40]
+** TODO Add bat back to map
+** TODO Implement damage system
+*** Update attack.rhm AttackSystem with damage-box based on orientation
+*** add DamageSystem iterates through entities with damage boxes + damage quantity
+**** For each entity with a hurtbox + health, check if intersects
+**** If intersects, decrease health
+** TODO Implement death system for entities -- for entity with health, if health is zero, emit death event, + if has dropitem component, spawn (i.e give position to) entiites + velocity + friction, bounce
+** TODO Implement item system
 * TODO Implement camera properly
 * TODO Populate map 
 ** Populate map with buildings etc.
