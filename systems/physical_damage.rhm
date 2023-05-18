@@ -1,0 +1,29 @@
+#lang rhombus
+
+import:
+  lib("raylib/2d/unsafe.rkt") as raylib
+
+  "../lib/datatypes.rhm" open
+  "../lib/ecs.rhm" open
+  "../lib/lang.rhm" open
+  "../lib/ordered_drawing.rhm"
+
+  "../lib/event.rhm"
+  "../messages.rhm" open
+
+  "../components/health.rhm" open
+  "../components/damage.rhm" open
+
+export:
+  PhysicalDamageApplicationSystem
+
+system PhysicalDamageApplicationSystem(
+     targets :: ApplyingDamageTo, physical_damage :: ApplyBasicPhysicalDamage
+   ) with this:
+
+  method update():
+    for:
+      each entity :~ entity.Entity : targets.entities
+      when (entity.has_component(Health)):
+        def health :: Health = entity.get_component(Health)
+        health.value := math.max(health.value - physical_damage.amount, 0.)

@@ -1,0 +1,24 @@
+#lang rhombus
+
+import:
+  lib("raylib/2d/unsafe.rkt") as raylib
+
+  "../lib/datatypes.rhm" open
+  "../lib/ecs.rhm" open
+  "../lib/lang.rhm" open
+  "../lib/ordered_drawing.rhm"
+
+  "../lib/event.rhm"
+  "../messages.rhm" open
+
+  "../components/health.rhm" open
+
+export:
+  DeathSystem
+
+system DeathSystem(health :: Health) with this:
+  
+  method update():
+    when (health.value <= 0):
+      event.send(DestroyEntity(this))
+
