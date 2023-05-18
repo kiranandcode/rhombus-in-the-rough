@@ -8,6 +8,7 @@ import:
   "../components/movement.rhm" open
   "../components/graphics.rhm" open
   "../components/damage.rhm" open
+  "../components/health.rhm" open
 
 export: Bat
 
@@ -29,4 +30,4 @@ instance Bat:
     -16., 0.,
     32., 32.
   )
-
+  component health :~ Health = Health(10.,10.)

@@ -10,8 +10,12 @@ export:
   HurtBox
   DamageBox
   ReceivingDamageFrom
-
+  ApplyingDamageTo
+  ApplyBasicPhysicalDamage
 
 component ReceivingDamageFrom(cycle :: Integral, entity :: entity.Entity)
+component ApplyingDamageTo(entities :: MutableSet)
 component DamageBox(area :: Rectangle)
 component HurtBox(area :: Rectangle)
+
+component ApplyBasicPhysicalDamage(amount :: Real)

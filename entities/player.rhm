@@ -9,6 +9,7 @@ import:
   "../components/character_state.rhm" open
   "../components/weapon.rhm" open
   "../components/health.rhm" open
+  "../components/damage.rhm" open
   "../components/movement.rhm" open
   "../components/graphics.rhm" open
   "../components/input.rhm" open
@@ -48,3 +49,4 @@ instance Player:
       9
     )
   component control :~ UserController = 100.0
+  component basic_damage :~ ApplyBasicPhysicalDamage = 5.0
