@@ -57,7 +57,7 @@ namespace entity:
       | error("Attempt to destroy an invalid entity")
       | for:
           each comp :: Component : components
-          comp.remove_component(id)
+          comp.remove_component(this)
         for:
           each sys :: System : systems
           sys.remove_entity(this)
