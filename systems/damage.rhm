@@ -11,14 +11,14 @@ import:
   "../lib/event.rhm"
   "../messages.rhm" open
 
+  "../components/health.rhm" open
   "../components/movement.rhm" open
   "../components/damage.rhm" open
 
-
-
 export:
-  DamageSystem
+  DamageAreaSystem
   DamageReceivingSystem
+  DamageApplicationSystem
   HurtSystem
 
 def damage_area : Rectangle(0.,0.,0.,0.)
@@ -35,6 +35,19 @@ system DamageReceivingSystem(recv :: ReceivingDamageFrom) with this:
     | ~else:
        #void
 
+system DamageApplicationSystem(damage_targets :: ApplyingDamageTo) with this:
+
+  method update():
+    when (damage_targets.entities.length() == 0):
+      event.send(RemoveComponent(this, ApplyingDamageTo))
+
+fun record_damage_between(attack_entity :: entity.Entity, receive_entity :: entity.Entity):
+  receive_entity.add_component(ReceivingDamageFrom(hurt_cycle, attack_entity))
+  if attack_entity.has_component(ApplyingDamageTo)
+  | def damage_targets :: ApplyingDamageTo : attack_entity.get_component(ApplyingDamageTo)
+    damage_targets.entities[receive_entity] := #true
+  | attack_entity.add_component(ApplyingDamageTo(MutableSet{receive_entity}))
+
 system HurtSystem(
     base_position :: Position,
     hurt_box :: HurtBox
@@ -47,7 +60,8 @@ system HurtSystem(
     hurt_area.height := hurt_box.area.height
 
     when (oentity != this && hurt_area.intersects(area)):
-      this.add_component(ReceivingDamageFrom(hurt_cycle, oentity))
+      record_damage_between(oentity, this)
+      // this.add_component(ReceivingDamageFrom(hurt_cycle, oentity))
 
   method draw():
     hurt_area.x := base_position.value.x + hurt_box.area.x
@@ -60,7 +74,7 @@ system HurtSystem(
     )
 
 
-system DamageSystem(
+system DamageAreaSystem(
     base_position :: Position,
     damage_box :: DamageBox
   ) with this:
@@ -70,6 +84,10 @@ system DamageSystem(
     damage_area.y := base_position.value.y + damage_box.area.y
     damage_area.width := damage_box.area.width
     damage_area.height := damage_box.area.height
+
+    when (this.has_component(ApplyingDamageTo)):
+      def damage_targets :: ApplyingDamageTo : this.get_component(ApplyingDamageTo)
+      damage_targets.entities := MutableSet{}
 
     HurtSystem.check_for_damage_from(this, damage_area)
 
