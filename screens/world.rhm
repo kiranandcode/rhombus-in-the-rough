@@ -22,6 +22,8 @@ import:
   "../systems/hud.rhm" open
   "../systems/attack.rhm" open
   "../systems/damage.rhm" open
+  "../systems/physical_damage.rhm" open
+  "../systems/death.rhm" open
 
   "inventory.rhm" open
 
@@ -53,7 +55,7 @@ class WorldScreen(
     draw_2d view:
       map.draw(view)
       // CollisionSystem.draw()
-      // DamageSystem.draw()
+      // DamageAreaSystem.draw()
       // HurtSystem.draw()
       CharacterDrawingSystem.draw()
       WeaponAnimationSystem.draw()
@@ -69,8 +71,11 @@ class WorldScreen(
  
    view.update()
    UserControlSystem.update()
-   DamageSystem.update()
+   DamageAreaSystem.update()
    DamageReceivingSystem.update()
+   DamageApplicationSystem.update()
+   PhysicalDamageApplicationSystem.update()
+   DeathSystem.update()
    AttackSystem.update()
    AnimationSystem.update()
    MovementSystem.update()

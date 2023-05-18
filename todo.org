@@ -26,14 +26,14 @@ CLOSED: [2023-05-13 Sat 10:08]
 CLOSED: [2023-05-17 Wed 09:40]
 ** DONE Add bat back to map
 CLOSED: [2023-05-17 Wed 14:44]
-** TODO Implement damage system
+** DONE Implement damage system
+CLOSED: [2023-05-18 Thu 07:03]
 *** Update attack.rhm AttackSystem with damage-box based on orientation
 *** add DamageSystem iterates through entities with damage boxes + damage quantity
 **** For each entity with a hurtbox + health, check if intersects
 **** If intersects, decrease health
 *** Maybe add an applying damage to as well....
 *** receiving damage system checks if entity has health
-
 ** TODO Implement death system for entities -- for entity with health, if health is zero, emit death event, + if has dropitem component, spawn (i.e give position to) entiites + velocity + friction, bounce
 ** TODO Implement item system
 *** Make items interactable --- PickupSystem on Item + IsActiveInteraction, then remove position, add to inventory
