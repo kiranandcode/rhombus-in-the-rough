@@ -73,7 +73,7 @@ fun draw_texture(s :: spritesheet.Sprite, x :: Real, y :: Real, w :: Real, h :: 
 
 fun draw_bar(offset_x, offset_y, value, max, [S, M, E] :: List.of(spritesheet.Sprite)):
   let scaling: 1.0
-  let width: scaling * max
+  let width: math.exact(math.floor(scaling * max))
   let offset_0: offset_x
   let offset_1: offset_0 + 20.0
   let mid_width: width - 15. - 16.
@@ -84,7 +84,7 @@ fun draw_bar(offset_x, offset_y, value, max, [S, M, E] :: List.of(spritesheet.Sp
   draw_texture(UIBarSprite.Mid,   offset_1, offset_y, mid_width, 20.)
   draw_texture(UIBarSprite.End,   offset_2, offset_y, 25.0, 20.)  
 
-  let width: scaling * value
+  let width: math.exact(math.floor(scaling * value))
   let contents_offset_y: offset_y + 3.0
   let offset_0: offset_0 + 9.0
   let offset_1: offset_0 + 8.0
