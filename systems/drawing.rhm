@@ -6,8 +6,10 @@ import:
   "../lib/datatypes.rhm" open
   "../lib/ecs.rhm" open
   "../lib/lang.rhm" open
+  "../lib/resources.rhm" expose: def_texture
   "../game/raylib_lang.rhm" open
   "../lib/adt.rhm"
+  "../lib/spritesheet.rhm" expose: Sprite
 
   "../lib/ordered_drawing.rhm"
 
@@ -18,10 +20,38 @@ import:
 
 export:
   CharacterDrawingSystem
+  ItemDrawingSystem
 
 use_static
 
 def hurt: Color(200,80,80,255)
+def_texture item_texture: "./resources/images/sprites-out.png"
+
+
+system ItemDrawingSystem(
+    position :: Position,
+    sprite :: ItemSprite
+  ):
+
+    method draw():
+      def item_sprite :: Sprite = sprite.sprite
+      def rect :: Rectangle: item_sprite.sprite_rect
+      ordered_drawing.queue_draw(
+         item_texture,
+         math.inexact(position.value.x - 16.),
+         math.inexact(position.value.y - 16.),
+         32.,
+         32.,
+         rect.x,
+         rect.y,
+         rect.width,
+         rect.height,
+         0.,
+         0.,
+         raylib.WHITE,
+         position.value.y - 32.0
+       )
+
 
 
 system CharacterDrawingSystem(
