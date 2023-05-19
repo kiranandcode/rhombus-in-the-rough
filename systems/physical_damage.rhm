@@ -21,9 +21,14 @@ system PhysicalDamageApplicationSystem(
      targets :: ApplyingDamageTo, physical_damage :: ApplyBasicPhysicalDamage
    ) with this:
 
-  method update():
+  method update_internal(delta):
     for:
       each entity :~ entity.Entity : targets.entities
       when (entity.has_component(Health)):
         def health :: Health = entity.get_component(Health)
-        health.value := math.max(health.value - physical_damage.amount, 0.)
+        health.value := math.max(health.value - physical_damage.amount * delta / 1.0, 0.)
+
+  fun update():
+      def delta : raylib.GetFrameTime()
+      update_internal(delta)
+    
