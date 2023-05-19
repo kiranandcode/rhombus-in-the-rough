@@ -22,6 +22,7 @@ system PhysicalDamageApplicationSystem(
    ) with this:
 
   method update_internal(delta):
+    println(["no of entities", targets.entities.length()])
     for:
       each entity :~ entity.Entity : targets.entities
       when (entity.has_component(Health)):

@@ -32,6 +32,9 @@ system DamageReceivingSystem(recv :: ReceivingDamageFrom) with this:
     cond
     | recv.cycle != hurt_cycle:
         event.send(RemoveComponent(this, ReceivingDamageFrom))
+        when (recv.entity.has_component(ApplyingDamageTo)):
+          def target:~ ApplyingDamageTo : recv.entity.get_component(ApplyingDamageTo)
+          target.entities[this] := #false
     | ~else:
        #void
 
