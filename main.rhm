@@ -270,14 +270,7 @@ while (!raylib.WindowShouldClose()):
     // def msg:
     //   racket.format("Nothing to show....")
     // raylib.DrawText(msg, 10, 10, 20, raylib.DARKGRAY)
-    raylib.DrawTexturePro(
-      sprites.inner(),
-      item_sprites.ItemSprites.SNAIL_SHELL.sprite_rect.inner(),
-      Rectangle(0.,0.,100.,100.).inner(),
-      Vector2(0.,0.).inner(),
-      0.,
-      raylib.WHITE
-    )
+
     raylib.DrawFPS(0,0)
 
 raylib.CloseWindow()
