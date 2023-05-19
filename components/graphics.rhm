@@ -4,9 +4,11 @@ import:
   "../lib/datatypes.rhm" open
   "../lib/ecs.rhm" open
   "../lib/resources.rhm"
+  "../lib/spritesheet.rhm" expose: Sprite
 
 export:
   AnimatedSprite
+  ItemSprite
 
 component AnimatedSprite(
    texture :: resources.Texture,
@@ -15,4 +17,8 @@ component AnimatedSprite(
    frame_update_speed :: Real,
    last_frame_update_time :: Real,
    frames :: Integral
+)
+
+component ItemSprite(
+   sprite :: Sprite
 )
