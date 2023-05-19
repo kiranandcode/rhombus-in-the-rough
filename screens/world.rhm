@@ -59,7 +59,10 @@ class WorldScreen(
       // HurtSystem.draw()
       CharacterDrawingSystem.draw()
       WeaponAnimationSystem.draw()
+      ItemDrawingSystem.draw()
+
       ordered_drawing.draw()
+
       InteractionSystem.draw()
       HUDDrawingSystem.draw()
 
