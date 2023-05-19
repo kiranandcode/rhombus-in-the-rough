@@ -11,6 +11,9 @@ import:
   "../lib/adt.rhm"
   "../lib/spritesheet.rhm" expose: Sprite
 
+  "../lib/event.rhm"
+  "../messages.rhm" open
+
   "../lib/ordered_drawing.rhm"
 
   "../components/movement.rhm" open
@@ -21,12 +24,24 @@ import:
 export:
   CharacterDrawingSystem
   ItemDrawingSystem
+  ItemAnimationSystem
 
 use_static
 
 def hurt: Color(200,80,80,255)
 def_texture item_texture: "./resources/images/sprites-out.png"
 
+system ItemAnimationSystem(
+     sprite :: ItemSprite,
+     animation :: ItemSpriteAnimation
+  ) with this:
+
+    method update():
+      def current_time: raylib.GetTime()
+      def delta: current_time - animation.start_time
+      sprite.offset_y := math.max(100.0 * delta - 120.0 * delta * delta, 0.)
+      when (sprite.offset_y <= 0):
+        event.send(RemoveComponent(this, ItemSpriteAnimation))
 
 system ItemDrawingSystem(
     position :: Position,
@@ -39,7 +54,7 @@ system ItemDrawingSystem(
       ordered_drawing.queue_draw(
          item_texture,
          math.inexact(position.value.x - 16.),
-         math.inexact(position.value.y - 16.),
+         math.inexact(position.value.y - 16. - sprite.offset_y),
          32.,
          32.,
          rect.x,

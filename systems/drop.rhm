@@ -1,0 +1,44 @@
+#lang rhombus
+
+import:
+  lib("raylib/2d/unsafe.rkt") as raylib
+  lib("racket/main.rkt") as racket
+
+  "../lib/datatypes.rhm" open
+  "../lib/ecs.rhm" open
+  "../lib/lang.rhm" open
+
+  "../components/movement.rhm" open
+  "../components/health.rhm" open
+  "../components/graphics.rhm" open
+  "../components/item_drop.rhm" open
+
+export:
+  ItemDropSystem
+
+use_static
+
+system ItemDropSystem(
+    position :: Position,
+    health :: Health,
+    to_drop :: ItemsToDrop
+  ) with this:
+
+  method update():
+    when (health.value <= 0.):
+      def entities_to_drop: to_drop.entities
+      def start_time: raylib.GetTime()
+      to_drop.entities := []
+      for:
+        each item :~ entity.Entity : entities_to_drop
+        def pos_x : position.value.x + racket.random(0,50) / 10.0
+        def pos_y : position.value.y + racket.random(0,50) / 10.0
+        def vel_x : (-5. + racket.random(0,100) / 10.0) * 8.
+        def vel_y : (-5. + racket.random(0,100) / 10.0) * 8.
+
+        item.add_component(Position(Vector2(pos_x, pos_y)))
+        item.add_component(Velocity(Vector2(vel_x, vel_y)))
+        item.add_component(Friction(Vector2(15., 15.)))
+        item.add_component(ItemSpriteAnimation(start_time))
+
+

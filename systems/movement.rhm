@@ -3,14 +3,34 @@
 import:
   lib("raylib/2d/unsafe.rkt") as raylib
 
+  "../lib/lang.rhm" open
   "../lib/datatypes.rhm" open
   "../lib/ecs.rhm" open
   "../components/movement.rhm" open
 
 export:
   MovementSystem
+  FrictionSystem
 
 use_static
+
+system FrictionSystem(
+    velocity :: Velocity,
+    friction :: Friction
+  ):
+
+  method update():
+    when (velocity.value.x != 0. || velocity.value.y != 0.):
+      def delta : raylib.GetFrameTime()
+      block:
+        if velocity.value.x >= 0.
+        | velocity.value.x := math.max(velocity.value.x - friction.value.x * delta, 0.)
+        | velocity.value.x := math.min(velocity.value.x + friction.value.x * delta, 0.)
+
+        if velocity.value.y >= 0.
+        | velocity.value.y := math.max(velocity.value.y - friction.value.y * delta, 0.)
+        | velocity.value.y := math.min(velocity.value.y + friction.value.y * delta, 0.)
+
 
 system MovementSystem(
     position :: Position,

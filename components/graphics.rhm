@@ -9,6 +9,7 @@ import:
 export:
   AnimatedSprite
   ItemSprite
+  ItemSpriteAnimation
 
 component AnimatedSprite(
    texture :: resources.Texture,
@@ -20,5 +21,10 @@ component AnimatedSprite(
 )
 
 component ItemSprite(
-   sprite :: Sprite
+   sprite :: Sprite,
+   offset_y :: Real
+)
+
+component ItemSpriteAnimation(
+  start_time :: Real
 )

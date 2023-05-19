@@ -1,0 +1,12 @@
+#lang rhombus
+
+import:
+  "../lib/datatypes.rhm" open
+  "../lib/ecs.rhm" open
+  "../lib/resources.rhm"
+  "../game/icons.rhm"
+
+export:
+  ItemsToDrop
+
+component ItemsToDrop(entities :: List.of(entity.Entity))

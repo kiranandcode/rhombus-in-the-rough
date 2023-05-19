@@ -148,10 +148,10 @@ meta:
         ...':
       def extra_initialisers: build_extra_initialisers(['$body', ...], name, '$arg ...', map)
       wrap_init_with_position(position, name, '$name := $arg ... . create()', extra_initialisers)
-  | 'entity $(name :: Name) :: $arg ...':
-      wrap_init_with_position(position, name, '$name := $arg ... . create()', [])
   | 'entity $(name :: Name) :: $arg ... = $init ...':
       wrap_init_with_position(position, name, '$name := $init ...', [])
+  | 'entity $(name :: Name) :: $arg ...':
+      wrap_init_with_position(position, name, '$name := $arg ... . create()', [])
   | 'init:
       $arg
       ...':

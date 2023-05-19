@@ -13,13 +13,20 @@ import:
 
   "../components/graphics.rhm" open
   "../components/movement.rhm" open
+  "../components/item_drop.rhm" open
 
 export:
   Map1
 
 instance BatWing:
-  component item :~ ItemSprite = item_sprites.ItemSprites.BAT_WING
-  component position :~ Position = Vector2(0.,0.)
+  component item :~ ItemSprite = ItemSprite(item_sprites.ItemSprites.BAT_WING, 0.)
+  component collision_box :~ CollisionBox = CollisionBox(Rectangle(-16.,16., 32., 16.),0)
+
+
+fun build_bat():
+  def bat: Bat.create()
+  bat.add_component(ItemsToDrop([BatWing.create(),BatWing.create()]))
+  bat
 
 
 map Map1("./map1.tmx"):
@@ -30,8 +37,7 @@ map Map1("./map1.tmx"):
     // entity blacksmith :: Blacksmith = Blacksmith()
     
   position "grassy-plain-area":
-    entity bat :: Bat
-    entity wing :: BatWing
+    entity bat :: Bat = build_bat()
 
   // position "off-the-path-point":
   //   entity bat :: Bat:

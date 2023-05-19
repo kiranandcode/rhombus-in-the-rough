@@ -24,6 +24,7 @@ import:
   "../systems/damage.rhm" open
   "../systems/physical_damage.rhm" open
   "../systems/death.rhm" open
+  "../systems/drop.rhm" open
 
   "inventory.rhm" open
 
@@ -80,8 +81,11 @@ class WorldScreen(
    PhysicalDamageApplicationSystem.update()
    DeathSystem.update()
    AttackSystem.update()
+   ItemAnimationSystem.update()
    AnimationSystem.update()
    MovementSystem.update()
+   FrictionSystem.update()
+   ItemDropSystem.update()
    CollisionSystem.update(map.get_map())
    InteractionSystem.update()
    DialogSystem.update()
