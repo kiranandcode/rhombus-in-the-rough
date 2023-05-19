@@ -1,12 +1,26 @@
 #lang rhombus
 
 import:
+  "../lib/ecs.rhm" open
+  "../lib/datatypes.rhm" open
+
   "../game/game_map_dsl.rhm" open
+
   "../entities/player.rhm" open
   "../entities/bat.rhm" open
 
+  "../game/item_sprites.rhm"
+
+  "../components/graphics.rhm" open
+  "../components/movement.rhm" open
+
 export:
   Map1
+
+instance BatWing:
+  component item :~ ItemSprite = item_sprites.ItemSprites.BAT_WING
+  component position :~ Position = Vector2(0.,0.)
+
 
 map Map1("./map1.tmx"):
 
@@ -17,6 +31,7 @@ map Map1("./map1.tmx"):
     
   position "grassy-plain-area":
     entity bat :: Bat
+    entity wing :: BatWing
 
   // position "off-the-path-point":
   //   entity bat :: Bat:
