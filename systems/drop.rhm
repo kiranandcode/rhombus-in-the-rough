@@ -11,6 +11,7 @@ import:
   "../components/movement.rhm" open
   "../components/health.rhm" open
   "../components/graphics.rhm" open
+  "../components/item.rhm" open
   "../components/item_drop.rhm" open
 
 export:

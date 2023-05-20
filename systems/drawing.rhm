@@ -20,6 +20,7 @@ import:
   "../components/graphics.rhm" open
   "../components/character_state.rhm" open
   "../components/damage.rhm" open
+  "../components/item.rhm" open
 
 export:
   CharacterDrawingSystem
