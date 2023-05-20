@@ -69,7 +69,7 @@ class WorldScreen(
       ordered_drawing.draw()
 
       InteractionSystem.draw()
-      HUDDrawingSystem.draw()
+    HUDDrawingSystem.draw()
 
 
 
