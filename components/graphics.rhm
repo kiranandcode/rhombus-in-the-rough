@@ -8,8 +8,6 @@ import:
 
 export:
   AnimatedSprite
-  ItemSprite
-  ItemSpriteAnimation
 
 component AnimatedSprite(
    texture :: resources.Texture,
@@ -18,13 +16,4 @@ component AnimatedSprite(
    frame_update_speed :: Real,
    last_frame_update_time :: Real,
    frames :: Integral
-)
-
-component ItemSprite(
-   sprite :: Sprite,
-   offset_y :: Real
-)
-
-component ItemSpriteAnimation(
-  start_time :: Real
 )
