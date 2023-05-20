@@ -8,36 +8,114 @@ import:
   "../lib/lang.rhm" open
   "../lib/spritesheet.rhm" expose: spritesheet Sprite
   "../lib/resources.rhm" expose: def_texture
+  "../game/inventory.rhm"
+
+  "inventory_panel_icons.rhm" open
 
 export:
-  InventoryPanels
-  Panel
+  draw
+  select_up select_left select_right select_down
 
-spritesheet InventoryPanels:
-  options:
-    ~spacing_x: 1.0
-    ~spacing_y: 1.0
-    ~offset_x: 190.0
-    ~offset_y: 292.0
-    ~width: 38.0
-    ~height: [38.0, 36.0, 38.0]
-    ~shared
-  BASE_TL BASE_TM(~width:36.0) BASE_TR(~spacing_x: 12.0)  INACTIVE_TL INACTIVE_TM(~width:36.0) INACTIVE_TR(~spacing_x: 12.0)  ACTIVE_TL ACTIVE_TM(~width:36.0) ACTIVE_TR
-  BASE_LM BASE_MM(~width:36.0) BASE_RM(~spacing_x: 12.0)  INACTIVE_LM INACTIVE_MM(~width:36.0) INACTIVE_RM(~spacing_x: 12.0)  ACTIVE_LM ACTIVE_MM(~width:36.0) ACTIVE_RM
-  BASE_BL BASE_BM(~width:36.0) BASE_BR(~spacing_x: 12.0)  INACTIVE_BL INACTIVE_BM(~width:36.0) INACTIVE_BR(~spacing_x: 12.0)  ACTIVE_BL ACTIVE_BM(~width:36.0) ACTIVE_BR
 
-class Panel(
-   TL :: Sprite, TM :: Sprite, TR :: Sprite,
-   LM :: Sprite, MM :: Sprite, RM :: Sprite,             
-   BL :: Sprite, BM :: Sprite, BR :: Sprite
-)
- 
-def Panel.base:
-  import .InventoryPanels open
-  Panel(BASE_TL, BASE_TM, BASE_TR, BASE_LM, BASE_MM, BASE_RM, BASE_BL, BASE_BM, BASE_BR)
-def Panel.inactive:
-  import .InventoryPanels open
-  Panel(INACTIVE_TL, INACTIVE_TM, INACTIVE_TR, INACTIVE_LM, INACTIVE_MM, INACTIVE_RM, INACTIVE_BL, INACTIVE_BM, INACTIVE_BR)
-def Panel.active:
-  import .InventoryPanels open
-  Panel(ACTIVE_TL, ACTIVE_TM, ACTIVE_TR, ACTIVE_LM, ACTIVE_MM, ACTIVE_RM, ACTIVE_BL, ACTIVE_BM, ACTIVE_BR)
+def INVENTORY_ROWS: 5.0
+def INVENTORY_COLS: 8.0
+def SIZE: 80.0
+def PADDING: 8.
+
+def draw_rect: Rectangle(0.,0., 32.0, 32.0)
+def inventory_slot: Rectangle(0.,0.,SIZE,SIZE)
+def item_slot: Rectangle(0.,0.,SIZE - PADDING,SIZE - PADDING)
+def origin: Vector2(0.,0.)
+
+def_texture ui_texture: "./resources/images/ui_big_pieces.png"
+def_texture item_texture: "./resources/images/sprites-out.png"
+
+def mutable currently_selected_row: 0.
+def mutable currently_selected_column: 0.
+
+fun select_right():
+  currently_selected_column := (currently_selected_column + 1) mod INVENTORY_COLS
+  
+fun select_down():
+  currently_selected_row := (currently_selected_row + 1) mod INVENTORY_ROWS
+  
+fun select_left():
+  currently_selected_column := (INVENTORY_COLS + currently_selected_column - 1) mod INVENTORY_COLS
+  
+fun select_up():
+  currently_selected_row := (INVENTORY_ROWS + currently_selected_row - 1) mod INVENTORY_ROWS
+
+
+fun draw(player_inventory :: inventory.Inventory):
+  def offset_x: math.floor((raylib.GetScreenWidth() - (SIZE * INVENTORY_COLS)) / 2.0)
+  def offset_y: math.floor((raylib.GetScreenHeight() - (SIZE * INVENTORY_ROWS)) / 2.0)
+  def mutable items: player_inventory.to_sequence()
+
+  fun next_item() :: False || Pair.of(String || False, inventory.InventorySlot):
+    match items
+    | [hd,tl, ...]: items := [tl,...]; hd
+    | ~else: #false
+
+  for:
+    each j: 0. .. INVENTORY_ROWS
+    each i: 0. .. INVENTORY_COLS
+
+    def x: offset_x + (SIZE * i)
+    def y: offset_y + (SIZE * j)
+
+    def panel:
+      cond
+      | i == currently_selected_column && j == currently_selected_row: Panel.inactive
+      | ~else: Panel.base
+
+    def sprite :: Sprite :
+      cond
+      | i == 0                    && j == 0                   : panel.TL
+      | i == (INVENTORY_COLS - 1) && j == (INVENTORY_ROWS - 1): panel.BR
+      | i == 0                    && j == (INVENTORY_ROWS - 1): panel.BL
+      | i == (INVENTORY_COLS - 1) && j == 0                   : panel.TR
+      | i == 0                                                : panel.LM
+      | j == 0                                                : panel.TM
+      | i == (INVENTORY_COLS - 1)                             : panel.RM
+      | j == (INVENTORY_ROWS - 1)                             : panel.BM
+      | ~else                                                 : panel.MM
+    inventory_slot.x := x
+    inventory_slot.y := y
+
+    item_slot.x := x + PADDING/2.
+    item_slot.y := y + PADDING/2.
+
+    raylib.DrawTexturePro(
+      ui_texture.inner(),
+      sprite.sprite_rect.inner(),
+      inventory_slot.inner(),
+      origin.inner(),
+      0.,
+      raylib.WHITE
+    )
+
+    def maybe_item: next_item()
+
+    when maybe_item:
+      def Pair(name :: (String || False), slot :: inventory.InventorySlot): maybe_item
+      raylib.DrawTexturePro(
+        item_texture.inner(),
+        slot.sprite.sprite_rect.inner(),
+        item_slot.inner(),
+        origin.inner(),
+        0.,
+        raylib.WHITE
+      )
+      def item_name: if name | name | "???"
+      raylib.DrawText(
+        item_name, math.exact(x + 8), math.exact(y + 8), 15, raylib.WHITE
+      )
+      when (slot.entities.length() > 1):
+        raylib.DrawText(
+          to_string(slot.entities.length()),
+          math.exact(x + SIZE - 16),
+          math.exact(y + SIZE - 20), 15, raylib.WHITE
+        )
+      
+
+

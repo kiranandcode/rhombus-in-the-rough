@@ -13,6 +13,7 @@ import:
    "lib/event.rhm"
    "lib/ordered_drawing.rhm"
    "lib/tiled.rhm"
+   "lib/message.rhm" open
 
    "game/raylib_lang.rhm" open
    "game/view.rhm" open
@@ -245,6 +246,11 @@ def world_screen: world.WorldScreen(
     View()// ,
     // game_map.TileMap(tmap)
   )
+
+message PickupItem(ent :: entity.Entity)
+event.handle
+| PickupItem(ent): world_screen.player_inventory.add_item(ent)
+
 
 game_state.init(
   world_screen

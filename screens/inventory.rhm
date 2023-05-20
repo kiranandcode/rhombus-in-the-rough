@@ -11,6 +11,7 @@ import:
   "../game/view.rhm" open
   "../game/game_map.rhm"
   "../game/game_state.rhm"
+  "../game/inventory_panel.rhm"
   "../game/inventory.rhm"
 
   "../lib/spritesheet.rhm" expose: spritesheet Sprite
@@ -29,23 +30,23 @@ def INVENTORY_COLS: 8.0
 def origin: Vector2(0.,0.)
 def SIZE: 80.0
 
-class InventoryScreen(mutable completed :: Boolean):
+class InventoryScreen(player_inventory :: inventory.Inventory, mutable completed :: Boolean):
   implements game_state.Screen
-  constructor (): super(#false)
+  constructor (inventory): super(inventory, #false)
 
   override method draw():
-    inventory.draw()
+    inventory_panel.draw(player_inventory)
 
   override method update():
     handle_inputs (raylib.IsKeyPressed)
     | raylib.KEY_A
-      inventory.select_left()
+      inventory_panel.select_left()
     | raylib.KEY_D
-      inventory.select_right()
+      inventory_panel.select_right()
     | raylib.KEY_W
-      inventory.select_up()
+      inventory_panel.select_up()
     | raylib.KEY_S
-      inventory.select_down()
+      inventory_panel.select_down()
     | raylib.KEY_I
       completed := #true
 

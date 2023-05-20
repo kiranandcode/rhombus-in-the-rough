@@ -1,0 +1,43 @@
+#lang rhombus
+
+import:
+  lib("raylib/2d/unsafe.rkt") as raylib
+
+  "../lib/datatypes.rhm" open
+
+  "../lib/lang.rhm" open
+  "../lib/spritesheet.rhm" expose: spritesheet Sprite
+  "../lib/resources.rhm" expose: def_texture
+
+export:
+  InventoryPanels
+  Panel
+
+spritesheet InventoryPanels:
+  options:
+    ~spacing_x: 1.0
+    ~spacing_y: 1.0
+    ~offset_x: 190.0
+    ~offset_y: 292.0
+    ~width: 38.0
+    ~height: [38.0, 36.0, 38.0]
+    ~shared
+  BASE_TL BASE_TM(~width:36.0) BASE_TR(~spacing_x: 12.0)  INACTIVE_TL INACTIVE_TM(~width:36.0) INACTIVE_TR(~spacing_x: 12.0)  ACTIVE_TL ACTIVE_TM(~width:36.0) ACTIVE_TR
+  BASE_LM BASE_MM(~width:36.0) BASE_RM(~spacing_x: 12.0)  INACTIVE_LM INACTIVE_MM(~width:36.0) INACTIVE_RM(~spacing_x: 12.0)  ACTIVE_LM ACTIVE_MM(~width:36.0) ACTIVE_RM
+  BASE_BL BASE_BM(~width:36.0) BASE_BR(~spacing_x: 12.0)  INACTIVE_BL INACTIVE_BM(~width:36.0) INACTIVE_BR(~spacing_x: 12.0)  ACTIVE_BL ACTIVE_BM(~width:36.0) ACTIVE_BR
+
+class Panel(
+   TL :: Sprite, TM :: Sprite, TR :: Sprite,
+   LM :: Sprite, MM :: Sprite, RM :: Sprite,             
+   BL :: Sprite, BM :: Sprite, BR :: Sprite
+)
+ 
+def Panel.base:
+  import .InventoryPanels open
+  Panel(BASE_TL, BASE_TM, BASE_TR, BASE_LM, BASE_MM, BASE_RM, BASE_BL, BASE_BM, BASE_BR)
+def Panel.inactive:
+  import .InventoryPanels open
+  Panel(INACTIVE_TL, INACTIVE_TM, INACTIVE_TR, INACTIVE_LM, INACTIVE_MM, INACTIVE_RM, INACTIVE_BL, INACTIVE_BM, INACTIVE_BR)
+def Panel.active:
+  import .InventoryPanels open
+  Panel(ACTIVE_TL, ACTIVE_TM, ACTIVE_TR, ACTIVE_LM, ACTIVE_MM, ACTIVE_RM, ACTIVE_BL, ACTIVE_BM, ACTIVE_BR)

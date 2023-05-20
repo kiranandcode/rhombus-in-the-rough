@@ -11,6 +11,7 @@ import:
   "../game/view.rhm" open
   "../game/game_map.rhm"
   "../game/game_state.rhm"
+  "../game/inventory.rhm"
 
   "../systems/movement.rhm" open
   "../systems/user_control.rhm" open
@@ -38,12 +39,13 @@ use_static
 
 class WorldScreen(
     view :: View,
+    player_inventory :: inventory.Inventory,
     mutable omap :: maybe(game_map.GameMap)
   ):
  implements game_state.Screen
 
  constructor(view):
-   super(view, #false)
+   super(view, inventory.Inventory(), #false)
 
  method set_map(new_map :: game_map.GameMap):
    when omap:
@@ -91,10 +93,11 @@ class WorldScreen(
    ItemDropSystem.update()
    PickupItemSystem.update()
    CollisionSystem.update(map.get_map())
+   MapClampSystem.update(map)
    InteractionSystem.update()
    DialogSystem.update()
 
    handle_inputs (raylib.IsKeyPressed)
    | raylib.KEY_I
-     game_state.push(InventoryScreen())
+     game_state.push(InventoryScreen(player_inventory))
 

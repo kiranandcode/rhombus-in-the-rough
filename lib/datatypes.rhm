@@ -39,14 +39,14 @@ meta:
 
   fun handle_update_nested(left, ty, ty_inner, get, set, tail):
     match tail
-     | ':= $vl':
+    | ':= $vl':
         values(
           'block:
             def b :~ $ty = $left
             def vl :~ $ty_inner = $vl
             $set(b.self, vl.inner())',
           '')
-     | ~else:
+    | ~else:
         values('(block:
                   def b :~ $ty = $left
                   ($ty_inner($get(b.self)) :~ $ty_inner) :~ $ty_inner)',

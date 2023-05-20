@@ -49,6 +49,6 @@ instance Player:
       0.,
       9
     )
-  component control :~ UserController = 100.0
+  component control :~ UserController = 150.0
   component basic_damage :~ ApplyBasicPhysicalDamage = 5.0
   component followed_by_camera :~ FollowedByCamera = FollowedByCamera()

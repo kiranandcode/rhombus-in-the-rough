@@ -462,8 +462,8 @@ expr.macro
    'add_component_helper($entity, $component($name))'
 | 'build_entity_create_body_def($entity, [component optional $name :: $component])':
    'if $name
-      | add_component_helper($entity, $component($name))
-      | #void'
+    | add_component_helper($entity, $component($name))
+    | #void'
 | 'build_entity_create_body_def($entity, [component $name :~ $(component :: Identifier) = $(fn :: Identifier)($body, ...)])':
     if to_string(fn.unwrap()) == to_string(component.unwrap())
     | 'add_component_helper($entity, $name)'

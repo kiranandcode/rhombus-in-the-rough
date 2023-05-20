@@ -14,13 +14,30 @@ import:
 
 export:
   CameraSystem
+  MapClampSystem
 
 use_static
 
 
+system MapClampSystem(position  :: Position) with this:
+   method update(map :: game_map.GameMap):
+     def tile_map :~ game_map.TileMap = map.map
+     position.value.x := math.max(position.value.x, 0.)
+     position.value.x := math.min(position.value.x, tile_map.width * tile_map.tile_rect.width)
+     position.value.y := math.max(position.value.y, 0.)
+     position.value.y := math.min(position.value.y, tile_map.height * tile_map.tile_rect.height)
+     
+
 system CameraSystem(position  :: Position, followed_by_camera :: FollowedByCamera) with this:
 
   method update(view :: view.View, map :: game_map.GameMap):
-    #void
+    def cam_target :~ Vector2 = view.camera.target
+    def tile_map :~ game_map.TileMap = map.map
+    cam_target.x := position.value.x - view.view_rect.width / 2.
+    cam_target.y := position.value.y - view.view_rect.height / 2.
 
 
+    cam_target.x := math.max(cam_target.x, 0.)
+    cam_target.x := math.min(cam_target.x, tile_map.width * tile_map.tile_rect.width - view.view_rect.width)
+    cam_target.y := math.max(cam_target.y, 0.)
+    cam_target.y := math.min(cam_target.y, tile_map.height * tile_map.tile_rect.height - view.view_rect.height)

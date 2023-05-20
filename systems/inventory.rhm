@@ -31,5 +31,4 @@ system PickupItemSystem(
   method update():
     event.send(PickupItem(this))
     event.send(RemoveComponent(this, IsActiveInteraction))
-    event.send(RemoveComponent(this, Position))
 

@@ -9,6 +9,7 @@ import:
 export:
   ItemSprite
   ItemSpriteAnimation
+  ItemMetaInformation
 
 component ItemSprite(
    sprite :: Sprite,

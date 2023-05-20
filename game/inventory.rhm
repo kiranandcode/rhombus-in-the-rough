@@ -3,81 +3,62 @@
 import:
   lib("raylib/2d/unsafe.rkt") as raylib
 
-  "../lib/datatypes.rhm" open
-
   "../lib/lang.rhm" open
-  "../lib/spritesheet.rhm" expose: spritesheet Sprite
-  "../lib/resources.rhm" expose: def_texture
+  "../lib/ecs.rhm" open
+  "../lib/spritesheet.rhm" expose: Sprite
 
-  "inventory_panel.rhm" open
+  "../components/movement.rhm" open
+  "../components/item.rhm" open
+
+  "../lib/event.rhm"
+  "../lib/message.rhm" open
+  "../messages.rhm" open
 
 export:
-  draw
-  InventoryItem
-  select_up select_left select_right select_down
+  Inventory
+  InventorySlot
 
-class InventoryItem(
-   sprite :: Sprite
-)
+use_static
 
-def INVENTORY_ROWS: 5.0
-def INVENTORY_COLS: 8.0
-def SIZE: 80.0
+def capacity: 40
 
-def draw_rect: Rectangle(0.,0., 32.0, 32.0)
-def origin: Vector2(0.,0.)
+class InventorySlot(sprite :: Sprite, mutable entities :: List.of(entity.Entity))
 
-def_texture ui_texture: "./resources/images/ui_big_pieces.png"
+class Inventory(items :: MutableMap, mutable unnamed_entities :: List.of(InventorySlot)):
+  implements Sequenceable
 
-def mutable currently_selected_row: 0.
-def mutable currently_selected_column: 0.
+  override method to_sequence():
+    def MapView{k : v, ...}: items
+    def [item, ...]: unnamed_entities
+    [Pair(k,v), ...] ++ [Pair(#false, item), ...]
 
-fun select_right():
-  currently_selected_column := (currently_selected_column + 1) mod INVENTORY_COLS
-  println(["currently selected column", currently_selected_column, "currently selected row", currently_selected_row])
-fun select_down():
-  currently_selected_row := (currently_selected_row + 1) mod INVENTORY_ROWS
-  println(["currently selected column", currently_selected_column, "currently selected row", currently_selected_row])
-fun select_left():
-  currently_selected_column := (INVENTORY_COLS + currently_selected_column - 1) mod INVENTORY_COLS
-  println(["currently selected column", currently_selected_column, "currently selected row", currently_selected_row])
-fun select_up():
-  currently_selected_row := (INVENTORY_ROWS + currently_selected_row - 1) mod INVENTORY_ROWS
-  println(["currently selected column", currently_selected_column, "currently selected row", currently_selected_row])
+  constructor():
+    super(MutableMap{},[])
 
+  method size() :: Int:
+    items.length() + unnamed_entities.length()
 
-fun draw():
-  def offset_x: math.floor((raylib.GetScreenWidth() - (SIZE * INVENTORY_COLS)) / 2.0)
-  def offset_y: math.floor((raylib.GetScreenHeight() - (SIZE * INVENTORY_ROWS)) / 2.0)
-  for:
-    each i: 0. .. INVENTORY_COLS
-    each j: 0. .. INVENTORY_ROWS
+  method try_add_item(item :: entity.Entity):: Boolean:
+    def item_sprite :~ ItemSprite : item.get_component(ItemSprite)
+    cond
+    | item.has_component(ItemMetaInformation):
+        def meta_information :: ItemMetaInformation : item.get_component(ItemMetaInformation)
+        cond
+        | items.has_key(meta_information.name):
+            def slot :: InventorySlot : items[meta_information]
+            slot.entities := List.cons(item, slot.entities)
+            #true
+        | size() < capacity:
+            def slot : InventorySlot(item_sprite.sprite, [item])
+            items[meta_information.name] := slot
+            #true
+        | ~else: #false
+    | size() < capacity:
+        unnamed_entities := List.cons(InventorySlot(item_sprite.sprite,[item]), unnamed_entities)
+        #true
+    | ~else: #false
 
-    def x: offset_x + (SIZE * i)
-    def y: offset_y + (SIZE * j)
+  method add_item(item :: entity.Entity):
+    when (try_add_item(item)):
+      item.remove_component(Position)
 
-    def panel:
-      cond
-      | i == currently_selected_column && j == currently_selected_row: Panel.inactive
-      | ~else: Panel.base
-
-    def sprite :: Sprite :
-      cond
-      | i == 0                    && j == 0                   : panel.TL
-      | i == (INVENTORY_COLS - 1) && j == (INVENTORY_ROWS - 1): panel.BR
-      | i == 0                    && j == (INVENTORY_ROWS - 1): panel.BL
-      | i == (INVENTORY_COLS - 1) && j == 0                   : panel.TR
-      | i == 0                                                : panel.LM
-      | j == 0                                                : panel.TM
-      | i == (INVENTORY_COLS - 1)                             : panel.RM
-      | j == (INVENTORY_ROWS - 1)                             : panel.BM
-      | ~else                                                 : panel.MM
-
-    raylib.DrawTexturePro(
-      ui_texture.inner(),
-      sprite.sprite_rect.inner(),
-      Rectangle(x,y,SIZE,SIZE).inner(),
-      origin.inner(),
-      0.,
-      raylib.WHITE
-    )
