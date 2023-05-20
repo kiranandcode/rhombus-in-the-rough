@@ -69,14 +69,12 @@ system AttackSystem(
         animation.texture := weapon_action.texture
         animation.frame_update_speed := weapon_action.frame_update_speed
         animation.frames := weapon_action.frames
-        println(["orientation is ", orientation.facing_direction])
         def damage_box :: Rectangle : 
           match orientation.facing_direction
           | Direction.UP: weapon.damage_box_up
           | Direction.DOWN: weapon.damage_box_down
           | Direction.LEFT: weapon.damage_box_left
           | Direction.RIGHT: weapon.damage_box_right
-        println(["damage box is ", damage_box.x, damage_box.y, damage_box.width, damage_box.height])
         this.add_component(DamageBox(damage_box))
 
     | entity_state.state == State.Attacking && weapon_action.animation_started && (
