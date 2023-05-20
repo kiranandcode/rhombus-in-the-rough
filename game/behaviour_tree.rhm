@@ -1,0 +1,256 @@
+#lang rhombus
+
+import:
+  rhombus/meta open
+  lib("racket/main.rkt") as racket
+  "../lib/adt.rhm"
+  meta:
+    lib("racket/syntax.rkt") as syntax
+    "../lib/utils.rhm" open
+
+export:
+  behaviour_tree
+  declare_behaviour_state
+  evaluation_result
+  BehaviourTree
+
+annot.macro 'evaluation_result': '(Boolean || Any.of(#'in_progress))'
+
+interface BehaviourTree:
+  method evaluate() :: evaluation_result
+
+class Constant(v):
+  implements BehaviourTree
+  override method evaluate(): v
+
+class AndTree(children::List.of(BehaviourTree)):
+  implements BehaviourTree
+  override method evaluate():
+    for values(completed=#true):
+      each child : children
+      break_when !completed || completed == #'in_progress
+      child.evaluate()
+
+class OrTree(children::List.of(BehaviourTree)):
+  implements BehaviourTree
+  override method evaluate():
+    for values(completed=#false):
+      each child : children
+      break_when completed || completed == #'in_progress
+      child.evaluate()
+
+class Condition(f :: Function):
+  implements BehaviourTree
+  override method evaluate(): f()
+
+class State(mutable value)
+
+module test:
+
+  check:
+   AndTree([Constant(#'in_progress)]).evaluate()
+   ~is #'in_progress
+
+  check:
+   AndTree([Constant(#false)]).evaluate()
+   ~is #false
+
+  check:
+   AndTree([Constant(#true)]).evaluate()
+   ~is #true
+
+  check:
+   AndTree([Constant(#true), Constant(#false)]).evaluate()
+   ~is #false
+
+  check:
+   AndTree([Constant(#false), Constant(#true)]).evaluate()
+   ~is #false
+
+  check:
+   AndTree([Constant(#'in_progress), Constant(#true)]).evaluate()
+   ~is #'in_progress
+
+  check:
+   AndTree([Constant(#'in_progress), Constant(#false)]).evaluate()
+   ~is #'in_progress
+
+  check:
+   AndTree([Constant(#true), Constant(#'in_progress)]).evaluate()
+   ~is #'in_progress
+
+  check:
+   AndTree([Constant(#false), Constant(#'in_progress)]).evaluate()
+   ~is #false
+
+
+  check:
+   OrTree([Constant(#'in_progress)]).evaluate()
+   ~is #'in_progress
+
+  check:
+   OrTree([Constant(#false)]).evaluate()
+   ~is #false
+
+  check:
+   OrTree([Constant(#true)]).evaluate()
+   ~is #true
+
+  check:
+   OrTree([Constant(#true), Constant(#false)]).evaluate()
+   ~is #true
+
+  check:
+   OrTree([Constant(#false), Constant(#true)]).evaluate()
+   ~is #true
+
+  check:
+   OrTree([Constant(#'in_progress), Constant(#true)]).evaluate()
+   ~is #'in_progress
+
+  check:
+   OrTree([Constant(#'in_progress), Constant(#false)]).evaluate()
+   ~is #'in_progress
+
+  check:
+   OrTree([Constant(#true), Constant(#'in_progress)]).evaluate()
+   ~is #true
+
+  check:
+   OrTree([Constant(#false), Constant(#'in_progress)]).evaluate()
+   ~is #'in_progress
+
+
+meta:
+  fun make_state_param('$(name :: Identifier)'):
+    def name_stx: Syntax.make('$name')
+    Syntax.make(syntax.#{format-id}(name_stx, "~a_param", name)).relocate(name)
+
+  fun make_param_helper('$(name :: Identifier)'):
+    def name_stx: Syntax.make('$name')
+    Syntax.make(syntax.#{format-id}(name_stx, "~a_param_helper", name)).relocate(name)
+
+
+defn.macro 'declare_behaviour_state($state, ...)':
+  def [[state_name, state_param], ...]: [[state, make_state_param('$state')], ...]
+  'namespace $state_name:
+     export: $state_param
+     def $state_param: racket.#{make-parameter}(#false)
+   ...'
+
+meta:
+
+  fun
+  | build_opts('with state($arg, ...)'): [arg,...]
+  | build_opts(''): #false
+
+  foldfun build_body(ls, params)
+  | 'all_of:
+       $body
+       ...' ~acc acc:
+      def [case, ...]: build_body(['$body',...], params)
+      def res: 'AndTree([($case), ...])'
+      List.cons(res, acc)
+  | 'first_of:
+       $body
+       ...' ~acc acc:
+      def [case, ...]: build_body(['$body',...], params)
+      List.cons('OrTree([$case, ...])', acc)
+  | 'check $fn($arg ..., ...)':
+      def [[param_state, param_var, param_var_helper], ...]:
+        def [param, ...]: params
+        [[param, make_state_param(param), make_param_helper(param)], ...]
+      'block:
+         def $param_var_helper :: State : $(param_state) . $param_var()
+         ...
+         Condition(
+           fun ():
+             def $param_state: $(param_var_helper) . value
+             ...
+             $fn($arg ..., ...)
+         )'
+  | 'check $fn($arg ..., ...) using state($state, ...)':
+      def [[state,state_var_helper], ...]:
+        [[state, make_param_helper(state)], ...]
+      def [[param_state, param_var, param_var_helper], ...]:
+        def [param, ...]: params
+        [[param, make_state_param(param), make_param_helper(param)], ...]
+      def result:
+        'block:
+           def $param_var_helper :: State : $(param_state) . $param_var()
+           ...
+           Condition(
+            fun ():
+              def values(result, $state, ...):
+                def $param_state : $(param_var_helper) . value
+                ...
+                $fn($arg ..., ...)
+              block:
+                $(state_var_helper) . value := $state
+              ...
+              result
+           )'
+      result
+  | 'perform $fn($arg ..., ...)':
+      def [[param_state, param_var, param_var_helper], ...]:
+        def [param, ...]: params
+        [[param, make_state_param(param), make_param_helper(param)], ...]
+      'block:
+         def $param_var_helper :: State : $(param_state) . $param_var()
+         ...
+         Condition(
+            fun ():
+              def $param_state : $(param_var_helper) . value
+              ...
+              $fn($arg ..., ...)
+              #'in_progress
+         )'
+  | 'perform $fn($arg ..., ...) using state($state, ...)':
+      def [[state,state_var_helper], ...]:
+        [[state, make_param_helper(state)], ...]
+      def [[param_state, param_var, param_var_helper], ...]:
+        def [param, ...]: params
+        [[param, make_state_param(param), make_param_helper(param)], ...]
+      'block:
+         def $param_var_helper :: State : $(param_state) . $param_var()
+         ...
+         Condition(
+          fun ():
+            def values($state, ...):
+              def $param_state : $(param_var_helper) . value
+              ...
+              $fn($arg ..., ...)
+            block:
+              $state_var_helper . value := $state
+              ...
+            #'in_progress
+         )'
+  | '$fn($arg ..., ...)':
+      def [[param_state, param_var, param_helper], ...]:
+        def [param, ...]: params
+        [[param, make_state_param(param), make_param_helper(param)], ...]
+      'block:
+         def $param_helper :: State : $param_state . $param_var()
+         ...
+         def $param_state : $(param_helper) . value
+         ...
+         $(fn) . build_inner($arg ..., ...)'
+
+
+defn.macro 'behaviour_tree $(name :: Identifier)($arg ..., ...) $opt ...:
+               $body
+               ...':
+  def opts: build_opts('$opt ...')
+  def [behaviour_tree_body, ...]: build_body(['$body',...], opts)
+  def result:
+    def [param, ...]: opts
+    'namespace $name:
+      export: build build_inner
+      fun build($arg ..., ...):
+        parameterize {$(param) . $(make_state_param(param)): State(#false), ...}:
+          $behaviour_tree_body
+          ...
+      fun build_inner($arg ..., ...):
+        $behaviour_tree_body
+        ...'
+  result
