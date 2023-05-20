@@ -13,6 +13,7 @@ import:
   "../components/movement.rhm" open
   "../components/graphics.rhm" open
   "../components/input.rhm" open
+  "../components/camera.rhm" open
 
 export: Player
 
@@ -50,3 +51,4 @@ instance Player:
     )
   component control :~ UserController = 100.0
   component basic_damage :~ ApplyBasicPhysicalDamage = 5.0
+  component followed_by_camera :~ FollowedByCamera = FollowedByCamera()
