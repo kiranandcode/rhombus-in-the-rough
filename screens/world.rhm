@@ -24,7 +24,9 @@ import:
   "../systems/damage.rhm" open
   "../systems/physical_damage.rhm" open
   "../systems/death.rhm" open
+  "../systems/inventory.rhm" open
   "../systems/drop.rhm" open
+  "../systems/camera.rhm" open
 
   "inventory.rhm" open
 
@@ -74,6 +76,7 @@ class WorldScreen(
    map.update()
  
    view.update()
+   CameraSystem.update(view,map)
    UserControlSystem.update()
    DamageAreaSystem.update()
    DamageReceivingSystem.update()
@@ -86,6 +89,7 @@ class WorldScreen(
    MovementSystem.update()
    FrictionSystem.update()
    ItemDropSystem.update()
+   PickupItemSystem.update()
    CollisionSystem.update(map.get_map())
    InteractionSystem.update()
    DialogSystem.update()

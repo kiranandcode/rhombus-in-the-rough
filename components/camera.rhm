@@ -1,0 +1,11 @@
+#lang rhombus
+
+import:
+  "../lib/datatypes.rhm" open
+  "../lib/ecs.rhm" open
+  "../lib/adt.rhm"
+
+export:
+  FollowedByCamera
+
+component FollowedByCamera()

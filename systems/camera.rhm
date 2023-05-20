@@ -1,0 +1,26 @@
+#lang rhombus
+
+import:
+  lib("raylib/2d/unsafe.rkt") as raylib
+
+  "../lib/datatypes.rhm" open
+  "../lib/ecs.rhm" open
+  "../lib/lang.rhm" open
+  "../game/view.rhm"
+  "../game/game_map.rhm"
+
+  "../components/movement.rhm" open
+  "../components/camera.rhm" open
+
+export:
+  CameraSystem
+
+use_static
+
+
+system CameraSystem(position  :: Position, followed_by_camera :: FollowedByCamera) with this:
+
+  method update(view :: view.View, map :: game_map.GameMap):
+    #void
+
+
