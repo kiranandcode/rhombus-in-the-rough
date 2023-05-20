@@ -7,7 +7,7 @@ import:
    lib("racket/main.rkt") as racket
    lib("raylib/2d/unsafe.rkt") as raylib
    
-export :
+export:
   View
 
 class View(camera :: Camera2D, view_rect :: Rectangle):
