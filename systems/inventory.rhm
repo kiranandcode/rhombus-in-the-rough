@@ -1,0 +1,35 @@
+#lang rhombus
+
+import:
+  lib("raylib/2d/unsafe.rkt") as raylib
+
+  "../lib/datatypes.rhm" open
+  "../lib/ecs.rhm" open
+  "../lib/lang.rhm" open
+
+  "../lib/event.rhm"
+  "../lib/message.rhm" expose: message
+  "../messages.rhm" open
+
+  "../components/movement.rhm" open
+  "../components/interaction.rhm" open
+  "../components/item.rhm" open
+
+
+export:
+  PickupItemSystem
+
+use_static
+
+message PickupItem(ent :: entity.Entity)
+
+system PickupItemSystem(
+    active_interaction  :: IsActiveInteraction,
+    item_sprite :: ItemSprite,
+  ) with this:
+
+  method update():
+    event.send(PickupItem(this))
+    event.send(RemoveComponent(this, IsActiveInteraction))
+    event.send(RemoveComponent(this, Position))
+
