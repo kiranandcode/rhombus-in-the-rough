@@ -5,14 +5,18 @@ import:
   "../lib/datatypes.rhm" open
 
   "../game/game_map_dsl.rhm" open
+  "../game/icons.rhm"
 
   "../entities/player.rhm" open
   "../entities/bat.rhm" open
+  "../entities/blacksmith.rhm" open
 
   "../game/item_sprites.rhm"
 
+  "../components/interaction.rhm" open
   "../components/graphics.rhm" open
   "../components/movement.rhm" open
+  "../components/item.rhm" open
   "../components/item_drop.rhm" open
 
 export:
@@ -21,6 +25,13 @@ export:
 instance BatWing:
   component item :~ ItemSprite = ItemSprite(item_sprites.ItemSprites.BAT_WING, 0.)
   component collision_box :~ CollisionBox = CollisionBox(Rectangle(-16.,16., 32., 16.),0)
+  component interactable :~ Interactable = Interactable(
+      icons.INSPECT,
+      -16.,
+      -48.,
+      #false
+    )
+
 
 
 fun build_bat():
@@ -32,9 +43,12 @@ fun build_bat():
 map Map1("./map1.tmx"):
 
 
-  position "in-front-of-house":
+  position "start-point":
     entity p :: Player
-    // entity blacksmith :: Blacksmith = Blacksmith()
+
+  position "in-front-of-house":
+    entity blacksmith :: Blacksmith
+
     
   position "grassy-plain-area":
     entity bat :: Bat = build_bat()
