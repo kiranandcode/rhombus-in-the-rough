@@ -58,6 +58,3 @@ instance Player with this:
   component basic_damage :~ ApplyBasicPhysicalDamage = 5.0
   component followed_by_camera :~ FollowedByCamera = FollowedByCamera()
 
-  method show_health():
-    println(this)
-    println(health)

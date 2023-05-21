@@ -51,18 +51,10 @@ map Map1("./map1.tmx"):
   position "in-front-of-house":
     entity blacksmith :: Blacksmith
 
-    
   position "grassy-plain-area":
     entity bat :: Bat = build_bat():
       ~with_path "bat-patrol" in set_patrol
 
-
-  // position "off-the-path-point":
-  //   entity bat :: Bat:
-  //     ~with_path "bat-patrol" in patrol
-
   init:
-    println(p.control)
-    p.show_health()
     #void
   
