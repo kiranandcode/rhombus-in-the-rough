@@ -21,7 +21,7 @@ def_texture main_character_image : "./resources/images/male_walkcycle.png"
 def_texture main_character_attack : "./resources/images/male_slash.png"
 def_texture dagger_slash : "./resources/images/WEAPON_dagger.png"
 
-instance Player:
+instance Player with this:
   component player :~ IsPlayer = IsPlayer()
   component state :~ HasState = State.Idle
   component weapon_action :~ WeaponActionAnimation = WeaponActionAnimation(
@@ -52,3 +52,7 @@ instance Player:
   component control :~ UserController = 150.0
   component basic_damage :~ ApplyBasicPhysicalDamage = 5.0
   component followed_by_camera :~ FollowedByCamera = FollowedByCamera()
+
+  method show_health():
+    println(this)
+    println(health)

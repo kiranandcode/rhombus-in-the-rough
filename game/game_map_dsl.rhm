@@ -82,7 +82,15 @@ meta:
         $body
         ...' ~acc acc:
       extract_fields(['$body', ...], acc)
-  | 'entity $(name :: Name) $arg ...': name
+  | 'entity $(name :: Name) :: $arg ...:
+        $body
+        ...':
+      [name, '$arg ...']
+  | 'entity $(name :: Name) :: $arg ... = $init ...':
+      [name, '$arg ...']
+  | 'entity $(name :: Name) :: $arg ...':
+      [name, '$arg ...']
+  | 'entity $(name :: Name) $arg ...': [name, 'entity.Entity']
   | ~skip 'init:
              $arg
              ...'
@@ -184,7 +192,7 @@ defn.macro
       tiled.load_map(map_path)
     def map: game_map.TileMap(map_data)
 
-    def [field, ...]: extract_fields(['$body', ...])
+    def [[field, annot], ...]: extract_fields(['$body', ...])
 
     def [init, ...]:
       for List:
@@ -198,7 +206,7 @@ defn.macro
     def [field_deinit, ...]: build_deinitialisers([field, ...])
     def id_class: Syntax.make(syntax.#{format-id}(id, "~a_class", to_string(id.unwrap()))).relocate(id)
     def result:
-      'class $id_class(mutable $field, ...):
+      'class $id_class(mutable $field :~ $annot, ...):
          nonfinal
          extends game_map.GameMap
          $texture_def

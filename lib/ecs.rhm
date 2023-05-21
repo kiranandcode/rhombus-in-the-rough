@@ -5,6 +5,7 @@ import:
    lib("racket/main.rkt") as racket
    meta:
      lib("racket/syntax.rkt") as syntax
+     "utils.rhm" open
    lib("ffi/unsafe.rkt") as unsafe
 
 export:
@@ -404,96 +405,156 @@ defn.macro
         fun entities(): _system.entities()
       »'
 
-
-     
 fun add_component_helper(entity :: entity.Entity, comp):
   entity.add_component(comp)
 
 meta:
   fun
-  | extract_entity_arg('[component $name :: $component]'): '$name'
-  | extract_entity_arg('[component optional $name :: $component]'): '$name = #false'
-  | extract_entity_arg('[component $name :~ $component = $body ...]'): '$name = ($body ...)'
+  | and_all([]): '#true'
+  | and_all([hd, & tl]):
+      '$hd && $(and_all(tl))'
+  
+  foldfun instance_entity_args(ls)
+  | 'component $name :: $component': '$name'
+  | 'component optional $(name :: Identifier) :: $component':
+      def kwarg: Keyword.from_symbol(name.unwrap())
+      '$kwarg: $name = #false'
+  | 'component $name :~ $component = $body ...':
+      def kwarg: Keyword.from_symbol(name.unwrap())
+      '$kwarg: $name = ($body ...)'
+  | ~skip 'method $body ...'
 
-  fun
-  | build_entity_args('$fn','[[$comp ...], $rest, ...]', '[$arg, ...]'):
-     def comp_arg: extract_entity_arg('[$comp ...]')
-     build_entity_args('$fn','[$rest, ...]', '[$comp_arg, $arg, ...]')
-  | build_entity_args('$fn','[[$comp ...]]', '[$arg, ...]'):
-     def comp_arg: extract_entity_arg('[$comp ...]')
-     build_entity_args('$fn','[]', '[$comp_arg, $arg, ...]')
+  foldfun instance_component_tests(ls, entity)
+  | 'component $name :: $component': '($(entity) :~ entity.Entity) . has_component ($component)'
+  | 'component $name :~ $component = $body ...': '($(entity) :~ entity.Entity). has_component ($component)'
+  | ~skip 'component optional $name :: $component'
+  | ~skip 'method $body ...'
 
-  | build_entity_args('$fn','[]', '[$arg, ...]'):
-     '$fn($arg, ...)'
+  foldfun instance_entity_exports(ls)
+  | 'component $name :: $component': '$name'
+  | 'component optional $name :: $component': '$name'
+  | 'component $name :~ $component = $body ...': '$name'
+  | 'method $name $body ...': '$name'
 
-  fun
-  | extract_entity_export('[component $name :: $component]'): '$name'
-  | extract_entity_export('[component optional $name :: $component]'): '$name'
-  | extract_entity_export('[component $name :~ $component = $body ...]'): '$name'
+  foldfun instance_entity_fields(ls)
+  | 'component $name :: $component': '$name'
+  | 'component optional $name :: $component': '$name'
+  | 'component $name :~ $component = $body ...': '$name'
+  | ~skip 'method $body ...'
 
-  fun 
-  | build_entity_exports('[[$comp ...], $rest, ...]'):
-     def name: extract_entity_export('[$comp ...]')
-     def exports: build_entity_exports('[$rest, ...]')
-     '$name $exports'
-  | build_entity_exports('[[$comp ...]]'):
-     def name: extract_entity_export('[$comp ...]')
-     '$name'
-  | build_entity_exports('[]'):
-     ''
+
+  foldfun instance_entity_helpers(ls)
+  | 'component $name :: $component':
+     'fun $name(entity :: entity.Entity) :: $component: entity.get_component($component)'
+  | 'component optional $name :: $component':
+     'fun $name(entity :: entity.Entity) :: Maybe($component): entity.get_component_opt($component)'
+  | 'component $name :~ $component = $body ...':
+     'fun $name(entity :: entity.Entity) :: $component: entity.get_component($component)'
+  | ~skip 'method $body ...'
+
+  foldfun instance_entity_methods(ls, instance_name, [field,...], ths)
+  | ~skip 'component $name :: $component'
+  | ~skip 'component optional $name :: $component'
+  | ~skip 'component $name :~ $component = $body ...'
+  | 'method $(fn :: Identifier)($arg,...):
+        $body
+        ...':
+      'fun $(instance_name) . $fn($ths :: $instance_name, $arg,...):
+          def $field : $(ths) . $field
+          ...
+          $body
+          ...'
+
+  foldfun instance_entity_method_args(ls)
+  | ~skip 'component $name :: $component'
+  | ~skip 'component optional $name :: $component'
+  | ~skip 'component $name :~ $component = $body ...'
+  | 'method $(fn :: Identifier)($arg,...):
+        $body
+        ...': [fn, [arg,...]]
+
+  foldfun instance_create_body_def(ls, entity)
+  | 'component $name :: $component': 'add_component_helper($entity, $component($name))'
+  | 'component optional $name :: $component':
+      'if $name
+       | add_component_helper($entity, $component($name))
+       | #void'
+  | 'component $name :~ $(component :: Identifier) = $(fn :: Identifier)($body, ...)':
+      if to_string(fn.unwrap()) == to_string(component.unwrap())
+      | 'add_component_helper($entity, $name)'
+      | 'add_component_helper($entity, $component($name))'
+  | 'component $name :~ $(component :: Identifier) = $body ...':
+      'add_component_helper($entity, $component($name))'
+  | ~skip 'method $body ...'
+
+meta:
+  fun extract_dot_provider(annot):
+     def '$(expansion :: annot_meta.Parsed)': annot
+     def values('$pred', '(($key, $data), ...)'): annot_meta.unpack_predicate(expansion)
+     def values(statinfo :: List, dot_provider):
+       for values(statinfo=[], dot_provider=#false):
+         each [key,data]: [[key,data], ...]
+         cond
+         | to_string(key) == to_string(statinfo_meta.dot_provider_key):
+             values(statinfo,data)
+         | ~else: values(List.cons([key,data], statinfo), dot_provider)
+     values(pred, statinfo.reverse(), dot_provider)
 
 defn.macro
-| 'build_entity_helper([component $name :: $component])':
-   'fun $name(entity :: entity.Entity) :: $component: entity.get_component($component)'
-| 'build_entity_helper([component optional $name :: $component])':
-   'fun $name(entity :: entity.Entity) :: $component: entity.get_component_opt($component)'
-| 'build_entity_helper([component $name :~ $component = $body ...])':
-   'fun $name(entity :: entity.Entity) :: $component: entity.get_component($component)'
-
-defn.macro
-| 'build_entity_helpers([$comp, ...])':
-   'build_entity_helper($comp)
-    ...'
-| 'build_entity_helpers([])': ''
-
-
-expr.macro
-| 'build_entity_create_body_def($entity, [component $name :: $component])':
-   'add_component_helper($entity, $component($name))'
-| 'build_entity_create_body_def($entity, [component optional $name :: $component])':
-   'if $name
-    | add_component_helper($entity, $component($name))
-    | #void'
-| 'build_entity_create_body_def($entity, [component $name :~ $(component :: Identifier) = $(fn :: Identifier)($body, ...)])':
-    if to_string(fn.unwrap()) == to_string(component.unwrap())
-    | 'add_component_helper($entity, $name)'
-    | 'add_component_helper($entity, $component($name))'   
-| 'build_entity_create_body_def($entity, [component $name :~ $(component :: Identifier) = $body ...])':
-    'add_component_helper($entity, $component($name))'   
-
-expr.macro
-| 'build_entity_create_body($entity, [$comp, ...])':
-   'block:
-      build_entity_create_body_def($entity, $comp)
-      ...
-      $entity'
-
-defn.macro
-| 'instance $name:
+| 'instance $name $opt ...:
      $body ...
      ...':
-   def fn: build_entity_args('create','[[$body ...], ...]', '[]')
-   def helpers: 'build_entity_helpers([[$body ...], ...])'
-   def exports: build_entity_exports('[[$body ...], ...]')
+   def ths:
+     match '$opt ...'
+     | 'with $ths': ths
+     | '': Syntax.make('this').relocate(Syntax.make('$name'))
+   def [arg,...]: instance_entity_args(['$body ...',...])
+   def [helper,...]: instance_entity_helpers(['$body ...',...])
+   def [exports,...]: instance_entity_exports(['$body ...',...])
+   def [field,...]: instance_entity_fields(['$body ...',...])
+   def [mthd,...]: instance_entity_methods(['$body ...',...], name, [field,...], ths)
+   def [[mthd_sym, [mthd_arg,...]],...]: instance_entity_method_args(['$body ...',...])
 
-   'namespace $name:
-     export:
-       create
-       $exports
+   def ent: 'ent'
+   def [create_body,...]: instance_create_body_def(['$body ...',...], ent)
+   def tests: and_all(instance_component_tests(['$body ...', ...], ent))
+   '«namespace $name:
+       export:
+         create
+         $exports
+         ...
 
-     $helpers
+       $helper
+       ...
 
-     fun $fn :: entity.Entity:
-       def ent :~ entity.Entity = entity.create()
-       build_entity_create_body(ent, [[$body ...], ...])'
+       fun create($arg,...) :: entity.Entity:
+         def $ent :~ entity.Entity = entity.create()
+         $create_body
+         ...
+         $ent
+
+     dot.macro
+     | 'dot_provider $('$')left $('$')dot $(field)':
+         '$(name) . $(field) ($('$')left)'
+     | ...
+     | 'dot_provider $('$')left $('$')dot $(mthd_sym)':
+         'fun ($mthd_arg, ...): $(name) . $(mthd_sym) ($('$')left, $mthd_arg, ...)'
+     | ...
+
+     | 'dot_provider $('$')left $('$')dot $('$')right':
+         def values(_, _, default_dot_provider):
+            extract_dot_provider('entity.Entity')
+         '$('$')(statinfo_meta.wrap(left,'(($('$')statinfo_meta.dot_provider_key, $('$')default_dot_provider))')) $('$')dot $('$')right'
+
+     annot.macro '$name':
+        def values(pred, [[key,data],$('...')], _):
+             extract_dot_provider('entity.Entity')
+        annot_meta.pack_predicate(
+           'fun ($ent): $('$')pred($ent) && $tests',
+           '(($('$') statinfo_meta.dot_provider_key, dot_provider), ($('$')key, $('$')data), $('...'))'
+        )
+     
+     $mthd
+     ...
+    »'
 

@@ -58,5 +58,7 @@ map Map1("./map1.tmx"):
   //     ~with_path "bat-patrol" in patrol
 
   init:
+    println(p.control)
+    p.show_health()
     #void
   
