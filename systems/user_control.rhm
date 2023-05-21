@@ -24,7 +24,6 @@ use_static
 
 system UserControlSystem(
     anim :: AnimatedSprite,
-    orientation :: Orientation,
     velocity :: Velocity,
     move_speed :: MoveSpeed,
     control :: UserControlled,
@@ -36,7 +35,7 @@ system UserControlSystem(
     | State.Attacking: #void
     | State.Idle:
 
-        def mutable new_direction : orientation.facing_direction
+        // def mutable new_direction : orientation.facing_direction
         def mutable any_input : #false
         def mutable attacking : #false
         velocity.value.x := 0.; velocity.value.y := 0.
@@ -45,16 +44,16 @@ system UserControlSystem(
         | raylib.KEY_SPACE
           attacking := #true
         | raylib.KEY_D
-          new_direction := Direction.RIGHT
+          // new_direction := Direction.RIGHT
           velocity.value.x += 1.
         | raylib.KEY_A
-          new_direction := Direction.LEFT
+          // new_direction := Direction.LEFT
           velocity.value.x -= 1.
         | raylib.KEY_W
-          new_direction := Direction.UP
+          // new_direction := Direction.UP
           velocity.value.y -= 1.
         | raylib.KEY_S
-          new_direction := Direction.DOWN
+          // new_direction := Direction.DOWN
           velocity.value.y += 1.
         | ~any
           any_input := #true
@@ -65,8 +64,8 @@ system UserControlSystem(
         | any_input:
             velocity.value := velocity.value.normalize()
             velocity.value := velocity.value.scale(move_speed.value)
-            when (orientation.facing_direction != new_direction || ! anim.moving):
-              orientation.facing_direction := new_direction
+            when (! anim.moving):
+              // orientation.facing_direction := new_direction
               anim.last_frame_update_time := raylib.GetTime()
               anim.frame_counter := 0
             anim.moving := #true

@@ -29,6 +29,7 @@ import:
   "../systems/drop.rhm" open
   "../systems/camera.rhm" open
   "../systems/behaviour.rhm" open
+  "../systems/direction.rhm" open
 
   "inventory.rhm" open
 
@@ -94,6 +95,7 @@ class WorldScreen(
    FrictionSystem.update()
    ItemDropSystem.update()
    PickupItemSystem.update()
+   DirectionSystem.update()
    CollisionSystem.update(map.get_map())
    MapClampSystem.update(map)
    InteractionSystem.update()
