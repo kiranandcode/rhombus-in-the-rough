@@ -34,30 +34,46 @@ CLOSED: [2023-05-18 Thu 07:03]
 **** If intersects, decrease health
 *** Maybe add an applying damage to as well....
 *** receiving damage system checks if entity has health
-** TODO Implement death system for entities -- for entity with health, if health is zero, emit death event, + if has dropitem component, spawn (i.e give position to) entiites + velocity + friction, bounce
-** TODO Implement item system
+** DONE Implement death system for entities -- for entity with health, if health is zero, emit death event, + if has dropitem component, spawn (i.e give position to) entiites + velocity + friction, bounce
+CLOSED: [2023-05-21 Sun 10:05]
+** DONE Implement item system
+CLOSED: [2023-05-21 Sun 10:05]
 *** Make items interactable --- PickupSystem on Item + IsActiveInteraction, then remove position, add to inventory
 *** Inventory entities have to have Sprite component, render sprite component, ItemName component, and render name
-** TODO Implement Behaviour Tree DSL
-** TODO Make bat perform patrol
-** TODO Implement Aggro system (same as damage system)
-** TODO Implement Dialog DSL
-* TODO Implement camera properly
+** DONE Implement Behaviour Tree DSL
+CLOSED: [2023-05-21 Sun 10:05]
+** DONE Make bat perform patrol
+CLOSED: [2023-05-21 Sun 10:05]
+** DONE Implement Aggro system (same as damage system)
+CLOSED: [2023-05-21 Sun 10:06]
+** DONE Implement Dialog DSL
+CLOSED: [2023-05-21 Sun 10:06]
+* DONE Implement camera properly
+CLOSED: [2023-05-21 Sun 10:06]
 * DONE Populate map 
 CLOSED: [2023-05-17 Wed 14:37]
 ** Populate map with buildings etc.
 ** Populate map with entities
-* TODO Add Inventory
-** TODO Add Item entity? ItemName, ItemSprite, ItemDescription
-** TODO Draw Inventory
-** TODO Draw items in inventory
-** TODO Add Holdable component with Item entity --- InventorySystem will add Item to Inventory when IsActive & Holdable
-* TODO Update user control to add attacks
-* TODO Draw GUI
-* TODO Add Enemy, make it killable
-* TODO Make enemy drop items
-* TODO Add Quest system
-* Refactoring Map Interface
+* DONE Add Inventory
+CLOSED: [2023-05-21 Sun 10:06]
+** DONE Add Item entity? ItemName, ItemSprite, ItemDescription
+CLOSED: [2023-05-21 Sun 10:06]
+** DONE Draw Inventory
+CLOSED: [2023-05-21 Sun 10:06]
+** DONE Draw items in inventory
+CLOSED: [2023-05-21 Sun 10:06]
+** DONE Add Holdable component with Item entity --- InventorySystem will add Item to Inventory when IsActive & Holdable
+CLOSED: [2023-05-21 Sun 10:06]
+* DONE Update user control to add attacks
+CLOSED: [2023-05-21 Sun 10:06]
+* DONE Draw GUI
+CLOSED: [2023-05-21 Sun 10:06]
+* DONE Add Enemy, make it killable
+CLOSED: [2023-05-21 Sun 10:06]
+* DONE Make enemy drop items
+CLOSED: [2023-05-21 Sun 10:06]
+* DONE Refactoring Map Interface
+CLOSED: [2023-05-21 Sun 10:09]
 ** DONE Define fields of new map interface
 CLOSED: [2023-05-14 Sun 10:36]
 ** DONE Update map drawing 
@@ -66,7 +82,11 @@ CLOSED: [2023-05-14 Sun 10:36]
 CLOSED: [2023-05-14 Sun 10:40]
 ** DONE Update collision system to prevent collisions with world
 CLOSED: [2023-05-14 Sun 11:42]
-** TODO Implement attack system
-** TODO Implement damage
-** TODO Drop items on death
+** DONE Implement attack system
+CLOSED: [2023-05-21 Sun 10:09]
+** DONE Implement damage
+CLOSED: [2023-05-21 Sun 10:09]
+** DONE Drop items on death
+CLOSED: [2023-05-21 Sun 10:09]
 
+* TODO Add Quest system
