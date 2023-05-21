@@ -1,0 +1,146 @@
+#lang rhombus
+
+import:
+  rhombus/meta open
+  lib("racket/base.rkt") as racket
+  "../lib/resources.rhm" expose: Texture def_texture
+  meta:
+    lib("racket/syntax.rkt") as syntax
+    "../lib/utils.rhm" open
+
+class DialogCharacter(
+    name :: maybe(String),
+    mutable current_sprite :: maybe(String),
+    default_sprite :: Texture,
+    states :: Map.of(String, Texture)
+ ):
+   method unset_state():
+     current_sprite := #false
+
+   method set_state(state :: String):
+     current_sprite := state
+
+   property sprite :: Texture :
+     if current_sprite
+     | states[current_sprite]
+     | default_sprite
+
+interface DialogItem:
+  property character :: maybe(DialogCharacter)
+  property text :: String
+
+class DialogText(
+   dialog_character :: maybe(DialogCharacter),
+   dialog_text :: String,
+   next :: maybe(DialogText)
+ ):
+   implements DialogItem
+   override property character: dialog_character
+   override property text: dialog_text
+
+class DialogTextVariant(
+   dialog_character :: maybe(DialogCharacter),
+   on_first_text :: maybe(String),
+   text_variants :: List.of(String),
+   next :: maybe(DialogText),
+   mutable rendered_index :: Integral
+ ):
+   implements DialogItem
+
+   constructor(character, on_first, text_variants, next):
+     if on_first
+     | super(character, on_first, text_variants, next, -1)
+     | super(character, on_first, text_variants, next, racket.random(List.length(text_variants)))
+
+   override property character: dialog_character
+   override property text:
+     if on_first_text && (rendered_index < 0)
+     | on_first_text
+     | text_variants[rendered_index]
+
+class DialogChoice(
+   choice_text :: String,
+   guard :: maybe(Function),
+   output_text :: maybe(String),
+   next :: DialogItem
+ )
+
+
+class DialogTextChoice(
+   dialog_character :: maybe(DialogCharacter),
+   dialog_text :: String,
+   choices :: List.of(DialogChoice)
+ ):
+   implements DialogItem
+   override property character: dialog_character
+   override property text: dialog_text
+
+meta:
+  fun texture_name(name):
+    def name_stx: Syntax.make('$name')
+    Syntax.make(syntax.#{format-id}(name_stx, "~a_texture", name)).relocate(name)
+  foldfun dialog_character_def_textures(ls)
+  | '$(id :: Identifier) : $(name :: String)':
+      'def_texture $(texture_name(id)): $name'
+
+  foldfun dialog_character_entries(ls)
+  | '$(id :: Identifier) : $(name :: String)': [id,to_string(id.unwrap())]
+
+
+defn.macro
+| 'dialog_character $name $opt ...:
+    $body
+    ...':
+    def character_name: match '$opt ...' | '($(name :: String))': name.unwrap() | ~else: #false
+    def [def_textures,...]: dialog_character_def_textures(['$body',...])
+    def [[state_id, state_id_string], ...]: dialog_character_entries(['$body',...])
+    'namespace $name:
+      export:
+        $(texture_name(state_id)) $state_id
+        ...
+      def $state_id: $state_id_string
+      ...
+      $def_textures
+      ...
+     def $name: DialogCharacter(
+       $character_name,
+       #false,
+       $(name) . default_texture,
+       Map{$state_id_string: $(name) . $(texture_name(state_id)), ...}
+     )'
+
+
+
+dialog_character guard_a:
+  default: "./resources/images/soldier_2_segmented.png"
+
+dialog GuardDialog:
+  guard_a: !("Hey there!") || "Good day!" || "Allo Allo..."
+
+//   branch
+//   | "Who are you?" ("") ["You ask about the guard himself..."]
+//     guard_a: "I'm a guard!"---
+//   | "What's up?"
+//     guard_a: "Noneya"
+//     "..."
+//     "what-"~~
+//     guard_a: "None-ya business."
+//     "..."
+//     "I'll be on my way then..."
+//     -> END
+//   | "You look a little worried" ("?") ". You ask about the guard's status"
+//     guard_a: "yeah... now that you mention it"
+//     guard_a: "..."
+//     ["The guard hesitates for a moment before turning to you."]
+//     branch guard_a: "Could you help me out with something?"
+//     | "Okay" ("!") ", Sure! I'd love to help"
+//       guard_a: "There's a large bat that's been flying around the yard recently..."
+//       guard_a: "I really" "HATE".{color: red} "bats."
+//       guard_a: "Please, get rid of that pest for me!"
+//       guard_a: "Of course, if you do a good job, then there might be something in it for you..."
+//       ["The guard winks, before returning to his original stature."]
+//     | "No! Suck it." ("") ["You reject the Guard's proposition rudely."]
+//       guard_a: "Fine."
+//       guard_a: "(I knew I shouldn't have brought it up...)"
+//       ["The guard mumbles under his breath before returning to his original stature."]
+//   "Move along now..."
