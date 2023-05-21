@@ -15,7 +15,7 @@ fun player_in_line_of_sight(elt): #void
 fun aggro_towards_player(elt): #void
 fun aggro_still_active(elt): #void
 fun move_towards_player(elt): #void
-fun follow_patrol(elt): #void
+fun do_follow_patrol(elt): #void
 
 declare_behaviour_state(target,patrol)
 
@@ -23,6 +23,7 @@ behaviour_tree attack_player(this) with state(target):
   all_of:
     check near_player(this) using state(target)
     perform do_attack_player(this, target)
+
 
 behaviour_tree aggro_player(this) with state(target):
   all_of:
@@ -39,6 +40,6 @@ behaviour_tree follow_patrol(this) with state(target, patrol):
     attack_player(this)
     follow_player(this)
     aggro_player(this)
-    perform follow_patrol(this,patrol)
+    perform do_follow_patrol(this,patrol)
 
 

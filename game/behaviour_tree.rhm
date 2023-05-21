@@ -5,6 +5,7 @@ import:
   lib("racket/main.rkt") as racket
   "../lib/adt.rhm"
   meta:
+    lib("racket/base.rkt") as rkt
     lib("racket/syntax.rkt") as syntax
     "../lib/utils.rhm" open
 
@@ -130,6 +131,28 @@ meta:
     def name_stx: Syntax.make('$name')
     Syntax.make(syntax.#{format-id}(name_stx, "~a_param_helper", name)).relocate(name)
 
+  fun make_class_param('$(name :: Identifier)'):
+    def name_stx: Syntax.make('$name')
+    Syntax.make(syntax.#{format-id}(name_stx, "~a_class_param", name)).relocate(name)
+
+  fun make_kwarg_param('$(name :: Identifier)'):
+    def name_stx: Syntax.make('$name')
+    Keyword.from_symbol(name.unwrap())
+
+  fun make_default_param('$(name :: Identifier)'):
+    def name_stx: Syntax.make('$name')
+    Syntax.make(syntax.#{format-id}(name_stx, "~a_default_value", name)).relocate(name)
+
+  fun make_param_getter('$(name :: Identifier)'):
+    def name_stx: Syntax.make('$name')
+    Syntax.make(syntax.#{format-id}(name_stx, "get_~a", name)).relocate(name)
+
+  fun make_param_setter('$(name :: Identifier)'):
+    def name_stx: Syntax.make('$name')
+    Syntax.make(syntax.#{format-id}(name_stx, "set_~a", name)).relocate(name)
+
+
+
 
 defn.macro 'declare_behaviour_state($state, ...)':
   def [[state_name, state_param], ...]: [[state, make_state_param('$state')], ...]
@@ -237,20 +260,33 @@ meta:
          $(fn) . build_inner($arg ..., ...)'
 
 
-defn.macro 'behaviour_tree $(name :: Identifier)($arg ..., ...) $opt ...:
+defn.macro 'behaviour_tree $(name :: Identifier)($arg, ...) $opt ...:
                $body
                ...':
   def opts: build_opts('$opt ...')
   def [behaviour_tree_body, ...]: build_body(['$body',...], opts)
   def result:
     def [param, ...]: opts
-    'namespace $name:
-      export: build build_inner
-      fun build($arg ..., ...):
-        parameterize {$(param) . $(make_state_param(param)): State(#false), ...}:
-          $behaviour_tree_body
-          ...
-      fun build_inner($arg ..., ...):
+    'class $name(tree :: BehaviourTree, $(make_class_param(param)) :: State, ...):
+      implements BehaviourTree
+      export: build_inner
+      fun build_inner($arg, ...):
         $behaviour_tree_body
-        ...'
+        ...
+      override method evaluate(): tree.evaluate()
+      method $(make_param_getter(param))():
+        $(make_class_param(param)) . value
+      ...
+      method $(make_param_setter(param))(new_vl):
+        $(make_class_param(param)) . value := new_vl
+      ...
+      constructor($arg,..., $(make_kwarg_param(param)): $(make_default_param(param)) = #false, ...):
+        def $(make_class_param(param)): State($(make_default_param(param)))
+        ...
+        def tree:
+          parameterize {$(param) . $(make_state_param(param)): $(make_class_param(param)), ...}:
+            $behaviour_tree_body
+            ...
+        super(tree, $(make_class_param(param)), ...)
+      '
   result
