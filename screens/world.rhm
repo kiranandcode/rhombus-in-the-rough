@@ -28,6 +28,7 @@ import:
   "../systems/inventory.rhm" open
   "../systems/drop.rhm" open
   "../systems/camera.rhm" open
+  "../systems/behaviour.rhm" open
 
   "inventory.rhm" open
 
@@ -79,6 +80,7 @@ class WorldScreen(
  
    view.update()
    CameraSystem.update(view,map)
+   BehaviourSystem.update()
    UserControlSystem.update()
    DamageAreaSystem.update()
    DamageReceivingSystem.update()

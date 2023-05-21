@@ -39,6 +39,8 @@ fun build_bat():
   bat.add_component(ItemsToDrop([BatWing.create(),BatWing.create()]))
   bat
 
+use_static
+
 
 map Map1("./map1.tmx"):
 
@@ -51,7 +53,9 @@ map Map1("./map1.tmx"):
 
     
   position "grassy-plain-area":
-    entity bat :: Bat = build_bat()
+    entity bat :: Bat = build_bat():
+      ~with_path "bat-patrol" in set_patrol
+
 
   // position "off-the-path-point":
   //   entity bat :: Bat:

@@ -66,15 +66,15 @@ class Vector2(self):
 
   method distance(): raymath.Vector2Length(self)
 
-  method normalize(): Vector2(raymath.Vector2Normalize(self))
+  method normalize() :: Vector2: Vector2(raymath.Vector2Normalize(self))
 
-  method subtract(other :: Vector2):
+  method subtract(other :: Vector2) :: Vector2:
     Vector2(raymath.Vector2Subtract(self, other.self))
 
-  method add(other :: Vector2):
+  method add(other :: Vector2) :: Vector2:
     Vector2(raymath.Vector2Add(self, other.self))
 
-  method scale(by :: Real):
+  method scale(by :: Real) :: Vector2:
     Vector2(raymath.Vector2Scale(self, math.inexact(by)))
 
   method inner(): self

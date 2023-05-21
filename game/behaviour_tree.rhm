@@ -179,20 +179,7 @@ meta:
        ...' ~acc acc:
       def [case, ...]: build_body(['$body',...], params)
       List.cons('OrTree([$case, ...])', acc)
-  | 'check $fn($arg ..., ...)':
-      def [[param_state, param_var, param_var_helper], ...]:
-        def [param, ...]: params
-        [[param, make_state_param(param), make_param_helper(param)], ...]
-      'block:
-         def $param_var_helper :: State : $(param_state) . $param_var()
-         ...
-         Condition(
-           fun ():
-             def $param_state: $(param_var_helper) . value
-             ...
-             $fn($arg ..., ...)
-         )'
-  | 'check $fn($arg ..., ...) using state($state, ...)':
+  | 'check $fn ...($arg ..., ...) using state($state, ...)':
       def [[state,state_var_helper], ...]:
         [[state, make_param_helper(state)], ...]
       def [[param_state, param_var, param_var_helper], ...]:
@@ -207,14 +194,14 @@ meta:
               def values(result, $state, ...):
                 def $param_state : $(param_var_helper) . value
                 ...
-                $fn($arg ..., ...)
+                $fn ...($arg ..., ...)
               block:
                 $(state_var_helper) . value := $state
               ...
               result
            )'
       result
-  | 'perform $fn($arg ..., ...)':
+  | 'check $fn ...($arg ..., ...)':
       def [[param_state, param_var, param_var_helper], ...]:
         def [param, ...]: params
         [[param, make_state_param(param), make_param_helper(param)], ...]
@@ -222,13 +209,13 @@ meta:
          def $param_var_helper :: State : $(param_state) . $param_var()
          ...
          Condition(
-            fun ():
-              def $param_state : $(param_var_helper) . value
-              ...
-              $fn($arg ..., ...)
-              #'in_progress
+           fun ():
+             def $param_state: $(param_var_helper) . value
+             ...
+             $fn ...($arg ..., ...)
          )'
-  | 'perform $fn($arg ..., ...) using state($state, ...)':
+
+  | 'perform $fn ...($arg ..., ...) using state($state, ...)':
       def [[state,state_var_helper], ...]:
         [[state, make_param_helper(state)], ...]
       def [[param_state, param_var, param_var_helper], ...]:
@@ -242,13 +229,28 @@ meta:
             def values($state, ...):
               def $param_state : $(param_var_helper) . value
               ...
-              $fn($arg ..., ...)
+              $fn ...($arg ..., ...)
             block:
-              $state_var_helper . value := $state
+              ($state_var_helper :~ State) . value := $state
               ...
             #'in_progress
          )'
-  | '$fn($arg ..., ...)':
+  | 'perform $fn ...($arg ..., ...)':
+      def [[param_state, param_var, param_var_helper], ...]:
+        def [param, ...]: params
+        [[param, make_state_param(param), make_param_helper(param)], ...]
+      'block:
+         def $param_var_helper :: State : $(param_state) . $param_var()
+         ...
+         Condition(
+            fun ():
+              def $param_state : $(param_var_helper) . value
+              ...
+              $fn ...($arg ..., ...)
+              #'in_progress
+         )'
+
+  | '$fn ...($arg ..., ...)':
       def [[param_state, param_var, param_helper], ...]:
         def [param, ...]: params
         [[param, make_state_param(param), make_param_helper(param)], ...]
@@ -257,7 +259,7 @@ meta:
          ...
          def $param_state : $(param_helper) . value
          ...
-         $(fn) . build_inner($arg ..., ...)'
+         $(fn) ... . build_inner($arg ..., ...)'
 
 
 defn.macro 'behaviour_tree $(name :: Identifier)($arg, ...) $opt ...:

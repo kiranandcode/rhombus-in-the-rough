@@ -5,6 +5,6 @@ import:
   "../lib/ecs.rhm" open
 
 export:
-  UserController
+  UserControlled
 
-component UserController(speed :: Real)
+component UserControlled()

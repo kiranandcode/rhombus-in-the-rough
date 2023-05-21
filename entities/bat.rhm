@@ -1,23 +1,41 @@
 #lang rhombus
 
 import:
+  lib("raylib/2d/unsafe.rkt") as raylib
+
   "../lib/ecs.rhm" open
   "../lib/datatypes.rhm" open
   "../lib/resources.rhm" expose: def_texture
+  "../lib/adt.rhm"
+  "../game/behaviour_tree.rhm" open
 
   "../components/movement.rhm" open
   "../components/graphics.rhm" open
   "../components/damage.rhm" open
   "../components/health.rhm" open
+  "../components/behaviour.rhm" open
 
 export: Bat
 
 
 def_texture bat_image : "./resources/images/enemies/bat.png"
 
-instance Bat:
+adt.datatype PatrolState
+| Waiting(start_time :: Real, next_index :: Integral)
+| MovingTowards(index :: Integral)
+def wait_time: 5.0
+def move_speed: 50.0
+
+declare_behaviour_state(patrol_state, patrol)
+
+behaviour_tree PatrolBehaviour(monster :: entity.Entity) with state(patrol_state, patrol):
+  perform Bat.follow_patrol(monster, patrol_state, patrol) using state(patrol_state)
+
+instance Bat with this:
   component position :~ Position = Vector2(280.,350.)
+  component velocity :~ Velocity = Vector2(0.,0.)
   component orientation :~ Orientation = Direction.DOWN
+  component move_speed :~ MoveSpeed = 50.0
   component sprite :~ AnimatedSprite = AnimatedSprite(
       bat_image,
       #true,
@@ -31,3 +49,34 @@ instance Bat:
     32., 32.
   )
   component health :~ Health = Health(10.,10.)
+
+  method follow_patrol(state :: PatrolState, patrol :: List.of(Vector2)):
+    adt.match state
+    | Waiting(start_time, next_index):
+        def current_time: raylib.GetTime()
+        println(["delta is ", (current_time - start_time), ">=", wait_time])
+        if (current_time - start_time) >= wait_time
+        | MovingTowards(next_index)
+        | Waiting(start_time, next_index)
+    | MovingTowards(index):
+        def target: patrol[index]
+        def line_to_target: target.subtract(position.value)
+        def distance: line_to_target.distance()
+        println(["position", position.value.to_string(), "target", target.to_string(), "distance", distance])
+        if distance <= 10.0
+        | velocity.value := Vector2(0.,0.)
+          Waiting(raylib.GetTime(), (index + 1) mod patrol.length())
+        | def direction: line_to_target.normalize()
+          def move_dir: direction.scale(move_speed.value)
+          velocity.value := move_dir
+          MovingTowards(index)
+
+  method set_patrol(path):
+    def behaviour: PatrolBehaviour(this)
+    behaviour.set_patrol_state(MovingTowards(0))
+    behaviour.set_patrol(path)
+    this.add_component(WithBehaviour(behaviour))
+
+
+
+

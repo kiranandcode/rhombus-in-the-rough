@@ -12,6 +12,7 @@ export:
   CollisionBox
   Direction
   Friction
+  MoveSpeed
 
 adt.enum Direction
 | UP
@@ -24,7 +25,7 @@ component Position(value :: Vector2)
 component Velocity(value :: Vector2)
 component Orientation(facing_direction :: Direction)
 component Friction(value :: Vector2)
-
+component MoveSpeed(value :: Real)
 component CollisionBox(area :: Rectangle, collision_update_count :: Integral) // relative to position
 
 

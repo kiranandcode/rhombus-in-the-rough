@@ -26,7 +26,8 @@ system UserControlSystem(
     anim :: AnimatedSprite,
     orientation :: Orientation,
     velocity :: Velocity,
-    control :: UserController,
+    move_speed :: MoveSpeed,
+    control :: UserControlled,
     has_state :: HasState
   ):
 
@@ -63,7 +64,7 @@ system UserControlSystem(
             has_state.state := State.Attacking
         | any_input:
             velocity.value := velocity.value.normalize()
-            velocity.value := velocity.value.scale(control.speed)
+            velocity.value := velocity.value.scale(move_speed.value)
             when (orientation.facing_direction != new_direction || ! anim.moving):
               orientation.facing_direction := new_direction
               anim.last_frame_update_time := raylib.GetTime()

@@ -82,6 +82,10 @@ meta:
         $body
         ...' ~acc acc:
       extract_fields(['$body', ...], acc)
+  | 'entity $(name :: Name) :: $arg ... = $init ...:
+        $body
+        ...':
+      [name, '$arg ...']
   | 'entity $(name :: Name) :: $arg ...:
         $body
         ...':
@@ -151,6 +155,11 @@ meta:
       if !map.points.has_key(pos_key)
       | Syntax.error("position \"" ++ pos_key ++ "\" not found in map", pos)
       | build_initialisers(['$body', ...], map, map.points[pos_key], acc)
+  | 'entity $(name :: Name) :: $arg ... = $init ...:
+        $body
+        ...':
+      def extra_initialisers: build_extra_initialisers(['$body', ...], name, '$arg ...', map)
+      wrap_init_with_position(position, name, '$name := $init ...', extra_initialisers)
   | 'entity $(name :: Name) :: $arg ...:
         $body
         ...':
