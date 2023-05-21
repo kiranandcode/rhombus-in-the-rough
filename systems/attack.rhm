@@ -14,10 +14,13 @@ import:
   "../components/weapon.rhm" open
   "../components/movement.rhm" open
   "../components/damage.rhm" open
+  "../components/attack.rhm" open
+
 
 export:
-  AttackSystem
+  WeaponAttackSystem
   WeaponAnimationSystem
+  MonsterAttackSystem
 
 use_static
 
@@ -47,7 +50,34 @@ system WeaponAnimationSystem(
            0.
          )
 
-system AttackSystem(
+system MonsterAttackSystem(
+     entity_state :: HasState,
+     animation :: AnimatedSprite,
+     orientation :: Orientation,
+     attack :: MonsterPhysicalAttack
+  ) with this:
+
+    method update():
+      def current_time : raylib.GetTime()
+      cond
+      | entity_state.state == State.Attacking && animation.frames != attack.end:
+          animation.frames := attack.end
+          animation.frame_counter := attack.start
+          def damage_box :: Rectangle : 
+            match orientation.facing_direction
+            | Direction.UP: Rectangle(-16.,0.,32.,32.)
+            | Direction.DOWN: Rectangle(-16.,16.,32.,32.)
+            | Direction.LEFT: Rectangle(-32.,0.,32.,32.)
+            | Direction.RIGHT: Rectangle(0.,0.,32.,32.)
+          attack.attack_start := current_time
+          this.add_component(DamageBox(damage_box))
+      | entity_state.state == State.Attacking && (current_time - attack.attack_start) >= attack.attack_duration:
+          animation.frames := attack.start
+          entity_state.state := State.Idle
+          this.remove_component(DamageBox)
+      | ~else: #void
+
+system WeaponAttackSystem(
      entity_state :: HasState,
      weapon_action :: WeaponActionAnimation,
      animation :: AnimatedSprite,

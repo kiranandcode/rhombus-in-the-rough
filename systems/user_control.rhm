@@ -35,7 +35,6 @@ system UserControlSystem(
     | State.Attacking: #void
     | State.Idle:
 
-        // def mutable new_direction : orientation.facing_direction
         def mutable any_input : #false
         def mutable attacking : #false
         velocity.value.x := 0.; velocity.value.y := 0.
@@ -44,16 +43,16 @@ system UserControlSystem(
         | raylib.KEY_SPACE
           attacking := #true
         | raylib.KEY_D
-          // new_direction := Direction.RIGHT
+
           velocity.value.x += 1.
         | raylib.KEY_A
-          // new_direction := Direction.LEFT
+
           velocity.value.x -= 1.
         | raylib.KEY_W
-          // new_direction := Direction.UP
+
           velocity.value.y -= 1.
         | raylib.KEY_S
-          // new_direction := Direction.DOWN
+
           velocity.value.y += 1.
         | ~any
           any_input := #true

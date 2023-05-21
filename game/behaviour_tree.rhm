@@ -165,7 +165,7 @@ meta:
 
   fun
   | build_opts('with state($arg, ...)'): [arg,...]
-  | build_opts(''): #false
+  | build_opts(''): []
 
   foldfun build_body(ls, params)
   | 'all_of:

@@ -1,0 +1,16 @@
+#lang rhombus
+
+import:
+  "../lib/datatypes.rhm" open
+  "../lib/ecs.rhm" open
+  "../lib/resources.rhm"
+
+export:
+  AggroRange
+  AggroTimeout
+  IsAggroedTo
+
+
+component AggroRange(value :: Real)
+component AggroTimeout(value :: Real)
+component IsAggroedTo(start_time :: Real, target :: entity.Entity)

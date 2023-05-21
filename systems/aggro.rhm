@@ -1,0 +1,60 @@
+#lang rhombus
+
+import:
+  lib("raylib/2d/unsafe.rkt") as raylib
+
+  "../lib/datatypes.rhm" open
+  "../lib/ecs.rhm" open
+  "../lib/lang.rhm" open
+
+  "../lib/event.rhm"
+  "../messages.rhm" open
+
+  "../components/movement.rhm" open
+  "../components/interaction.rhm" open
+  "../components/aggro.rhm" open
+
+export:
+  AggroSystem
+  DeAggroSystem
+
+system DeAggroSystem(aggro_timeout :: AggroTimeout, aggro :: IsAggroedTo) with this:
+
+  method update_internal(current_time :: Real):
+    def delta: current_time - aggro.start_time
+    when (delta >= aggro_timeout.value):
+      event.send(RemoveComponent(this, IsAggroedTo))
+
+  fun update():
+    def time : raylib.GetTime()
+    update_internal(time)
+
+system PlayerPositionSystem(player :: IsPlayer, position :: Position) with this:
+
+  method check_within_range(enemy_position :: Vector2, aggro_range :: Real, f :: Function):
+    def player_pos: position.value
+    def line_to_player: player_pos.subtract(enemy_position)
+    def distance: line_to_player.distance()
+    when (distance <= aggro_range):
+      f(this, line_to_player, distance)
+
+
+fun same_direction(target :: Vector2, face_direction :: Direction):
+  match face_direction
+  | Direction.UP: target.y <= 0.
+  | Direction.DOWN: target.y >= 0.
+  | Direction.LEFT: target.x <= 0.
+  | Direction.RIGHT: target.x >= 0.
+
+system AggroSystem(range :: AggroRange, position :: Position, orientation :: Orientation) with this:
+
+  method update():
+    when (!this.has_component(IsAggroedTo)):
+      PlayerPositionSystem.check_within_range(
+          position.value,
+          range.value * 2.0,
+          fun (player :: entity.Entity, direction :: Vector2, distance :: Real):
+            when (distance <= range.value || same_direction(direction, orientation.facing_direction)):
+              this.add_component(IsAggroedTo(raylib.GetTime(), player))
+      )
+      

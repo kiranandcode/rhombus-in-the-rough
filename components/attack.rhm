@@ -1,0 +1,15 @@
+#lang rhombus
+
+import:
+  "../lib/datatypes.rhm" open
+  "../lib/ecs.rhm" open
+  "../lib/resources.rhm"
+
+export: MonsterPhysicalAttack
+
+component MonsterPhysicalAttack(
+    start :: Integral, end :: Integral,
+    attack_duration :: Real,
+    attack_range :: Real,
+    attack_start :: Real
+ )

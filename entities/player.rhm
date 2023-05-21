@@ -49,6 +49,10 @@ instance Player with this:
       0.,
       9
     )
+  component hurt :~ HurtBox = Rectangle(
+    -16., 0.,
+    32., 32.
+  )
   component control :~ UserControlled = UserControlled()
   component move_speed :~ MoveSpeed = 150.0
   component basic_damage :~ ApplyBasicPhysicalDamage = 5.0

@@ -30,6 +30,7 @@ import:
   "../systems/camera.rhm" open
   "../systems/behaviour.rhm" open
   "../systems/direction.rhm" open
+  "../systems/aggro.rhm" open
 
   "inventory.rhm" open
 
@@ -81,6 +82,8 @@ class WorldScreen(
  
    view.update()
    CameraSystem.update(view,map)
+   DeAggroSystem.update()
+   AggroSystem.update()
    BehaviourSystem.update()
    UserControlSystem.update()
    DamageAreaSystem.update()
@@ -88,7 +91,8 @@ class WorldScreen(
    DamageApplicationSystem.update()
    PhysicalDamageApplicationSystem.update()
    DeathSystem.update()
-   AttackSystem.update()
+   MonsterAttackSystem.update()
+   WeaponAttackSystem.update()
    ItemAnimationSystem.update()
    AnimationSystem.update()
    MovementSystem.update()
