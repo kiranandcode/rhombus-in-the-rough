@@ -1,47 +1,59 @@
 #lang rhombus
 import:
   rhombus/meta open
+  meta:
+    lib("racket/syntax.rkt") as syntax
 export:
   foldfun
 
 meta:
   
-  fun build_cases(name, [ls, arg, ...], cases):
+  fun build_cases(name, [ls, arg, ...], cases, [expr_arg, ...]):
     for List:
       each case: cases
       match case
       | '~skip $case ...':
-           '$name([$case ..., rest, $('...')], $arg, ..., acc):
-                $name([rest, $('...')], $arg, ..., acc)'
-      | '$case ... ~acc $acc:
+           '$name([$case ..., rest, $('...')], $arg, ..., acc, $expr_arg, ...):
+                $name([rest, $('...')], $arg, ..., acc, $expr_arg, ...)'
+      | '$case ... ~acc $acc $expr_arg ...:
              $body
              ...':
-          '$name([$case ..., rest, $('...')], $arg, ..., $acc):
-               def acc:
+          '$name([$case ..., rest, $('...')], $arg, ..., $acc, $expr_arg, ...):
+               def values(acc, $expr_arg, ...):
                    $body
                    ...
-               $name([rest, $('...')], $arg, ..., acc)'
+               $name([rest, $('...')], $arg, ..., acc, $expr_arg, ...)'
       | '$case ...:
              $body
              ...':
-          '$name([$case ..., rest, $('...')], $arg, ..., acc):
-               def result:
+          '$name([$case ..., rest, $('...')], $arg, ..., acc, $expr_arg, ...):
+               def values(result, $expr_arg, ...):
                    $body
                    ...
-               $name([rest, $('...')], $arg, ..., List.cons(result,acc))'
+               $name([rest, $('...')], $arg, ..., List.cons(result,acc), $expr_arg, ...)'
 
 defn.macro
+| 'foldfun $name($ls, $arg, ...) ~values ($expr_arg = $expr, ...)
+   | $case
+     ...
+   | ...':
+    def [new_case, ...]: build_cases(name, [ls, arg, ...], ['$case
+                                                             ...', ...], [expr_arg, ...])
+    'fun
+     | $name($ls, $arg, ...): $name($ls, $arg, ..., [], $expr, ...)
+     | $name([], $arg, ..., acc, $expr_arg, ...): values(List.reverse(acc), $expr_arg, ...)
+     | $new_case
+     | ...'
 | 'foldfun $name($ls, $arg, ...)
    | $case
      ...
    | ...':
 
     def [new_case, ...]: build_cases(name, [ls, arg, ...], ['$case
-                                                                ...', ...])
+                                                                ...', ...], [])
     'fun
      | $name($ls, $arg, ...): $name($ls, $arg, ..., [])
      | $name([], $arg, ..., acc): List.reverse(acc)
      | $new_case
      | ...'
-
 
