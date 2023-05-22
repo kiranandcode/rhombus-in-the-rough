@@ -200,7 +200,7 @@ meta:
        $branch_body
        ...
      | ...' ~acc acc:
-      let values(id, [case_name, ...], case_prev_nodes, acc, links):
+      let values(id, case_info, case_prev_nodes, acc, links):
         for values(id=id, cases=[], prev_nodes=[], acc = acc, links = links):
           each [case, body] : [[branch_case.expr, ['$branch_body', ...]], ...]
           def case_cond_id: id_to_dialog_var('id', id)
@@ -213,6 +213,7 @@ meta:
          | id == 0: values(start_sym, id + 1)
          | snippet_name: values(snippet_name, id)
          | ~else: values(id_to_dialog_var('id',id), id + 1)
+      let [case_name, ...]: List.reverse(case_info)
       let stx: 'def $def_sym: DialogTextChoice(
                   #false,
                   $(msg.expr),
@@ -228,7 +229,7 @@ meta:
        $branch_body
        ...
      | ...' ~acc acc:
-      let values(id, [case_name, ...], case_prev_nodes, acc, links):
+      let values(id, case_info, case_prev_nodes, acc, links):
         for values(id=id, cases=[], prev_nodes=[], acc = acc, links = links):
           each [case, body] : [[branch_case.expr, ['$branch_body', ...]], ...]
           def case_cond_id: id_to_dialog_var('id', id)
@@ -241,6 +242,7 @@ meta:
          | id == 0: values(start_sym, id + 1)
          | snippet_name: values(snippet_name, id)
          | ~else: values(id_to_dialog_var('id',id), id + 1)
+      let [case_name, ...]: List.reverse(case_info) 
       let stx: 'def $def_sym: DialogTextChoice(
                   $character,
                   $(msg.expr),
@@ -256,7 +258,7 @@ meta:
        $branch_body
        ...
      | ...' ~acc acc:
-      let values(id, [case_name, ...], case_prev_nodes, acc, links):
+      let values(id, case_info, case_prev_nodes, acc, links):
         for values(id=id, cases=[], prev_nodes=[], acc = acc, links = links):
           each [case, body] : [[branch_case.expr, ['$branch_body', ...]], ...]
           def case_cond_id: id_to_dialog_var('id', id)
@@ -269,6 +271,7 @@ meta:
          | id == 0: values(start_sym, id + 1)
          | snippet_name: values(snippet_name, id)
          | ~else: values(id_to_dialog_var('id',id), id + 1)
+      let [case_name, ...]: List.reverse(case_info) 
       let stx: 'def $def_sym: DialogTextChoice(
                   #false,
                   #false,
@@ -286,7 +289,7 @@ meta:
          cond
          | id == 0: values(start_sym, id + 1)
          | snippet_name: values(snippet_name, id)
-         | ~else: values(id_to_dialog_var('$expr ...',id), id + 1)
+         | ~else: values(id_to_dialog_var('id',id), id + 1)
       def stx:
         'def $def_sym:
              DialogTextVariant(#false, $first, [$choice, ...], #false)'

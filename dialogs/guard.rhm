@@ -11,15 +11,14 @@ dialog_character guard_a:
 
 dialog guard_dialog:
   // guard_a: "hello! ~a"
-  guard_a: 1 "Hey there!" || "Good ~a!" "day" || "Allo Allo..."
-  guard_a: "Hey there!" || "Good day!" || "Allo Allo..."
-
-  == awesome ==
+  guard_a: 1 "Halt! Who goes there?" || "Good ~a!" "day" || "Allo Allo..."
+  1 "I'm a traveller, passing by" || "Hello again!" || "Just one more thing..."
   branch "What do you want...."
-  | "Good day!"
+  | "Nevermind...."
+    ["The guard returns to his position."]
     ~> END
-  | "Bad day!"
-  "That's sad..."
+  | "I'd like to ask you a question"
+  guard_a: "Sure! Fire away."
   branch
   | "Who are you?" ("") [" You ask about the guard himself..."]
     guard_a: "I'm a guard!"
@@ -31,21 +30,21 @@ dialog guard_dialog:
     "..."
     "I'll be on my way then..."
     ~> END
-  | "You look a little worried" ("?") ". You ask about the guard's status"
+  | "You look a little worried" ("?") ". You inquire\n about the guard's status"
     guard_a: "yeah... now that you mention it"
     guard_a: "..."
     ["The guard hesitates for a moment before turning to you."]
     branch guard_a: "Could you help me out with something?"
     | "Okay" ("!") ", Sure! I'd love to help"
-      guard_a: "There's a large bat that's been flying around the yard recently..."
+      guard_a: "There's a large bat that's been flying\n around the yard recently..."
       guard_a: "I really HATE bats."
       guard_a: "Please, get rid of that pest for me!"
-      guard_a: "Of course, if you do a good job, then there might be something in it for you..."
-      ["The guard winks, before returning to his original stature."]
-    | "No! Suck it." ("") ["You reject the Guard's proposition rudely."]
+      guard_a: "Of course, if you do a good job, then\n there might be something in it for you..."
+      ["The guard winks, before returning\n to his original stature."]
+    | "No! Suck it" (".") ["! You reject the Guard's proposition rudely."]
       guard_a: "Fine."
       guard_a: "(I knew I shouldn't have brought it up...)"
-      ["The guard mumbles under his breath before returning to his original stature."]
+      ["The guard mumbles under his breath before\n returning to his original stature."]
   "Move along now..."
 
 

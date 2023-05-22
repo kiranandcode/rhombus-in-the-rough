@@ -21,10 +21,22 @@ def origin: Vector2(0.,0.)
 
 adt.datatype State
 | Init()
-| FadeIn(start_time :: Real, ratio :: Real)
+| FadeInTextbox(start_time :: Real, ratio :: Real)
 | RenderingText(start_time :: Real, offset :: Integral)
-| RenderingCompleted()
+| RenderingTextboxCompleted()
+| RenderingOptions(
+    active :: maybe(Integral),
+    choices :: List.of(String),
+    continuations :: List.of(dialog.DialogChoice)
+  )
+| RenderingOptionOutput(
+    text :: String,
+    start_time :: Real,
+    offset :: Integral,
+    next :: maybe(dialog.DialogItem)
+  )
 | Completed()
+
 
 def character_color : Color(255,255,255,0)
 def dialog_color : Color(255,255,255,0)
@@ -51,7 +63,7 @@ class DialogScreen(
   override method draw():
     adt.match state
     | Init(): #void
-    | FadeIn(_, render_ratio):
+    | FadeInTextbox(_, render_ratio):
        configure_dialog_box(render_ratio)
        when (dialog_item.character):
          dialog_box.draw_character_left(dialog_item.character.sprite)
@@ -61,41 +73,119 @@ class DialogScreen(
           dialog_box.draw_character_left(dialog_item.character.sprite)
         dialog_box.draw()
         dialog_box.draw_text(dialog_item.text.substring(0, offset))
-    | RenderingCompleted():
+    | RenderingOptionOutput(text, _, offset, _):
+        dialog_box.draw()
+        dialog_box.draw_text(text.substring(0, offset))
+    | RenderingTextboxCompleted():
         when (dialog_item.character):
           dialog_box.draw_character_left(dialog_item.character.sprite)
         dialog_box.draw()
         dialog_box.draw_text(dialog_item.text)
+    | RenderingOptions(active, choices, _):
+        def dialog_choices :: dialog.DialogTextChoice: dialog_item
+        when (dialog_item.character):
+          dialog_box.draw_character_left(dialog_item.character.sprite)
+        when (dialog_item.dialog_text):
+          dialog_box.draw()
+          dialog_box.draw_text(dialog_item.text)
+        dialog_box.draw_options(choices, active)
     | Completed(): #void
+
+  method configure_next_state(force=#false):
+    match dialog_item
+    | #false: state := Completed()
+    | d :: dialog.DialogText:
+        if force
+        | state := RenderingTextboxCompleted()
+        | state := RenderingText(raylib.GetTime(), 0)
+    | d :: dialog.DialogTextVariant:
+        if force
+        | state := RenderingTextboxCompleted()
+        | state := RenderingText(raylib.GetTime(), 0)
+    | d :: dialog.DialogTextChoice:
+        if d.dialog_text && !force
+        | state := RenderingText(raylib.GetTime(), 0)
+        | def [Pair(choice, option), ...]:
+              for List:
+                each choice : d.choices
+                keep_when (! choice.guard || choice.guard())
+                Pair(choice.choice_text, choice)
+          state := RenderingOptions(#false, [choice,...], [option, ...])
+  method set_dialog_item_and_configure(item):
+    if item
+    | dialog_item := item
+      configure_next_state()
+    | state := Completed()
 
   override method update():
     adt.match state
-    | Init(): state := FadeIn(raylib.GetTime(), 0.)
-    | FadeIn(start_time, _):
+    | Init(): state := FadeInTextbox(raylib.GetTime(), 0.)
+    | FadeInTextbox(start_time, _):
         def current_time: raylib.GetTime()
         def ratio: (current_time - start_time) / FADE_IN_DURATION
         if ratio >= 1.0
-        | state := RenderingText(current_time, 0)
-        | state := FadeIn(start_time, ratio)
+        | configure_next_state()
+        | state := FadeInTextbox(start_time, ratio)
     | RenderingText(start_time, _): 
         def current_time: raylib.GetTime()
         def index : math.exact(math.floor((current_time - start_time) * CHAR_PER_MS))
         if index >= dialog_item.text.length()
-        | state := RenderingCompleted()
+        | configure_next_state(#true)
         | state := RenderingText(start_time, index)
+    | RenderingOptionOutput(text, start_time, offset, next):
+        when (offset < text.length()):
+          def current_time: raylib.GetTime()
+          def index : math.exact(math.floor((current_time - start_time) * CHAR_PER_MS))
+          if index >= text.length()
+          | state := RenderingOptionOutput(text, start_time, text.length(), next)
+          | state := RenderingOptionOutput(text, start_time, index, next)
+    | ~else: #void
+
+    adt.match state
+    | RenderingOptions(active, choices, opts):
+        def mutable delta: #false
+        handle_inputs (raylib.IsKeyReleased)
+        | raylib.KEY_W
+          delta := -1
+        | raylib.KEY_S
+          delta := 1
+        cond
+        | active && delta:
+            let active: (active + choices.length() + delta) mod choices.length()
+            state := RenderingOptions(active, choices, opts)
+        | !active && delta:
+            state := RenderingOptions(0, choices, opts)
+        | ~else: #void
     | ~else: #void
 
     handle_inputs (raylib.IsKeyReleased)
     | raylib.KEY_Q
       adt.match state
-      | Init(): state := FadeIn(raylib.GetTime(), 0.)
-      | FadeIn(_,_): state := RenderingCompleted()
-      | RenderingText(_, _): state := RenderingCompleted()
-      | RenderingCompleted():
+      | Init(): state := FadeInTextbox(raylib.GetTime(), 0.)
+      | FadeInTextbox(_,_): configure_next_state()
+      | RenderingText(_, _): configure_next_state(#true)
+      | RenderingOptionOutput(text, start_time, offset, next):
+          if offset < text.length()
+          | state := RenderingOptionOutput(text, start_time, text.length(), next)
+          | set_dialog_item_and_configure(next)
+      | RenderingTextboxCompleted():
           if dialog_item.next
-          | dialog_item := dialog_item.next
-            state := RenderingText(raylib.GetTime(), 0)
+          | dialog_item.on_completed()
+            set_dialog_item_and_configure(dialog_item.next)
           | state := Completed()
+      | RenderingOptions(active, choices, opts):
+          when active:
+            def selected_option: opts[active]
+            cond 
+            | selected_option.output_message:
+                state := RenderingOptionOutput(
+                            selected_option.output_text,
+                            raylib.GetTime(),
+                            0,
+                            selected_option.next
+                         )
+            | ~else:
+                set_dialog_item_and_configure(selected_option.next)
       | Completed(): #void
 
   override method should_pop():
