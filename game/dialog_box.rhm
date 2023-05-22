@@ -17,32 +17,61 @@ def_texture ui_texture: "./resources/images/ui_big_pieces.png"
 fun cell(x :: Real, y :: Real) :: Rectangle:
   Rectangle(x,y,16.,16.)
 
+class Panel(
+   TOP_CORNER_LEFT :: Rectangle,
+   LEFT_EDGE :: Rectangle,
+   BOTTOM_CORNER_LEFT :: Rectangle,
+   TOP_MIDDLE :: Rectangle,
+   MIDDLE :: Rectangle,
+   BOTTOM_MIDDLE :: Rectangle,
+   TOP_CORNER_RIGHT :: Rectangle,
+   RIGHT_EDGE :: Rectangle,
+   BOTTOM_CORNER_RIGHT :: Rectangle
+)
 
-def [TOP_CORNER_LEFT, LEFT_EDGE, BOTTOM_CORNER_LEFT] :~ List.of(Rectangle) = [
-    cell(16.,424.),
-    cell(16.,440.),
-    cell(16.,448.),
- ]
+def [BASE, INACTIVE, ACTIVE] :: List.of(Panel) :
+  for List:
+    each offset_x: [0, 43, 86]
+    
+    def [TOP_CORNER_LEFT, LEFT_EDGE, BOTTOM_CORNER_LEFT] :~ List.of(Rectangle) = [
+        cell(16.,424. + offset_x),
+        cell(16.,440. + offset_x),
+        cell(16.,448. + offset_x),
+     ]
 
-def [TOP_MIDDLE, MIDDLE, BOTTOM_MIDDLE] :~ List.of(Rectangle) = [
-    cell(33.,424.),
-    cell(33.,440.),
-    cell(33.,448.),
- ]
+    def [TOP_MIDDLE, MIDDLE, BOTTOM_MIDDLE] :~ List.of(Rectangle) = [
+        cell(33.,424. + offset_x),
+        cell(33.,440. + offset_x),
+        cell(33.,448. + offset_x),
+     ]
 
-def [TOP_CORNER_RIGHT, RIGHT_EDGE, BOTTOM_CORNER_RIGHT] :~ List.of(Rectangle) = [
-    cell(154.,424.),
-    cell(154.,432.),
-    cell(154.,448.),
- ]
+    def [TOP_CORNER_RIGHT, RIGHT_EDGE, BOTTOM_CORNER_RIGHT] :~ List.of(Rectangle) = [
+        cell(154.,424. + offset_x),
+        cell(154.,432. + offset_x),
+        cell(154.,448. + offset_x),
+     ]
+    Panel(
+      TOP_CORNER_LEFT, LEFT_EDGE, BOTTOM_CORNER_LEFT,
+      TOP_MIDDLE, MIDDLE, BOTTOM_MIDDLE,
+      TOP_CORNER_RIGHT, RIGHT_EDGE, BOTTOM_CORNER_RIGHT
+    )
 
 def dest_box : Rectangle(0.,0.,32.,32.)
 def origin : Vector2(0.,0.)
 def width_cells: 18
 def height_cells: 5
 
+def width_option_cells: 18
+def height_option_cells: 3
+
+
 def width_pixels: (width_cells * 32.)
 def height_pixels: (height_cells * 32.)
+
+def width_option_pixels: (width_option_cells * 32.)
+def height_option_pixels: (height_option_cells * 32.)
+def option_padding: 30
+
 
 fun draw_cell(cell :: Rectangle, x :: Real, y :: Real, color :: Color):
   dest_box.x := math.inexact(x)
@@ -66,7 +95,6 @@ def text_pos : Vector2(0.,0.)
 
 def character_color : Color(255,255,255,0)
 def dialog_color : Color(255,255,255,0)
-
 
 class DialogBox(
       mutable offset_x :: Real,
@@ -149,17 +177,18 @@ class DialogBox(
     for:
       each i: 0 .. width_cells
       each j: 0 .. height_cells
+      def panel: BASE
       def cell:
         cond
-        | i == 0 && j == 0                             : TOP_CORNER_LEFT
-        | i == width_cells - 1 && j == 0               : TOP_CORNER_RIGHT
-        | i == 0 && j == height_cells - 1              : BOTTOM_CORNER_LEFT
-        | i == width_cells - 1 && j == height_cells - 1: BOTTOM_CORNER_RIGHT
-        | i == 0                                       : LEFT_EDGE
-        | j == 0                                       : TOP_MIDDLE
-        | i == width_cells - 1                         : RIGHT_EDGE
-        | j == height_cells - 1                        : BOTTOM_MIDDLE
-        | ~else                                        : MIDDLE
+        | i == 0 && j == 0                             : panel.TOP_CORNER_LEFT
+        | i == width_cells - 1 && j == 0               : panel.TOP_CORNER_RIGHT
+        | i == 0 && j == height_cells - 1              : panel.BOTTOM_CORNER_LEFT
+        | i == width_cells - 1 && j == height_cells - 1: panel.BOTTOM_CORNER_RIGHT
+        | i == 0                                       : panel.LEFT_EDGE
+        | j == 0                                       : panel.TOP_MIDDLE
+        | i == width_cells - 1                         : panel.RIGHT_EDGE
+        | j == height_cells - 1                        : panel.BOTTOM_MIDDLE
+        | ~else                                        : panel.MIDDLE
 
       draw_cell(
         cell,
@@ -168,3 +197,68 @@ class DialogBox(
         dialog_color
       )
 
+  method draw_option_text(option_offset_y, text :: String):
+    set_color()
+    def width: raylib.GetScreenWidth()
+
+    def text_width: raylib.MeasureText(text, math.exact(font_size))
+
+    def offset_width: (width - width_option_pixels + text_width) / 2.
+
+    text_pos.x := offset_width + 30
+    text_pos.y := option_offset_y + 30
+
+    raylib.DrawTextPro(
+      raylib.GetFontDefault(),
+      text,
+      text_pos.inner(),
+      origin.inner(),
+      0.,
+      math.floor(font_size),
+      2.0,
+      dialog_color.inner()
+    )
+
+  method draw_options(choices :: List.of(String), active=#false):
+    def width: raylib.GetScreenWidth()
+    def height: raylib.GetScreenHeight()
+    def no_choices: choices.length()
+    def offset_width: (width - width_option_pixels) / 2.
+    def offset_height: height - (height_option_pixels * no_choices) - (option_padding * (no_choices - 1))
+
+    for:
+      each:
+        choice: choices
+        ind: 0 ..
+      
+      def panel :: Panel:
+        cond
+        | active && ind == active: ACTIVE
+        | ~else: BASE
+      def option_offset: (height_option_pixels + option_padding) * ind
+
+      for:
+        each i: 0 .. width_option_cells
+        each j: 0 .. height_option_cells
+        def cell:
+          cond
+          | i == 0 && j == 0                             : panel.TOP_CORNER_LEFT
+          | i == width_cells - 1 && j == 0               : panel.TOP_CORNER_RIGHT
+          | i == 0 && j == height_cells - 1              : panel.BOTTOM_CORNER_LEFT
+          | i == width_cells - 1 && j == height_cells - 1: panel.BOTTOM_CORNER_RIGHT
+          | i == 0                                       : panel.LEFT_EDGE
+          | j == 0                                       : panel.TOP_MIDDLE
+          | i == width_cells - 1                         : panel.RIGHT_EDGE
+          | j == height_cells - 1                        : panel.BOTTOM_MIDDLE
+          | ~else                                        : panel.MIDDLE
+
+        draw_cell(
+          cell,
+          offset_width + 32. * i,
+          offset_height + option_offset + 32. * j,
+          dialog_color
+        )
+      draw_option_text(
+        offset_height + option_offset,
+        choice
+      )

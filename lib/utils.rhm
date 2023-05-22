@@ -15,11 +15,11 @@ meta:
       | '~skip $case ...':
            '$name([$case ..., rest, $('...')], $arg, ..., acc, $expr_arg, ...):
                 $name([rest, $('...')], $arg, ..., acc, $expr_arg, ...)'
-      | '$case ... ~acc $acc $expr_arg ...:
+      | '$case ... ~acc $acc:
              $body
              ...':
           '$name([$case ..., rest, $('...')], $arg, ..., $acc, $expr_arg, ...):
-               def values(acc, $expr_arg, ...):
+               let values(acc, $expr_arg, ...):
                    $body
                    ...
                $name([rest, $('...')], $arg, ..., acc, $expr_arg, ...)'
@@ -27,7 +27,7 @@ meta:
              $body
              ...':
           '$name([$case ..., rest, $('...')], $arg, ..., acc, $expr_arg, ...):
-               def values(result, $expr_arg, ...):
+               let values(result, $expr_arg, ...):
                    $body
                    ...
                $name([rest, $('...')], $arg, ..., List.cons(result,acc), $expr_arg, ...)'
@@ -39,11 +39,13 @@ defn.macro
    | ...':
     def [new_case, ...]: build_cases(name, [ls, arg, ...], ['$case
                                                              ...', ...], [expr_arg, ...])
-    'fun
-     | $name($ls, $arg, ...): $name($ls, $arg, ..., [], $expr, ...)
-     | $name([], $arg, ..., acc, $expr_arg, ...): values(List.reverse(acc), $expr_arg, ...)
-     | $new_case
-     | ...'
+    def result:
+      'fun
+       | $name($ls, $arg, ...): $name($ls, $arg, ..., [], $expr, ...)
+       | $name([], $arg, ..., acc, $expr_arg, ...): values(List.reverse(acc), $expr_arg, ...)
+       | $new_case
+       | ...'
+    result
 | 'foldfun $name($ls, $arg, ...)
    | $case
      ...

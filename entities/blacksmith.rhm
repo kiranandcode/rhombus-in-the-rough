@@ -9,6 +9,9 @@ import:
   "../components/interaction.rhm" open
   "../components/movement.rhm" open
   "../components/graphics.rhm" open
+  "../components/dialog.rhm" open
+
+  "../dialogs/guard.rhm" open
 
 
 export: Blacksmith
@@ -20,6 +23,7 @@ instance Blacksmith:
   // component velocity :~ Velocity = Vector2(0.,0.)
   component collision_box :~ CollisionBox = CollisionBox(Rectangle(-16.,16., 32., 16.),0)
   component orientation :~ Orientation = Direction.DOWN
+  component dialog :~ DialogItem = guard_dialog
   component interactable :~ Interactable = Interactable(
       icons.TALK,
       -16.,

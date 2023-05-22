@@ -4,76 +4,15 @@ import:
   rhombus/meta open
   lib("racket/base.rkt") as racket
   "../lib/resources.rhm" expose: Texture def_texture
+  "../game/dialog.rhm" open
   meta:
     lib("racket/syntax.rkt") as syntax
     "../lib/utils.rhm" open
 
-class DialogCharacter(
-    name :: maybe(String),
-    mutable current_sprite :: maybe(String),
-    default_sprite :: Texture,
-    states :: Map.of(String, Texture)
- ):
-   method unset_state():
-     current_sprite := #false
-
-   method set_state(state :: String):
-     current_sprite := state
-
-   property sprite :: Texture :
-     if current_sprite
-     | states[current_sprite]
-     | default_sprite
-
-interface DialogItem:
-  property character :: maybe(DialogCharacter)
-  property text :: String
-
-class DialogText(
-   dialog_character :: maybe(DialogCharacter),
-   dialog_text :: String,
-   next :: maybe(DialogText)
- ):
-   implements DialogItem
-   override property character: dialog_character
-   override property text: dialog_text
-
-class DialogTextVariant(
-   dialog_character :: maybe(DialogCharacter),
-   on_first_text :: maybe(String),
-   text_variants :: List.of(String),
-   next :: maybe(DialogText),
-   mutable rendered_index :: Integral
- ):
-   implements DialogItem
-
-   constructor(character, on_first, text_variants, next):
-     if on_first
-     | super(character, on_first, text_variants, next, -1)
-     | super(character, on_first, text_variants, next, racket.random(List.length(text_variants)))
-
-   override property character: dialog_character
-   override property text:
-     if on_first_text && (rendered_index < 0)
-     | on_first_text
-     | text_variants[rendered_index]
-
-class DialogChoice(
-   choice_text :: String,
-   guard :: maybe(Function),
-   output_text :: maybe(String),
-   next :: DialogItem
- )
-
-
-class DialogTextChoice(
-   dialog_character :: maybe(DialogCharacter),
-   dialog_text :: String,
-   choices :: List.of(DialogChoice)
- ):
-   implements DialogItem
-   override property character: dialog_character
-   override property text: dialog_text
+export:
+  dialog_character
+  dialog
+  
 
 meta:
   fun texture_name(name):
@@ -109,38 +48,289 @@ defn.macro
        Map{$state_id_string: $(name) . $(texture_name(state_id)), ...}
      )'
 
+meta:
+  fun id_to_dialog_var(ref, id :: Int):
+    Syntax.make(syntax.#{format-id}(Syntax.make(ref), "tmp_~a", id)).relocate(ref)
+
+  fun to_text(msg, '$expr ...'):
+    match '$expr ...' | '': msg | '$expr ...': 'fun (): to_string(racket.format($msg, $expr, ...))'
+
+  syntax_class FmtString
+  | '$(msg :: String) $fmt ...':
+        field expr     = match '$fmt ...' | '': msg | '$fmt ...': 'fun (): to_string(racket.format($msg, $fmt, ...))'
+        field raw_expr = match '$fmt ...' | '': msg | '$fmt ...': 'to_string(racket.format($msg, $fmt, ...))'
+        field text     = match '$fmt ...' | '': msg.unwrap() | '$fmt ...': #false
+  | '[$(msg :: String) $fmt ...]':
+        field expr     = match '$fmt ...' | '': msg | '$fmt ...': 'fun (): to_string(racket.format($msg, $fmt, ...))'
+        field raw_expr = match '$fmt ...' | '': msg | '$fmt ...': 'to_string(racket.format($msg, $fmt, ...))'
+        field text     = match '$fmt ...' | '': msg.unwrap() | '$fmt ...': #false
 
 
-dialog_character guard_a:
-  default: "./resources/images/soldier_2_segmented.png"
+  syntax_class BranchCase
+  | '$(common :: FmtString) ($(opt :: FmtString)) $(text :: FmtString)':
+        field expr:
+          def common_text: common.text
+          def choice_text:
+            def option_text: opt.text
+            if common_text && option_text
+            | common_text +& option_text
+            | 'fun (): $(common.raw_expr) ++ $(opt.raw_expr)'
+          def output_text:
+            def text_text: text.text
+            if common_text && text_text
+            | common_text +& text_text
+            | 'fun (): $(common.raw_expr) ++ $(text.raw_expr)'
+          'DialogChoice(
+              $choice_text,
+              #false,
+              $output_text,
+              #false
+           )'
+  | '($(opt :: FmtString)) $(text :: FmtString)':
+        field expr:
+          def choice_text: opt.expr
+          def output_text: text.expr
+          'DialogChoice(
+              $choice_text,
+              #false,
+              $output_text,
+              #false
+           )'
+  | '($(opt :: FmtString))':
+        field expr:
+          def choice_text: opt.expr
+          'DialogChoice(
+              $choice_text,
+              #false,
+              #false,
+              #false
+           )'
+  | '$(common :: FmtString)':
+        field expr:
+          def common_text: common.expr
+          'DialogChoice(
+              $common_text,
+              #false,
+              #false,
+              #false
+           )'
+          
 
-dialog GuardDialog:
-  guard_a: !("Hey there!") || "Good day!" || "Allo Allo..."
 
-//   branch
-//   | "Who are you?" ("") ["You ask about the guard himself..."]
-//     guard_a: "I'm a guard!"---
-//   | "What's up?"
-//     guard_a: "Noneya"
-//     "..."
-//     "what-"~~
-//     guard_a: "None-ya business."
-//     "..."
-//     "I'll be on my way then..."
-//     -> END
-//   | "You look a little worried" ("?") ". You ask about the guard's status"
-//     guard_a: "yeah... now that you mention it"
-//     guard_a: "..."
-//     ["The guard hesitates for a moment before turning to you."]
-//     branch guard_a: "Could you help me out with something?"
-//     | "Okay" ("!") ", Sure! I'd love to help"
-//       guard_a: "There's a large bat that's been flying around the yard recently..."
-//       guard_a: "I really" "HATE".{color: red} "bats."
-//       guard_a: "Please, get rid of that pest for me!"
-//       guard_a: "Of course, if you do a good job, then there might be something in it for you..."
-//       ["The guard winks, before returning to his original stature."]
-//     | "No! Suck it." ("") ["You reject the Guard's proposition rudely."]
-//       guard_a: "Fine."
-//       guard_a: "(I knew I shouldn't have brought it up...)"
-//       ["The guard mumbles under his breath before returning to his original stature."]
-//   "Move along now..."
+  fun
+  | split_by_or('$rest ... || $expr'):
+     def choices: split_by_or('$rest ...')
+     List.cons('$expr', choices)
+  | split_by_or('$expr ...'):
+     ['$expr ...']
+
+  foldfun split_choices(ls) ~values (seen_first = #false)
+  | '$(msg :: FmtString)':
+      values(msg.expr, seen_first)
+  | '1 $(msg :: FmtString)' ~acc acc:
+       if seen_first
+       | Syntax.error("Duplicate text with first priority", msg)
+       | values(acc, msg.expr)
+
+  foldfun extract_exports(ls)
+  | '== $(name :: Identifier) ==': name
+  | 'branch $rest ...
+     | $case ...
+       $branch_body
+       ...
+     | ...' ~acc acc:
+       for values(acc=acc):
+         each body: [['$branch_body', ...], ...]
+         extract_exports(body, acc)
+  | ~skip '~> $rest ...'
+  | ~skip '$character: $expr ... || $rest ...'
+  | ~skip '$character: $(msg :: FmtString)'
+  | ~skip '$expr ... || $rest ...'
+  | ~skip '$(msg :: FmtString)'
+
+
+  foldfun build_dialog(ls, init_id, start_sym) ~values (id = init_id, snippet_name=#false, prev_nodes=[], links=[])
+  | '~> END' ~acc acc:
+     if snippet_name
+     | Syntax.error("A snippet can not begin with a jump")
+     | values(acc, id, #false, [], links)
+  | '~> $(name :: Identifier) $rest ...' ~acc acc:
+     def new_links:
+       for List:
+         each node_sym: prev_nodes
+         Pair(node_sym, '$name $rest ...')
+     if snippet_name
+     | Syntax.error("A snippet can not begin with a jump", name)
+     | values(acc, id, #false, [], new_links ++ links)
+  | '== $(name :: Identifier) ==' ~acc acc:
+      values(acc, id, name, prev_nodes, links)
+  | '$character: $expr ... || $rest ...':
+      def choices: List.reverse(split_by_or('$expr ... || $rest ...'))
+      def values([choice,...], first): split_choices(choices)
+      def values(def_sym, next_id):
+         cond
+         | id == 0: values(start_sym, id + 1)
+         | snippet_name: values(snippet_name, id)
+         | ~else: values(id_to_dialog_var(character,id), id + 1)
+      def stx:
+        'def $def_sym:
+             DialogTextVariant($character, $first, [$choice, ...], #false)'
+      def new_links:
+        for List:
+          each node_sym: prev_nodes
+          Pair(node_sym, def_sym)
+      values(stx, next_id, #false, [def_sym], new_links ++ links)
+  | '$character: $(msg :: FmtString)':
+      def text: msg.expr
+      def values(def_sym, next_id):
+         cond
+         | id == 0: values(start_sym, id + 1)
+         | snippet_name: values(snippet_name, id)
+         | ~else: values(id_to_dialog_var(character,id), id + 1)
+      def stx:
+        'def $def_sym:
+             DialogText($character, $text, #false)'
+      def new_links:
+        for List:
+          each node_sym: prev_nodes
+          Pair(node_sym, def_sym)
+      values(stx, next_id, #false, [def_sym], new_links ++ links)
+  | 'branch $(msg :: FmtString)
+     | $(branch_case :: BranchCase)
+       $branch_body
+       ...
+     | ...' ~acc acc:
+      let values(id, [case_name, ...], case_prev_nodes, acc, links):
+        for values(id=id, cases=[], prev_nodes=[], acc = acc, links = links):
+          each [case, body] : [[branch_case.expr, ['$branch_body', ...]], ...]
+          def case_cond_id: id_to_dialog_var('id', id)
+          let stx: 'def $case_cond_id: $case'
+          let values(acc,id,_,case_prev_nodes,links):
+             build_dialog(body, init_id, start_sym, acc, id + 1, #false, [case_cond_id], links)
+          values(id,List.cons(case_cond_id, cases), prev_nodes ++ case_prev_nodes, List.cons(stx, List.reverse(acc)), links)
+      def values(def_sym, next_id):
+         cond
+         | id == 0: values(start_sym, id + 1)
+         | snippet_name: values(snippet_name, id)
+         | ~else: values(id_to_dialog_var('id',id), id + 1)
+      let stx: 'def $def_sym: DialogTextChoice(
+                  #false,
+                  $(msg.expr),
+                  [$case_name, ...]
+                )'
+      def new_links:
+        for List:
+          each node_sym: prev_nodes
+          Pair(node_sym, def_sym)
+      values(List.cons(stx, acc), next_id, #false, case_prev_nodes, new_links ++ links)
+  | 'branch $(character :: Identifier): $(msg :: FmtString)
+     | $(branch_case :: BranchCase)
+       $branch_body
+       ...
+     | ...' ~acc acc:
+      let values(id, [case_name, ...], case_prev_nodes, acc, links):
+        for values(id=id, cases=[], prev_nodes=[], acc = acc, links = links):
+          each [case, body] : [[branch_case.expr, ['$branch_body', ...]], ...]
+          def case_cond_id: id_to_dialog_var('id', id)
+          let stx: 'def $case_cond_id: $case'
+          let values(acc,id,_,case_prev_nodes,links):
+             build_dialog(body, init_id, start_sym, acc, id + 1, #false, [case_cond_id], links)
+          values(id,List.cons(case_cond_id, cases), prev_nodes ++ case_prev_nodes, List.cons(stx, List.reverse(acc)), links)
+      def values(def_sym, next_id):
+         cond
+         | id == 0: values(start_sym, id + 1)
+         | snippet_name: values(snippet_name, id)
+         | ~else: values(id_to_dialog_var('id',id), id + 1)
+      let stx: 'def $def_sym: DialogTextChoice(
+                  $character,
+                  $(msg.expr),
+                  [$case_name, ...]
+                )'
+      def new_links:
+        for List:
+          each node_sym: prev_nodes
+          Pair(node_sym, def_sym)
+      values(List.cons(stx, acc), next_id, #false, case_prev_nodes, new_links ++ links)
+  | 'branch
+     | $(branch_case :: BranchCase)
+       $branch_body
+       ...
+     | ...' ~acc acc:
+      let values(id, [case_name, ...], case_prev_nodes, acc, links):
+        for values(id=id, cases=[], prev_nodes=[], acc = acc, links = links):
+          each [case, body] : [[branch_case.expr, ['$branch_body', ...]], ...]
+          def case_cond_id: id_to_dialog_var('id', id)
+          let stx: 'def $case_cond_id: $case'
+          let values(acc,id,_,case_prev_nodes,links):
+             build_dialog(body, init_id, start_sym, acc, id + 1, #false, [case_cond_id], links)
+          values(id,List.cons(case_cond_id, cases), prev_nodes ++ case_prev_nodes, List.cons(stx, List.reverse(acc)), links)
+      def values(def_sym, next_id):
+         cond
+         | id == 0: values(start_sym, id + 1)
+         | snippet_name: values(snippet_name, id)
+         | ~else: values(id_to_dialog_var('id',id), id + 1)
+      let stx: 'def $def_sym: DialogTextChoice(
+                  #false,
+                  #false,
+                  [$case_name, ...]
+                )'
+      def new_links:
+        for List:
+          each node_sym: prev_nodes
+          Pair(node_sym, def_sym)
+      values(List.cons(stx, acc), next_id, #false, case_prev_nodes, new_links ++ links)
+  | '$expr ... || $rest ...':
+      def choices: List.reverse(split_by_or('$expr ... || $rest ...'))
+      def values([choice,...], first): split_choices(choices)
+      def values(def_sym, next_id):
+         cond
+         | id == 0: values(start_sym, id + 1)
+         | snippet_name: values(snippet_name, id)
+         | ~else: values(id_to_dialog_var('$expr ...',id), id + 1)
+      def stx:
+        'def $def_sym:
+             DialogTextVariant(#false, $first, [$choice, ...], #false)'
+      def new_links:
+        for List:
+          each node_sym: prev_nodes
+          Pair(node_sym, def_sym)
+      values(stx, next_id, #false, [def_sym], new_links ++ links)
+  | '$(msg :: FmtString)':
+      def text: msg.expr
+      def values(def_sym, next_id):
+         cond
+         | id == 0: values(start_sym, id + 1)
+         | snippet_name: values(snippet_name, id)
+         | ~else: values(id_to_dialog_var(msg,id), id + 1)
+      def stx:
+        'def $def_sym:
+             DialogText(#false, $text, #false)'
+      def new_links:
+        for List:
+          each node_sym: prev_nodes
+          Pair(node_sym, def_sym)
+      values(stx, next_id, #false, [def_sym], new_links ++ links)
+
+
+defn.macro
+| 'dialog $(name :: Identifier):
+     $body
+     ...':
+    def start : 'start'
+    def values([defs, ...], _, _, _, [Pair(link_from, link_to), ...]): build_dialog(['$body',...], 0, start)
+    def [exports, ...]: extract_exports(['$body',...])
+    def result :
+      'namespace $name:
+          export:
+            $start
+            $exports
+            ...
+          $defs
+          ...
+          $(link_from) . next := $(link_to)
+          ...
+       namespace ~open:
+         export: $name
+         def tmp: $(name) . start
+         def $name : tmp'
+    result

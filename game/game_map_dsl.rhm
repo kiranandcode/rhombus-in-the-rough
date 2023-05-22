@@ -123,7 +123,6 @@ meta:
           pos.value.y := $(Pair.rest(position))'       
   | '~with_path $(pos_id :: String) in $fn':
       def pos_key: pos_id.unwrap()
-      println("hello")
       def path: Map.ref(map.paths, pos_key, #false)
       if !path
       | Syntax.error("path \"" ++ pos_key ++ "\" not found in map", pos_id)

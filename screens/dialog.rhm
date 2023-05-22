@@ -4,6 +4,7 @@ import:
   lib("raylib/2d/unsafe.rkt") as raylib
 
   "../lib/datatypes.rhm" open
+  "../lib/lang.rhm" open
   "../lib/adt.rhm"
 
   "../game/raylib_lang.rhm" open
@@ -32,7 +33,7 @@ def FADE_IN_DURATION: 0.5
 def CHAR_PER_MS: 50.0
 
 class DialogScreen(
-     dialog_item :: dialog.Dialog,
+     mutable dialog_item :: dialog.Dialog,
      dialog_box :: dialog_box.DialogBox,
      mutable state :: State
    ):
@@ -52,14 +53,17 @@ class DialogScreen(
     | Init(): #void
     | FadeIn(_, render_ratio):
        configure_dialog_box(render_ratio)
-       dialog_box.draw_character_left(dialog_item.character_sprite)
+       when (dialog_item.character):
+         dialog_box.draw_character_left(dialog_item.character.sprite)
        dialog_box.draw()
     | RenderingText(_, offset):
-        dialog_box.draw_character_left(dialog_item.character_sprite)
+        when (dialog_item.character):
+          dialog_box.draw_character_left(dialog_item.character.sprite)
         dialog_box.draw()
         dialog_box.draw_text(dialog_item.text.substring(0, offset))
     | RenderingCompleted():
-        dialog_box.draw_character_left(dialog_item.character_sprite)
+        when (dialog_item.character):
+          dialog_box.draw_character_left(dialog_item.character.sprite)
         dialog_box.draw()
         dialog_box.draw_text(dialog_item.text)
     | Completed(): #void
@@ -87,7 +91,11 @@ class DialogScreen(
       | Init(): state := FadeIn(raylib.GetTime(), 0.)
       | FadeIn(_,_): state := RenderingCompleted()
       | RenderingText(_, _): state := RenderingCompleted()
-      | RenderingCompleted(): state := Completed()
+      | RenderingCompleted():
+          if dialog_item.next
+          | dialog_item := dialog_item.next
+            state := RenderingText(raylib.GetTime(), 0)
+          | state := Completed()
       | Completed(): #void
 
   override method should_pop():

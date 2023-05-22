@@ -9,11 +9,89 @@ import:
    lib("racket/main.rkt") as racket
    lib("raylib/2d/unsafe.rkt") as raylib
 
-export: Dialog
+export: Dialog DialogCharacter DialogItem DialogText DialogTextVariant DialogChoice DialogTextChoice
 
 use_static
 
-class Dialog(
-  character_sprite :: Texture,
-  text :: String
-)
+
+class DialogCharacter(
+    name :: maybe(String),
+    mutable current_sprite :: maybe(String),
+    default_sprite :: Texture,
+    states :: Map.of(String, Texture)
+ ):
+   method unset_state():
+     current_sprite := #false
+
+   method set_state(state :: String):
+     current_sprite := state
+
+   property sprite :: Texture :
+     if current_sprite
+     | states[current_sprite]
+     | default_sprite
+
+fun
+| force_text(s :: String) :: String : s
+| force_text(f :: Function) :: String : f ()
+
+interface DialogItem:
+  property character :: maybe(DialogCharacter)
+  property text :: String
+
+class Dialog(mutable next :: maybe(DialogItem)):
+  implements DialogItem
+  nonfinal
+
+class DialogText(
+   dialog_character :: maybe(DialogCharacter),
+   dialog_text :: String || Function,
+ ):
+   extends Dialog
+   implements DialogItem
+   constructor(dialog_character, dialog_text, next):
+     super(next)(dialog_character, dialog_text)
+
+   override property character: dialog_character
+   override property text: force_text(dialog_text)
+
+class DialogTextVariant(
+   dialog_character :: maybe(DialogCharacter),
+   on_first_text :: maybe(String || Function),
+   text_variants :: List.of(String || Function),
+   mutable rendered_index :: Integral
+ ):
+   extends Dialog
+   implements DialogItem
+
+   constructor(character, on_first, text_variants, next):
+     if on_first
+     | super(next)(character, on_first, text_variants, -1)
+     | super(next)(character, on_first, text_variants, racket.random(List.length(text_variants)))
+
+   override property character: dialog_character
+   override property text:
+     if on_first_text && (rendered_index < 0)
+     | force_text(on_first_text)
+     | force_text(text_variants[rendered_index])
+
+class DialogChoice(
+   choice_text :: String || Function,
+   guard :: maybe(Function),
+   output_text :: maybe(String || Function),
+   mutable next :: maybe(DialogItem)
+ )
+
+
+class DialogTextChoice(
+   dialog_character :: maybe(DialogCharacter),
+   dialog_text :: maybe(String || Function),
+   choices :: List.of(DialogChoice)
+ ):
+   extends Dialog
+   implements DialogItem
+   constructor(dialog_character, dialog_text, choices):
+     super(#false)(dialog_character, dialog_text, choices)
+
+   override property character: dialog_character
+   override property text: force_text(dialog_text)
