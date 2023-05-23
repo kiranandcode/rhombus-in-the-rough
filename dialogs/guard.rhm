@@ -10,7 +10,6 @@ dialog_character guard_a:
   default: "./resources/images/soldier_2_segmented.png"
 
 dialog guard_dialog:
-  // guard_a: "hello! ~a"
   guard_a: 1 "Halt! Who goes there?" || "Good ~a!" "day" || "Allo Allo..."
   1 "I'm a traveller, passing by" || "Hello again!" || "Just one more thing..."
   branch guard_a: "What do you want...."
@@ -22,6 +21,7 @@ dialog guard_dialog:
   branch
   | "Who are you?" ("") [" You ask about the guard himself..."]
     guard_a: "I'm a guard!"
+    ~> quest
   | "What's up?"
     guard_a: "Noneya."
     "..."
@@ -34,6 +34,7 @@ dialog guard_dialog:
     guard_a: "yeah... now that you mention it..."
     guard_a: "..."
     ["The guard hesitates for a moment before\n turning to you."]
+    == quest ==
     branch guard_a: "Could you help me out with something?"
     | "Okay" ("!") ", Sure! I'd love to help"
       guard_a: "There's a large bat that's been flying around\n the yard recently..."

@@ -1,11 +1,18 @@
-* End Goals
- * TODO Add dialog writing lang
- ** P1: .... P2: ..... Choice: ..... Narrator: .....
- * TODO Add map description lang
- * TODO Add item/inventory description lang
- * TODO Add multiple worlds
- * TODO Add enemies description lang
- * TODO Add quest description lang
+* DONE End Goals
+CLOSED: [2023-05-23 Tue 01:36]
+** DONE Add dialog writing lang
+CLOSED: [2023-05-23 Tue 01:36]
+*** P1: .... P2: ..... Choice: ..... Narrator: .....
+** DONE Add map description lang
+CLOSED: [2023-05-23 Tue 01:36]
+** DONE Add item/inventory description lang
+CLOSED: [2023-05-23 Tue 01:36]
+** DONE Add multiple worlds
+CLOSED: [2023-05-23 Tue 01:36]
+** DONE Add enemies description lang
+CLOSED: [2023-05-23 Tue 01:36]
+** DONE Add quest description lang
+CLOSED: [2023-05-23 Tue 01:36]
 * Minor steps
 ** DONE Refactor dialog box into class -- has display_sprites, list of sprites, text, proportion --- just does drawing
 CLOSED: [2023-05-11 Thu 04:53]
@@ -48,45 +55,55 @@ CLOSED: [2023-05-21 Sun 10:05]
 CLOSED: [2023-05-21 Sun 10:06]
 ** DONE Implement Dialog DSL
 CLOSED: [2023-05-21 Sun 10:06]
-* DONE Implement camera properly
+* Tasks
+** DONE Implement camera properly
 CLOSED: [2023-05-21 Sun 10:06]
-* DONE Populate map 
+** DONE Populate map 
 CLOSED: [2023-05-17 Wed 14:37]
-** Populate map with buildings etc.
-** Populate map with entities
-* DONE Add Inventory
+*** Populate map with buildings etc.
+*** Populate map with entities
+** DONE Add Inventory
 CLOSED: [2023-05-21 Sun 10:06]
-** DONE Add Item entity? ItemName, ItemSprite, ItemDescription
+*** DONE Add Item entity? ItemName, ItemSprite, ItemDescription
 CLOSED: [2023-05-21 Sun 10:06]
-** DONE Draw Inventory
+*** DONE Draw Inventory
 CLOSED: [2023-05-21 Sun 10:06]
-** DONE Draw items in inventory
+*** DONE Draw items in inventory
 CLOSED: [2023-05-21 Sun 10:06]
-** DONE Add Holdable component with Item entity --- InventorySystem will add Item to Inventory when IsActive & Holdable
+*** DONE Add Holdable component with Item entity --- InventorySystem will add Item to Inventory when IsActive & Holdable
 CLOSED: [2023-05-21 Sun 10:06]
-* DONE Update user control to add attacks
+** DONE Update user control to add attacks
 CLOSED: [2023-05-21 Sun 10:06]
-* DONE Draw GUI
+** DONE Draw GUI
 CLOSED: [2023-05-21 Sun 10:06]
-* DONE Add Enemy, make it killable
+** DONE Add Enemy, make it killable
 CLOSED: [2023-05-21 Sun 10:06]
-* DONE Make enemy drop items
+** DONE Make enemy drop items
 CLOSED: [2023-05-21 Sun 10:06]
-* DONE Refactoring Map Interface
+** DONE Refactoring Map Interface
 CLOSED: [2023-05-21 Sun 10:09]
-** DONE Define fields of new map interface
+*** DONE Define fields of new map interface
 CLOSED: [2023-05-14 Sun 10:36]
-** DONE Update map drawing 
+*** DONE Update map drawing 
 CLOSED: [2023-05-14 Sun 10:36]
-** DONE Refactor ordered drawing to sort by custom height
+*** DONE Refactor ordered drawing to sort by custom height
 CLOSED: [2023-05-14 Sun 10:40]
-** DONE Update collision system to prevent collisions with world
+*** DONE Update collision system to prevent collisions with world
 CLOSED: [2023-05-14 Sun 11:42]
-** DONE Implement attack system
+*** DONE Implement attack system
 CLOSED: [2023-05-21 Sun 10:09]
-** DONE Implement damage
+*** DONE Implement damage
 CLOSED: [2023-05-21 Sun 10:09]
-** DONE Drop items on death
+*** DONE Drop items on death
 CLOSED: [2023-05-21 Sun 10:09]
-
-* TODO Add Quest system
+** DONE Add Quest system
+CLOSED: [2023-05-23 Tue 01:35]
+* Cool Things to show off
+- basic macros: When etc. [[file:lib/lang.rhm]]
+- Foldfun [[file:lib/utils.rhm]], application to be shown later
+- Sprite Map [[file:game/item_sprites.rhm]]
+- Map [[file:maps/map1.rhm]]
+- ECS [[file:components/health.rhm]], [[file:systems/hud.rhm]]
+- ECS instances [[file:entities/bat.rhm]]
+- Behaviour trees [[file:behaviours/monster.rhm]]
+- Inkle-lite [[file:dialogs/guard.rhm]]
