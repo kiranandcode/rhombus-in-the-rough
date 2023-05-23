@@ -88,7 +88,7 @@ class DialogScreen(
         when (dialog_item.dialog_text):
           dialog_box.draw()
           dialog_box.draw_text(dialog_item.text)
-        dialog_box.draw_options(choices, active)
+        dialog_box.draw_options(choices, active, dialog_item.dialog_text)
     | Completed(): #void
 
   method configure_next_state(force=#false):

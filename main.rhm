@@ -262,6 +262,7 @@ raylib.SetTargetFPS(60);
 
 world_screen.set_map(map1.Map1)
 
+def box: dialog_box.DialogBox()
 while (!raylib.WindowShouldClose()):
 
   game_state.update()
@@ -272,8 +273,6 @@ while (!raylib.WindowShouldClose()):
 
     game_state.draw()
     // dialog_box.draw()
-
-    // def msg:
     //   racket.format("Nothing to show....")
     // raylib.DrawText(msg, 10, 10, 20, raylib.DARKGRAY)
 

@@ -203,7 +203,7 @@ class DialogBox(
 
     def text_width: raylib.MeasureText(text, math.exact(font_size))
 
-    def offset_width: (width - width_option_pixels + text_width) / 2.
+    def offset_width: (width - width_option_pixels) / 2.
 
     text_pos.x := offset_width + 30
     text_pos.y := option_offset_y + 30
@@ -219,12 +219,13 @@ class DialogBox(
       dialog_color.inner()
     )
 
-  method draw_options(choices :: List.of(String), active=#false):
+  method draw_options(choices :: List.of(String), active=#false, with_text=#false):
     def width: raylib.GetScreenWidth()
     def height: raylib.GetScreenHeight()
     def no_choices: choices.length()
     def offset_width: (width - width_option_pixels) / 2.
-    def offset_height: height - (height_option_pixels * no_choices) - (option_padding * (no_choices - 1))
+    def total_height: if with_text | height - height_pixels | height
+    def offset_height: (total_height - (height_option_pixels * no_choices) - (option_padding * (no_choices - 1))) / 2.
 
     for:
       each:
@@ -236,20 +237,21 @@ class DialogBox(
         | active && ind == active: ACTIVE
         | ~else: BASE
       def option_offset: (height_option_pixels + option_padding) * ind
-
+      def cell_w: width_option_cells
+      def cell_h: height_option_cells
       for:
-        each i: 0 .. width_option_cells
-        each j: 0 .. height_option_cells
+        each i: 0 .. cell_w
+        each j: 0 .. cell_h
         def cell:
           cond
           | i == 0 && j == 0                             : panel.TOP_CORNER_LEFT
-          | i == width_cells - 1 && j == 0               : panel.TOP_CORNER_RIGHT
-          | i == 0 && j == height_cells - 1              : panel.BOTTOM_CORNER_LEFT
-          | i == width_cells - 1 && j == height_cells - 1: panel.BOTTOM_CORNER_RIGHT
+          | i == cell_w - 1 && j == 0                    : panel.TOP_CORNER_RIGHT
+          | i == 0 && j == cell_h - 1                    : panel.BOTTOM_CORNER_LEFT
+          | i == cell_w - 1 && j == cell_h - 1           : panel.BOTTOM_CORNER_RIGHT
           | i == 0                                       : panel.LEFT_EDGE
           | j == 0                                       : panel.TOP_MIDDLE
-          | i == width_cells - 1                         : panel.RIGHT_EDGE
-          | j == height_cells - 1                        : panel.BOTTOM_MIDDLE
+          | i == cell_w - 1                              : panel.RIGHT_EDGE
+          | j == cell_h - 1                              : panel.BOTTOM_MIDDLE
           | ~else                                        : panel.MIDDLE
 
         draw_cell(
