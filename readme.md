@@ -6,8 +6,6 @@ scheme/lisp-based [Racket programming
 language](https://github.com/racket/racket) &
 [Raylib](https://www.raylib.com/sd), licensed under AGPLv3+.
 
-![Screenshot 1](./screenshots/screenshot-1.png)
-![Screenshot 2](./screenshots/screenshot-2.png)
 ![Screenshot 3](./screenshots/screenshot-3.png)
 
 The artwork for the game is based on submissions for the Libre Pixel Cup,
@@ -114,3 +112,6 @@ Some interesting DSLs in the project:
     TEETH_NECKLACE POTION_NECKLACE CROSS_NECKLACE CLOTH_BAND METAL_BAND CLOTH_SHOES LEATHER_SHOES REINFORCED_SHOES STRENGTHENED_SHOES SPEEDY_SHOES METAL_SHOES FOREIGN_SHOES LEATHER_HELMET GLADIATOR_HELMET KNIGHT_HELMET WIZARD_HELMET
     FIRE_WIZARD_HELMET MONSTER_PLATE MONSTER_BONE_SHIELD METAL_SHIELD GOLD_SHIELD ROUND_SHIELD BANDIT_SHIELD METAL_BRACELET REINFORCED_METAL_SHEILD GLADIATOR_SHIELD MIRROR_SHIELD ROBOTIC_SHIELD MONSTER_SHIELD MONSTER_KING_SHIELD WOODEN_SHIELD REINFORCED_WOODEN_SHIELD
   ```
+## More screenshots
+![Screenshot 1](./screenshots/screenshot-1.png)
+![Screenshot 2](./screenshots/screenshot-2.png)
