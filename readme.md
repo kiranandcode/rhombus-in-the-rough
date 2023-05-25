@@ -1,8 +1,10 @@
 # A Rhombus in the Rough: Adventure Awaits!
 
-This is a small libre RPG game built using the experimental Rhombus
-dialect of the scheme/lisp-based Racket programming language & Raylib,
-licensed under AGPLv3+.
+This is a small libre RPG game built using the experimental [Rhombus
+dialect](https://github.com/racket/rhombus-prototype) of the
+scheme/lisp-based [Racket programming
+language](https://github.com/racket/racket) &
+[Raylib](https://www.raylib.com/sd), licensed under AGPLv3+.
 
 ![Screenshot 1](./screenshots/screenshot-1.png)
 ![Screenshot 2](./screenshots/screenshot-2.png)
