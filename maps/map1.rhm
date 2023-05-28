@@ -32,8 +32,6 @@ instance BatWing:
       #false
     )
 
-
-
 fun build_bat():
   def bat: Bat.create()
   bat.add_component(ItemsToDrop([BatWing.create(),BatWing.create()]))
@@ -43,7 +41,6 @@ use_static
 
 
 map Map1("./map1.tmx"):
-
 
   position "start-point":
     entity p :: Player

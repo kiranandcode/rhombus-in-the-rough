@@ -33,7 +33,6 @@
    <wangtile tileid="131" wangid="0,1,0,0,0,0,0,0"/>
    <wangtile tileid="132" wangid="0,1,0,0,0,0,0,1"/>
    <wangtile tileid="133" wangid="0,0,0,0,0,0,0,1"/>
-   <wangtile tileid="163" wangid="0,1,0,1,0,1,0,1"/>
    <wangtile tileid="164" wangid="0,1,0,1,0,1,0,1"/>
    <wangtile tileid="165" wangid="0,1,0,1,0,1,0,1"/>
   </wangset>

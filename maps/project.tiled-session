@@ -12,19 +12,62 @@
             "scaleInDock": 1,
             "scaleInEditor": 1
         },
+        "/home/kirang/Downloads/decoration_medieval/deco-med.tmx": {
+            "scale": 0.5942,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 902.894648266577,
+                "y": 956.7485695052171
+            }
+        },
+        "/home/kirang/Downloads/decoration_medieval/deco-med.tmx#container": {
+            "scaleInDock": 1
+        },
+        "/home/kirang/Downloads/decoration_medieval/deco-med.tmx#food": {
+            "scaleInDock": 1
+        },
+        "/home/kirang/Downloads/decoration_medieval/deco-med.tsx": {
+            "scaleInDock": 1
+        },
+        "/home/kirang/Downloads/fence/fence_medieval.tsx": {
+            "scaleInDock": 1
+        },
+        "/home/kirang/terrain/bricks/bricks-v5.tsx": {
+            "scaleInDock": 1
+        },
+        "/home/kirang/terrain/terrain/terrain-map-v7.tsx": {
+            "dynamicWrapping": true,
+            "scaleInDock": 1
+        },
         "Exterior Tiles.tsx": {
             "scaleInDock": 0.9049,
             "scaleInEditor": 1
         },
         "map1.tmx": {
-            "scale": 2.2509,
-            "selectedLayer": 9,
+            "expandedObjectLayers": [
+                9
+            ],
+            "scale": 0.7995,
+            "selectedLayer": 8,
             "viewCenter": {
-                "x": 700.1643786929671,
-                "y": 338.7533875338753
+                "x": 771.1069418386492,
+                "y": 459.66228893058155
+            }
+        },
+        "map2.tmx": {
+            "expandedObjectLayers": [
+                20,
+                14
+            ],
+            "scale": 0.9068,
+            "selectedLayer": 17,
+            "viewCenter": {
+                "x": 329.1795324217026,
+                "y": 642.3687692986325
             }
         },
         "terrain.tsx": {
+            "dynamicWrapping": false,
             "scaleInDock": 1,
             "scaleInEditor": 1
         },
@@ -39,17 +82,22 @@
     },
     "last.externalTilesetPath": "/home/kirang/Documents/code/racket/murder-on-the-rhombus/maps",
     "last.imagePath": "/home/kirang/Documents/code/racket/murder-on-the-rhombus/resources/images",
+    "map.height": 80,
     "map.lastUsedFormat": "tmx",
+    "map.width": 80,
     "openFiles": [
         "map1.tmx"
     ],
     "project": "project.tiled-project",
+    "property.type": "int",
     "recentFiles": [
+        "/home/kirang/Downloads/decoration_medieval/deco-med.tmx",
         "map1.tmx",
         "testing.tmx",
         "Exterior Tiles.tsx",
         "/home/kirang/Documents/code/racket/murder-on-the-rhombus/resources/images/terrain.tsx",
         "terrain.tsx"
     ],
-    "tileset.lastUsedFilter": "Tiled tileset files (*.tsx *.xml)"
+    "tileset.lastUsedFilter": "Tiled tileset files (*.tsx *.xml)",
+    "tileset.lastUsedFormat": "tsx"
 }
