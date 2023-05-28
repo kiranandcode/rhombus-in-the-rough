@@ -35,7 +35,12 @@ class CollisionBox(
 ):
   extends Object
 
-class Point(name :: String, x :: Real, y :: Real):
+class Point(
+        name :: String,
+        x :: Real,
+        y :: Real,
+        properties :: Map.of(String, Any)
+     ):
   extends Object
 class Polygon(name :: String, x :: Real, y :: Real, points :: List.of(Pair.of(Real, Real))):
   extends Object
@@ -47,7 +52,7 @@ class ObjectGroup(
 
 class Layer(
    name :: String,
-   properties :: Map.of(String, Integral),
+   properties :: Map.of(String, Any),
    data :: List.of(List.of(Integral))
  )
 
@@ -78,13 +83,39 @@ fun read_map_data(fname):
     )
   )
 
+fun read_properties(properties):
+  for Map:
+    each data: properties
+    match data
+    | [#'property, fields]:
+        def name: to_string(lookup(fields, #'name))
+        let ty: lookup(fields, #'type, #false)
+        let ty: if ty | to_string(ty) | ty
+        match ty
+        | "int" || #false:
+           def value: racket.#{string->number}(lookup(fields, #'value))
+           values(name, value)
+        | "bool":
+           def value: match to_string(lookup(fields, #'value)) | "true": #true | "false": #false
+           values(name, value)
+
+
 fun read_object(object):
+  println(object)
   match object
+  | [#'object, meta_data,
+     [#'properties, [], property, ...],
+     [#'point, []]]:
+      def name: to_string(lookup(meta_data, #'name))
+      def x: racket.#{string->number}(lookup(meta_data, #'x))
+      def y: racket.#{string->number}(lookup(meta_data, #'y))
+      def properties: read_properties([property, ...])
+      Point(name, x, y, properties)
   | [#'object, meta_data, [#'point, []]]:
       def name: to_string(lookup(meta_data, #'name))
       def x: racket.#{string->number}(lookup(meta_data, #'x))
       def y: racket.#{string->number}(lookup(meta_data, #'y))
-      Point(name, x, y)
+      Point(name, x, y, Map{})
   | [#'object, meta_data, [#'polygon, data]]:
       def name: to_string(lookup(meta_data, #'name))
       def x: racket.#{string->number}(lookup(meta_data, #'x))
@@ -134,14 +165,6 @@ fun load_tileset(fname):
   def source_path: racket.#{build-path}(tileset_root_dir, source)
   Tileset(tile_width, tile_height, tilecount, columns, (source_path.string()))
 
-fun read_properties(properties):
-  for Map:
-    each data: properties
-    match data
-    | [#'property, fields]:
-        def name: to_string(lookup(fields, #'name))
-        def value: racket.#{string->number}(lookup(fields, #'value))
-        values(name, value)
 
 fun load_map(fname):
   def path: Path(fname)
@@ -188,4 +211,5 @@ fun load_map(fname):
     layers.reverse(),
     objects.reverse()
   )
+
 
