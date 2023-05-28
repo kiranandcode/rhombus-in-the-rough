@@ -4,7 +4,7 @@ This will eventually be displayed in-game as well, but for now, I'll keep track 
 
 ## Images
 
-- [Exterior Tiles.png](./resources/images/Exterior Tiles.png), [Interior 2.png](./resources/images/Interior 2.png), [Interior.png](./resources/images/Interior.png), [terrain.png](./resources/images/terrain.png) 
+- [Exterior-Tiles.png](./resources/images/Exterior Tiles.png), [Interior-2.png](./resources/images/Interior 2.png), [Interior.png](./resources/images/Interior.png), [terrain.png](./resources/images/terrain.png) 
   - from [lpc submissions merged](https://opengameart.org/content/lpc-submissions-merged) on OpenGameArt.
   - attribution: [attribution-terrain.md](./attribution/terrain-attribution.md2)
 
@@ -40,5 +40,10 @@ This will eventually be displayed in-game as well, but for now, I'll keep track 
 
 - [soldier-sprite.png](./resources/images/soldier-sprite.png), [soldier-sprite-segmented.png](./resources/images/soldier-sprite-segmented.png), [soldier_2.png](./resources/images/soldier_2.png), [soldier_2_segmented.png](./resources/images/soldier_2_segmented.png)
    - from Stable Diffusion
-   - Attribution: Me
+   - attribution: Me
+   - license: CC-BY-SA 4.0
+
+- [decorations-medieval.png](./resources/images/decorations-medieval.png), [fence-medieval.png](./resources/images/fence-medieval.png)
+   - from [[LPC] Medieval village decorations](https://opengameart.org/content/lpc-medieval-village-decorations)
+   - attribution: [LPC] Medieval Village Decorations" by bluecarrot16, Lanea Zimmerman (Sharm), Reemax (Tuomo Untinen), Xenodora, Johann C, Johannes Sjölund, Casper Nilsson, Daniel Cook, Rayane Félix (RayaneFLX), Wolthera van Hövell tot Westerflier (TheraHedwig), Hyptosis, mold, Zachariah Husiar (Zabin), Clint Bellanger, Jetrel, Nemisys, Guido Bos, Curt, Bertram, and Daniel Eddeland (daneeklu). see [Credits-decorations-medieval.txt](./attribution/CREDITS-decorations-medieval.txt)
    - license: CC-BY-SA 4.0
