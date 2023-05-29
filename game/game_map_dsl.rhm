@@ -107,7 +107,7 @@ meta:
       def pos_key: pos_id.unwrap()
       def position: Map.ref(map.points, pos_key, #false)
       if !position
-      | Syntax.error("position \"" ++ pos_key ++ "\" not found in map", pos_id)
+      | syntax_meta.error("position \"" ++ pos_key ++ "\" not found in map", pos_id)
       | 'block:
           def ent :: $annot = $name
           ent . $fn(Vector2($(Pair.first(position)), $(Pair.rest(position))))'       
@@ -115,7 +115,7 @@ meta:
       def pos_key: pos_id.unwrap()
       def position: Map.ref(map.points, pos_key, #false)
       if !position
-      | Syntax.error("position \"" ++ pos_key ++ "\" not found in map", pos_id)
+      | syntax_meta.error("position \"" ++ pos_key ++ "\" not found in map", pos_id)
       | 'block:
           def ent :: entity.Entity = $name
           def pos :: Position = ent.get_component(Position)
@@ -125,7 +125,7 @@ meta:
       def pos_key: pos_id.unwrap()
       def path: Map.ref(map.paths, pos_key, #false)
       if !path
-      | Syntax.error("path \"" ++ pos_key ++ "\" not found in map", pos_id)
+      | syntax_meta.error("path \"" ++ pos_key ++ "\" not found in map", pos_id)
       | def [Pair(px, py), ...]: path
         'block:
           def ent :: $annot = $name
@@ -152,7 +152,7 @@ meta:
         ...' ~acc acc:
       def pos_key :: String : pos.unwrap()
       if !map.points.has_key(pos_key)
-      | Syntax.error("position \"" ++ pos_key ++ "\" not found in map", pos)
+      | syntax_meta.error("position \"" ++ pos_key ++ "\" not found in map", pos)
       | build_initialisers(['$body', ...], map, map.points[pos_key], acc)
   | 'entity $(name :: Name) :: $arg ... = $init ...:
         $body

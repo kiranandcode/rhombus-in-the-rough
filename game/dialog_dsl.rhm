@@ -129,7 +129,7 @@ meta:
       values(msg.expr, seen_first)
   | '1 $(msg :: FmtString)' ~acc acc:
        if seen_first
-       | Syntax.error("Duplicate text with first priority", msg)
+       | syntax_meta.error("Duplicate text with first priority", msg)
        | values(acc, msg.expr)
 
   foldfun extract_exports(ls)
@@ -152,7 +152,7 @@ meta:
   foldfun build_dialog(ls, init_id, start_sym) ~values (id = init_id, snippet_name=#false, prev_nodes=[], links=[])
   | '~> END' ~acc acc:
      if snippet_name
-     | Syntax.error("A snippet can not begin with a jump")
+     | syntax_meta.error("A snippet can not begin with a jump")
      | values(acc, id, #false, [], links)
   | '~> $(name :: Identifier) $rest ...' ~acc acc:
      def new_links:
@@ -160,7 +160,7 @@ meta:
          each node_sym: prev_nodes
          Pair(node_sym, '$name $rest ...')
      if snippet_name
-     | Syntax.error("A snippet can not begin with a jump", name)
+     | syntax_meta.error("A snippet can not begin with a jump", name)
      | values(acc, id, #false, [], new_links ++ links)
   | '== $(name :: Identifier) ==' ~acc acc:
       values(acc, id, name, prev_nodes, links)
