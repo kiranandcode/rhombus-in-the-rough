@@ -101,7 +101,6 @@ fun read_properties(properties):
 
 
 fun read_object(object):
-  println(object)
   match object
   | [#'object, meta_data,
      [#'properties, [], property, ...],
