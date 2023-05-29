@@ -1,0 +1,184 @@
+// def_texture main_character_image : "./resources/images/male_walkcycle.png"
+// def_texture main_character_attack : "./resources/images/male_slash.png"
+// def_texture dagger_slash : "./resources/images/WEAPON_dagger.png"
+
+// def_texture blacksmith_image : "./resources/images/soldier.png"
+// def_texture bat_image : "./resources/images/enemies/bat.png"
+// def_texture bee_image : "./resources/images/enemies/bee.png"
+// def_texture big_worm_image : "./resources/images/enemies/big_worm.png"
+// def_texture eyeball_image : "./resources/images/enemies/eyeball.png"
+// def_texture ghost_image : "./resources/images/enemies/ghost.png"
+// def_texture pumpking_image : "./resources/images/enemies/pumpking.png"
+// def_texture slime_image : "./resources/images/enemies/slime.png"
+// def_texture snake_image : "./resources/images/enemies/snake.png"
+
+// def_texture blacksmith_character_sprite : "./resources/images/soldier_2_segmented.png"
+// def_texture blacksmith_original_character_sprite : "./resources/images/soldier-sprite-segmented.png"
+
+// def HUMANOID_FRAMES : 9
+
+// instance Player:
+//   component player :~ IsPlayer = IsPlayer()
+//   component state :~ HasState = State.Idle
+//   component weapon_action :~ WeaponActionAnimation = WeaponActionAnimation(
+//       #false, 0., main_character_attack,
+//       0.075, 6,
+//       main_character_attack, 0., 0
+//   )
+//   component weapon_animation :~ WeaponAnimation = dagger_slash
+//   component health :~ Health = Health(100, 100)
+//   component position :~ Position = Vector2(320.,320.)
+//   component collision_box :~ CollisionBox = CollisionBox(Rectangle(-16.,16., 32., 16.),0)
+//   component velocity :~ Velocity = Vector2(0.,0.)
+//   component orientation :~ Orientation = Direction.DOWN
+//   component sprite :~ AnimatedSprite = AnimatedSprite(
+//       main_character_image,
+//       #false,
+//       0,
+//       0.05,
+//       0.,
+//       HUMANOID_FRAMES
+//     )
+//   component control :~ UserController = 100.0
+
+// instance NPC:
+//   component position :~ Position = Vector2(320.,320.)
+//   // component velocity :~ Velocity = Vector2(0.,0.)
+//   component collision_box :~ CollisionBox = CollisionBox(Rectangle(-16.,16., 32., 16.),0)
+//   component orientation :~ Orientation = Direction.DOWN
+//   component interactable :~ Interactable = Interactable(
+//       icons.TALK,
+//       -16.,
+//       -48.,
+//       #false
+//     )
+//   component sprite :~ AnimatedSprite = AnimatedSprite(
+//       blacksmith_image,
+//       #false,
+//       0,
+//       0.05,
+//       0.,
+//       HUMANOID_FRAMES
+//     )
+
+// instance Bat:
+//   component position :~ Position = Vector2(280.,350.)
+//   component orientation :~ Orientation = Direction.DOWN
+//   component sprite :~ AnimatedSprite = AnimatedSprite(
+//       bat_image,
+//       #true,
+//       0,
+//       0.1,
+//       0.,
+//       4
+//     )
+
+// instance BigWorm:
+//   component position :~ Position = Vector2(210.,330.)
+//   component orientation :~ Orientation = Direction.DOWN
+//   component collision_box :~ CollisionBox = CollisionBox(Rectangle(-16.,0., 32., 32.),0)
+//   component sprite :~ AnimatedSprite = AnimatedSprite(
+//       big_worm_image,
+//       #true,
+//       0,
+//       0.25,
+//       0.,
+//       3
+//     )
+
+// instance EyeBall:
+//   component position :~ Position = Vector2(350.,370.)
+//   component orientation :~ Orientation = Direction.DOWN
+//   component collision_box :~ CollisionBox = CollisionBox(Rectangle(-16.,0., 32., 32.),0)
+//   component sprite :~ AnimatedSprite = AnimatedSprite(
+//       eyeball_image,
+//       #true,
+//       0,
+//       0.5,
+//       0.,
+//       3
+//     )
+
+// instance Ghost:
+//   component position :~ Position = Vector2(380.,170.)
+//   component orientation :~ Orientation = Direction.DOWN
+//   component collision_box :~ CollisionBox = CollisionBox(Rectangle(-16.,0., 32., 32.),0)
+//   component sprite :~ AnimatedSprite = AnimatedSprite(
+//       ghost_image,
+//       #true,
+//       0,
+//       0.5,
+//       0.,
+//       3
+//     )
+
+// instance Pumpking:
+//   component position :~ Position = Vector2(380.,70.)
+//   component orientation :~ Orientation = Direction.DOWN
+//   component collision_box :~ CollisionBox = CollisionBox(Rectangle(-16.,0., 32., 32.),0)
+//   component sprite :~ AnimatedSprite = AnimatedSprite(
+//       pumpking_image,
+//       #true,
+//       0,
+//       0.2,
+//       0.,
+//       3
+//     )
+
+// instance Slime:
+//   component position :~ Position = Vector2(280.,70.)
+//   component orientation :~ Orientation = Direction.DOWN
+//   component collision_box :~ CollisionBox = CollisionBox(Rectangle(-16.,0., 32., 32.),0)
+//   component sprite :~ AnimatedSprite = AnimatedSprite(
+//       slime_image,
+//       #true,
+//       0,
+//       0.2,
+//       0.,
+//       3
+//     )
+
+
+// instance Snake:
+//   component position :~ Position = Vector2(180.,100.)
+//   component orientation :~ Orientation = Direction.DOWN
+//   component collision_box :~ CollisionBox = CollisionBox(Rectangle(-16.,0., 32., 32.),0)
+//   component sprite :~ AnimatedSprite = AnimatedSprite(
+//       snake_image,
+//       #true,
+//       0,
+//       0.3,
+//       0.,
+//       3
+//     )
+
+
+
+// def character: Player.create()
+// def blacksmith: NPC.create()
+// def blacksmith_2 :: entity.Entity : NPC.create()
+// def bat :: entity.Entity : Bat.create()
+// def big_worm :: entity.Entity : BigWorm.create()
+// def eyeball :: entity.Entity : EyeBall.create()
+// def ghost :: entity.Entity : Ghost.create()
+// def pumpking :: entity.Entity : Pumpking.create()
+// def slime :: entity.Entity : Slime.create()
+// def snake :: entity.Entity : Snake.create()
+
+// def posn :: Position = blacksmith_2.get_component(Position)
+// posn.value.x := 100.
+// posn.value.y := 200.
+    
+// blacksmith.add_component(
+//   DialogItem(dialog.Dialog(
+//     blacksmith_character_sprite,
+//     "Hi there!"
+//   ))
+// )
+
+// blacksmith_2.add_component(
+//   DialogItem(dialog.Dialog(
+//     blacksmith_original_character_sprite,
+//     "Hi there... Nice to meet you. Have you spoken to my\nbrother?..."
+//   ))
+// )

@@ -42,8 +42,8 @@ use_static
 
 map Map1("./map1.tmx"):
 
-  position "start-point":
-    entity p :: Player
+  // position "start-point":
+  //   entity p :: Player
 
   position "in-front-of-house":
     entity blacksmith :: Blacksmith

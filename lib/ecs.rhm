@@ -291,7 +291,7 @@ defn.macro
 
 
 expr.macro
-| 'name_to_component_value($(name :: Identifier))':
+| 'name_to_component_value($(name :: Name))':
     '$(name) . _component'
 
 expr.macro

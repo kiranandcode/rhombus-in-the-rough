@@ -32,6 +32,8 @@ import:
   "../systems/direction.rhm" open
   "../systems/aggro.rhm" open
 
+  "../game/map_manager.rhm"
+
   "inventory.rhm" open
 
 export:
@@ -42,26 +44,27 @@ use_static
 
 class WorldScreen(
     view :: View,
+    map_manager :: map_manager.MapManager,
     player_inventory :: inventory.Inventory,
     mutable omap :: maybe(game_map.GameMap)
   ):
  implements game_state.Screen
 
- constructor(view):
-   super(view, inventory.Inventory(), #false)
+ constructor(view, map_manager :: map_manager.MapManager):
+   super(view, map_manager, inventory.Inventory(), #false)
 
- method set_map(new_map :: game_map.GameMap):
-   when omap:
-     def map :~ game_map.GameMap = omap
-     map.destroy()
-   omap := new_map
-   def map :~ game_map.GameMap = omap
-   map.init()
+ // method set_map(new_map :: game_map.GameMap):
+ //   when omap:
+ //     def map :~ game_map.GameMap = omap
+ //     map.destroy()
+ //   omap := new_map
+ //   def map :~ game_map.GameMap = omap
+ //   map.init()
 
  override method draw():
     def map :~ game_map.GameMap = omap
     draw_2d view:
-      map.draw(view)
+      map_manager.draw(view)
       // CollisionSystem.draw()
       // DamageAreaSystem.draw()
       // HurtSystem.draw()
@@ -77,11 +80,10 @@ class WorldScreen(
 
 
  override method update():
-   def map :~ game_map.GameMap = omap
-   map.update()
+   map_manager.update()
  
    view.update()
-   CameraSystem.update(view,map)
+   CameraSystem.update(view,map_manager.current_map)
    DeAggroSystem.update()
    AggroSystem.update()
    BehaviourSystem.update()
@@ -100,8 +102,8 @@ class WorldScreen(
    ItemDropSystem.update()
    PickupItemSystem.update()
    DirectionSystem.update()
-   CollisionSystem.update(map.get_map())
-   MapClampSystem.update(map)
+   CollisionSystem.update(map_manager.current_map.get_map())
+   MapClampSystem.update(map_manager.current_map)
    InteractionSystem.update()
    DialogSystem.update()
 

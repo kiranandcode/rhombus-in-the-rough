@@ -1,0 +1,71 @@
+#lang rhombus
+
+import:
+  lib("racket/main.rkt") as racket
+  "game_map.rhm"
+  "view.rhm"
+
+  "../lib/lang.rhm" open
+
+  "../lib/ecs.rhm" open
+  "../components/movement.rhm"
+
+  "../lib/tiled.rhm"
+
+  "../lib/event.rhm"
+  "../messages.rhm" open
+
+export: MapManager
+
+use_static
+
+system ClearPhysicalObjectsSystem(pos :: movement.Position) with this:
+
+  method clear():
+    event.send(DestroyEntity(this))
+
+class MapManager(
+     loaded_maps :: MutableMap,
+     player :: entity.Entity,
+     mutable current_map :: game_map.GameMap
+  ):
+    constructor(player :: entity.Entity, init_map :: game_map.GameMap):
+      def Pair(pos_x, pos_y): init_map.get_map().points["start-point"]
+      def player_position :: movement.Position : player.get_component(movement.Position)
+      player_position.value.x := pos_x
+      player_position.value.y := pos_y
+      init_map.init()
+      super(MutableMap{}, player, init_map)
+
+    method load_map(name :: String, map :: game_map.GameMap):
+      loaded_maps[name] := map
+
+    method draw(view :: view.View):
+      current_map.draw(view)
+  
+    method update():
+      current_map.update()
+
+    method change_map(target :: String):
+      def [map_name, entry_point_name]: racket.#{string-split}(target, ".")
+      when (Map.has_key(loaded_maps, map_name)):
+        def next_map :: game_map.GameMap: loaded_maps[map_name]
+        def tile_map :: game_map.TileMap: next_map.get_map()
+        if !Map.has_key(tile_map.points, entry_point_name)
+        | println("entry point " +& entry_point_name +& " not found in map " +& map_name)
+        | def Pair(px,py): tile_map.points[entry_point_name]
+          def player_position :: movement.Position : player.get_component(movement.Position)
+          player.remove_component(movement.Position)
+
+          ClearPhysicalObjectsSystem.clear()
+          current_map.destroy()
+          current_map := next_map
+
+          player_position.value.x := px
+          player_position.value.y := py
+          player.add_component(movement.Position(player_position.value))
+
+          current_map.init()
+
+
+
