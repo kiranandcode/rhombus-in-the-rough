@@ -6,54 +6,23 @@ import:
    lib("raylib/2d/unsafe.rkt") as raylib
    lib("raylib/raymath/unsafe.rkt") as raymath
 
-   "lib/datatypes.rhm" open
    "lib/lang.rhm" open
    "lib/resources.rhm" expose: def_texture
-   "lib/ecs.rhm" open
    "lib/event.rhm"
-   "lib/ordered_drawing.rhm"
-   "lib/tiled.rhm"
    "lib/message.rhm" open
 
    "game/raylib_lang.rhm" open
    "game/view.rhm" open
-   "game/game_map.rhm"
-   "game/dialog_box.rhm"
-   "game/dialog.rhm"
-   "game/icons.rhm"
-   "game/terrain.rhm"
    "game/game_state.rhm"
-   "game/item_sprites.rhm"
    "game/map_manager.rhm"
 
    "screens/world.rhm"
    "entities/player.rhm" open
 
-   "components/movement.rhm" open
-   "components/graphics.rhm" open
-   "components/input.rhm" open
-   "components/interaction.rhm" open
-   "components/dialog.rhm" open
-   "components/health.rhm" open
-   "components/character_state.rhm" open
-   "components/weapon.rhm" open
-
-   "systems/movement.rhm" open
-   "systems/user_control.rhm" open
-   "systems/animation.rhm" open
-   "systems/drawing.rhm" open
-   "systems/collision.rhm" open
-   "systems/interaction.rhm" open
    "maps/map1.rhm"
-
-   meta:
-     lib("racket/syntax.rkt") as syntax
-
 
 use_static
 
-
-def_texture sprites: "./resources/images/sprites-out.png"
 // constants
 def screen_width: 800
 def screen_height: 450
