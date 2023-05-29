@@ -18,17 +18,17 @@ meta:
   | ensure_constructor_exists(constr, no_args, '[]'):
       error("Inexhaustive match: Constructor " ++ to_string(constr) ++ " not present")
   | ensure_constructor_exists(constr, no_args, '[[~else], $rest, ...]'): #void
-  | ensure_constructor_exists(constr, no_args, '[[$oconstr ... ($arg, ...)], $rest, ...]'):
+  | ensure_constructor_exists(constr, no_args, '[[$(oconstr :: Name) ($arg, ...)], $rest, ...]'):
       cond 
-      | to_string(constr) != to_string('$oconstr ...'):
+      | !syntax_meta.equal_binding(constr, oconstr):
           ensure_constructor_exists(constr, no_args, '[$rest, ...]')
       | [arg, ...].length() != no_args:
-          error("Number of arguments does not match: " ++ to_string('$oconstr ... ($arg, ...)') ++ " should have " ++ to_string(no_args) ++ " arguments")
+          error("Number of arguments does not match: " ++ to_string('$oconstr ($arg, ...)') ++ " should have " ++ to_string(no_args) ++ " arguments")
       | ~else: #void
 
-  | ensure_constructor_exists(constr, no_args, '[[$oconstr ...], $rest, ...]'):
+  | ensure_constructor_exists(constr, no_args, '[[$(oconstr :: Name)], $rest, ...]'):
       cond 
-      | to_string(constr) != to_string('$oconstr ...'):
+      | !syntax_meta.equal_binding(constr, oconstr):
           ensure_constructor_exists(constr, no_args, '[$rest, ...]')
       | ~else: #void
 
@@ -137,3 +137,14 @@ defn.macro
             ...
           annot.macro '$name': '$name . $name'
           »'
+
+module test:
+  // check that dotted names work
+  namespace nested:
+    export all_defined
+    datatype Example
+    | One(a)
+    | Two(a, b)
+  ematch nested.One(0)
+  | nested.One(_): "one"
+  | nested.Two(_, _): "two"

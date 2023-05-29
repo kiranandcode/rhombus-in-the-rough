@@ -279,26 +279,20 @@ fun test():
     ~is ["hello ", "world", "!!!"]
   
 defn.macro
-| 'component $name($field_name :: $ty, ...)':
-   def name_stx: Syntax.make('$name')
-   def _name_value : match name | '$(x::Identifier)': to_string(x.unwrap())
-   def _name : Syntax.make(syntax.#{format-id}(name_stx, "_~a", _name_value)).relocate(name)
-   def _name_class : Syntax.make(syntax.#{format-id}(name_stx, "~a_class", _name_value)).relocate(name)
+| 'component $(name :: Identifier)($field_name :: $ty, ...)':
    '«namespace $name:
-       export: $_name $_name_class
-       def $_name: Component($_name_value)
-       class $_name_class(mutable $field_name :: $ty, ...)
-     annot.macro '$name': '$name . $_name_class'
+       export: _component _class
+       def _component: Component($(to_string(name)))
+       class _class(mutable $field_name :: $ty, ...)
+     annot.macro '$name': '$(name) . _class'
      fun
-     | $name($field_name :: $ty, ...) : [$name . $_name, $name . $_name_class($field_name, ...)]
-     | $name(): [$name . $_name]»'
+     | $name($field_name :: $ty, ...) : [$(name) . _component, $(name) . _class($field_name, ...)]
+     | $name(): [$(name) . _component]»'
+
 
 expr.macro
 | 'name_to_component_value($(name :: Identifier))':
-   def name_stx: Syntax.make('$name')
-   def _name_value: to_string(name.unwrap())
-   def _name : Syntax.make(syntax.#{format-id}(name_stx, "_~a", _name_value)).relocate(name)
-   '$name . $_name'
+    '$(name) . _component'
 
 expr.macro
 | 'system_defs($name, [[$component_name, $component], ...], [$body, ...])':
@@ -415,47 +409,48 @@ meta:
       '$hd && $(and_all(tl))'
   
   foldfun instance_entity_args(ls)
-  | 'component $name :: $component': '$name'
-  | 'component optional $(name :: Identifier) :: $component':
+  | 'component $name :: $(component :: Name)': '$name'
+  | 'component optional $(name :: Identifier) :: $(component :: Name)':
       def kwarg: Keyword.from_symbol(name.unwrap())
       '$kwarg: $name = #false'
-  | 'component $name :~ $component = $body ...':
+  | 'component $name :~ $(component :: Name) = $body ...':
       def kwarg: Keyword.from_symbol(name.unwrap())
       '$kwarg: $name = ($body ...)'
   | ~skip 'method $body ...'
 
   foldfun instance_component_tests(ls, entity)
-  | 'component $name :: $component': '($(entity) :~ entity.Entity) . has_component ($component)'
-  | 'component $name :~ $component = $body ...': '($(entity) :~ entity.Entity). has_component ($component)'
-  | ~skip 'component optional $name :: $component'
+  | 'component $name :: $(component :: Name)': '($(entity) :~ entity.Entity) . has_component ($component)'
+  | 'component $name :~ $(component :: Name) = $body ...':
+      '($(entity) :~ entity.Entity). has_component ($component)'
+  | ~skip 'component optional $name :: $(component :: Name)'
   | ~skip 'method $body ...'
 
   foldfun instance_entity_exports(ls)
-  | 'component $name :: $component': '$name'
-  | 'component optional $name :: $component': '$name'
-  | 'component $name :~ $component = $body ...': '$name'
+  | 'component $name :: $(component :: Name)': '$name'
+  | 'component optional $name :: $(component :: Name)': '$name'
+  | 'component $name :~ $(component :: Name) = $body ...': '$name'
   | 'method $name $body ...': '$name'
 
   foldfun instance_entity_fields(ls)
-  | 'component $name :: $component': '$name'
-  | 'component optional $name :: $component': '$name'
-  | 'component $name :~ $component = $body ...': '$name'
+  | 'component $name :: $(component :: Name)': '$name'
+  | 'component optional $name :: $(component :: Name)': '$name'
+  | 'component $name :~ $(component :: Name) = $body ...': '$name'
   | ~skip 'method $body ...'
 
 
   foldfun instance_entity_helpers(ls)
-  | 'component $name :: $component':
+  | 'component $name :: $(component :: Name)':
      'fun $name(entity :: entity.Entity) :: $component: entity.get_component($component)'
-  | 'component optional $name :: $component':
+  | 'component optional $name :: $(component :: Name)':
      'fun $name(entity :: entity.Entity) :: Maybe($component): entity.get_component_opt($component)'
-  | 'component $name :~ $component = $body ...':
+  | 'component $name :~ $(component :: Name) = $body ...':
      'fun $name(entity :: entity.Entity) :: $component: entity.get_component($component)'
   | ~skip 'method $body ...'
 
   foldfun instance_entity_methods(ls, instance_name, [field,...], ths)
-  | ~skip 'component $name :: $component'
-  | ~skip 'component optional $name :: $component'
-  | ~skip 'component $name :~ $component = $body ...'
+  | ~skip 'component $name :: $(component :: Name)'
+  | ~skip 'component optional $name :: $(component :: Name)'
+  | ~skip 'component $name :~ $(component :: Name) = $body ...'
   | 'method $(fn :: Identifier)($arg,...):
         $body
         ...':
@@ -466,24 +461,24 @@ meta:
           ...'
 
   foldfun instance_entity_method_args(ls)
-  | ~skip 'component $name :: $component'
-  | ~skip 'component optional $name :: $component'
-  | ~skip 'component $name :~ $component = $body ...'
+  | ~skip 'component $name :: $(component :: Name)'
+  | ~skip 'component optional $name :: $(component :: Name)'
+  | ~skip 'component $name :~ $(component :: Name) = $body ...'
   | 'method $(fn :: Identifier)($arg,...):
         $body
         ...': [fn, [arg,...]]
 
   foldfun instance_create_body_def(ls, entity)
-  | 'component $name :: $component': 'add_component_helper($entity, $component($name))'
-  | 'component optional $name :: $component':
+  | 'component $name :: $(component :: Name)': 'add_component_helper($entity, $component($name))'
+  | 'component optional $name :: $(component :: Name)':
       'if $name
        | add_component_helper($entity, $component($name))
        | #void'
-  | 'component $name :~ $(component :: Identifier) = $(fn :: Identifier)($body, ...)':
-      if to_string(fn.unwrap()) == to_string(component.unwrap())
+  | 'component $name :~ $(component :: Name) = $(fn :: Identifier)($body, ...)':
+      if syntax_meta.equal_binding(fn, component)
       | 'add_component_helper($entity, $name)'
       | 'add_component_helper($entity, $component($name))'
-  | 'component $name :~ $(component :: Identifier) = $body ...':
+  | 'component $name :~ $(component :: Name) = $body ...':
       'add_component_helper($entity, $component($name))'
   | ~skip 'method $body ...'
 
