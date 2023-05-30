@@ -109,6 +109,21 @@ expr.macro
         | ...
         | ~else: #void
      )'
+| 'handle
+   | $case ...:
+       $body
+       ...
+   | ...':
+
+    'add_handler(
+      fun (msg :: message.Message):
+        match msg
+        | $case ...:
+            $body
+            ...
+        | ...
+        | ~else: #void
+     )'
 
 
 module test:

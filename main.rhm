@@ -42,7 +42,9 @@ message ChangeMap(target :: String)
 
 event.handle
 | PickupItem(ent): world_screen.player_inventory.add_item(ent)
-| ChangeMap(target): world_screen.map_manager.change_map(target)
+| ChangeMap(target):
+   println("changing world to " +& target)
+   world_screen.map_manager.change_map(target)
 
 game_state.init(
   world_screen

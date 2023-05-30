@@ -83,7 +83,7 @@ fun read_map_data(fname):
     )
   )
 
-fun read_properties(properties):
+fun read_properties(properties, default=#false):
   for Map:
     each data: properties
     match data
@@ -91,8 +91,11 @@ fun read_properties(properties):
         def name: to_string(lookup(fields, #'name))
         let ty: lookup(fields, #'type, #false)
         let ty: if ty | to_string(ty) | ty
-        match ty
-        | "int" || #false:
+        match (ty || default)
+        | "string":
+           def value: to_string(lookup(fields, #'value))
+           values(name, value)
+        | "int" :
            def value: racket.#{string->number}(lookup(fields, #'value))
            values(name, value)
         | "bool":
@@ -108,7 +111,7 @@ fun read_object(object):
       def name: to_string(lookup(meta_data, #'name))
       def x: racket.#{string->number}(lookup(meta_data, #'x))
       def y: racket.#{string->number}(lookup(meta_data, #'y))
-      def properties: read_properties([property, ...])
+      def properties: read_properties([property, ...], "string")
       Point(name, x, y, properties)
   | [#'object, meta_data, [#'point, []]]:
       def name: to_string(lookup(meta_data, #'name))
@@ -192,7 +195,7 @@ fun load_map(fname):
           def properties:
             if property_data
             | def [_, property, ...]: property_data
-              read_properties([property, ...])
+              read_properties([property, ...], "int")
             | Map{}
           def [encoding, data]: lookup([layer_data, ...], #'data)
           def layer_data: read_layer_data(to_string(data))

@@ -31,6 +31,7 @@ import:
   "../systems/behaviour.rhm" open
   "../systems/direction.rhm" open
   "../systems/aggro.rhm" open
+  "../systems/map_transition.rhm"
 
   "../game/map_manager.rhm"
 
@@ -106,6 +107,7 @@ class WorldScreen(
    MapClampSystem.update(map_manager.current_map)
    InteractionSystem.update()
    DialogSystem.update()
+   map_transition.MapTransitionSystem.update()
 
    handle_inputs (raylib.IsKeyPressed)
    | raylib.KEY_I

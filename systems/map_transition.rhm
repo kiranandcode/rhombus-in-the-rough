@@ -7,6 +7,7 @@ import:
   "../lib/ecs.rhm" open
   "../lib/lang.rhm" open
 
+  "../lib/event.rhm"
   "../lib/message.rhm" expose: message
 
   "../components/movement.rhm"
@@ -17,7 +18,7 @@ export: MapTransitionSystem
 
 message ChangeMap(target :: String)
 
-def map_transition_distance_squared: 600
+def map_transition_distance_squared: 100
 
 system MapTransitionSystem(
     position :: movement.Position,
@@ -27,7 +28,10 @@ system MapTransitionSystem(
  method update_internal(player_pos :: Vector2):
    def dx: (position.value.x - player_pos.x)
    def dy: (position.value.y - player_pos.y)
-   when ((dx * dx) + (dy * dy) < map_transition_distance_squared):
+   def dist: (dx * dx) + (dy * dy)
+   println("distance: " +& dist +& " < " +& map_transition_distance_squared)
+   when (dist < map_transition_distance_squared):
+     event.send(ChangeMap(transition.target))
      // game_state.change_map(transition.target)
      #void
 

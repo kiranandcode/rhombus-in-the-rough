@@ -6,7 +6,8 @@ import:
   "game_map.rhm"
   "../lib/resources.rhm" expose: Texture def_texture
   "../lib/ecs.rhm" open
-  "../components/movement.rhm" open
+  "../components/movement.rhm" 
+  "../components/map_transition.rhm"
   meta:
     "game_map.rhm"
     "../lib/tiled.rhm"
@@ -57,6 +58,11 @@ meta:
       for List:
         each values(pname, Pair(pl,pr)): map.points
         [pname, 'Pair($pl, $pr)']
+    def [[point_meta_key, point_meta_vl], ...]:
+      for List:
+        each values(pname, data): map.point_meta_data
+        [pname, data]
+
     def [[path_key, path_vl], ...]:
       for List:
         each values(pname, paths): map.paths
@@ -71,6 +77,7 @@ meta:
          Map { $tmap_key: $tmap_vl, ...},
          [$layer, ...],
          Map {$point_key: $point_vl, ...},
+         Map {$point_meta_key: $point_meta_vl, ...},
          Map {$path_key: $path_vl, ...}
        )',
       texture_defs
@@ -118,7 +125,7 @@ meta:
       | syntax_meta.error("position \"" ++ pos_key ++ "\" not found in map", pos_id)
       | 'block:
           def ent :: entity.Entity = $name
-          def pos :: Position = ent.get_component(Position)
+          def pos :: movement.Position = ent.get_component(movement.Position)
           pos.value.x := $(Pair.first(position))
           pos.value.y := $(Pair.rest(position))'       
   | '~with_path $(pos_id :: String) in $fn':
@@ -136,7 +143,7 @@ meta:
     | 'block:
          $init
          def ent :: entity.Entity = $name
-         def pos :: Position = ent.get_component(Position)
+         def pos :: movement.Position = ent.get_component(movement.Position)
          pos.value.x := $(Pair.first(position))
          pos.value.y := $(Pair.rest(position))
          $extra_init
@@ -185,6 +192,19 @@ meta:
         def ent :: entity.Entity = $field
         ent.destroy_safe()'
 
+  fun build_map_transitions(map :: game_map.TileMap):
+    for List:
+      each values(point_name, meta_data): map.point_meta_data
+      keep_when meta_data.has_key("target")
+      def target: meta_data["target"]
+      def Pair(x,y): map.points[point_name]
+      'block:
+         def ent :: entity.Entity : entity.create()
+         ent.add_component(movement.Position(Vector2($x,$y)))
+         ent.add_component(map_transition.MapTransition($target))'
+      
+
+
 defn.macro
 | 'map $(id :: Identifier)($(path :: String)):
      $body
@@ -212,6 +232,9 @@ defn.macro
 
     def [initialiser,...]: build_initialisers(['$body', ...], map, #false)
     def [field_deinit, ...]: build_deinitialisers([field, ...])
+
+    def [map_transition, ...]: build_map_transitions(map)
+
     def id_class: Syntax.make(syntax.#{format-id}(id, "~a_class", to_string(id.unwrap()))).relocate(id)
     def result:
       'class $id_class(mutable $field :~ $annot, ...):
@@ -222,10 +245,17 @@ defn.macro
          constructor():
            def map_data: $tmap
            super(map_data)($init, ...)
+
+         method setup_map_transitions():
+           $map_transition
+           ...
+
          override method init():
            $initialiser
            ...
+           setup_map_transitions()
            #void
+
          override method update(): #void
          override method destroy():
            $field_deinit

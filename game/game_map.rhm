@@ -40,6 +40,7 @@ class TileMap(
     tile_map :: Map.of(Integral, Tile),
     layers :: List.of(TileLayer),
     points :: Map.of(String, Pair.of(Real,Real)),
+    point_meta_data :: Map.of(String, Map.of(String, Any)),
     paths :: Map.of(String, List.of(Pair.of(Real, Real)))
   ):
 
@@ -107,8 +108,9 @@ class TileMap(
      tile_map :: Map.of(Integral, Tile),
      layers :: List.of(TileLayer),
      points :: Map.of(String, Pair.of(Real,Real)),
+     point_meta_data :: Map.of(String, Map.of(String, Any)),
      paths :: Map.of(String, List.of(Pair.of(Real,Real)))):
-       super(width, height, tile_rect, dest_rect, collision_boxes, tile_map, layers, points, paths)
+       super(width, height, tile_rect, dest_rect, collision_boxes, tile_map, layers, points, point_meta_data, paths)
   | (map :: tiled.Map):
       def width: map.width
       def height: map.height
@@ -128,6 +130,15 @@ class TileMap(
           keep_when element is_a tiled.Point
           def elt :~ tiled.Point = element
           values(elt.name, Pair(elt.x, elt.y))
+
+      def point_meta_data:
+        for Map:
+          each object: map.objects
+          each element: object.elements
+          keep_when element is_a tiled.Point
+          def elt :~ tiled.Point = element
+          values(elt.name, elt.properties)
+
       def paths:
         for Map:
           each object: map.objects
@@ -181,6 +192,7 @@ class TileMap(
         tile_map,
         layers,
         points,
+        point_meta_data,
         paths
       )
 
