@@ -29,7 +29,6 @@ system MapTransitionSystem(
    def dx: (position.value.x - player_pos.x)
    def dy: (position.value.y - player_pos.y)
    def dist: (dx * dx) + (dy * dy)
-   println("distance: " +& dist +& " < " +& map_transition_distance_squared)
    when (dist < map_transition_distance_squared):
      event.send(ChangeMap(transition.target))
      // game_state.change_map(transition.target)

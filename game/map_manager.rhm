@@ -50,7 +50,6 @@ class MapManager(
       def [map_name, entry_point_name]: racket.#{string-split}(target, ".")
       let map_name: to_string(map_name)
       let entry_point_name: to_string(entry_point_name)
-      println([map_name, entry_point_name, (Map.has_key(loaded_maps, map_name))])
       when (Map.has_key(loaded_maps, map_name)):
         def next_map :: game_map.GameMap: loaded_maps[map_name]
         def tile_map :: game_map.TileMap: next_map.get_map()

@@ -16,7 +16,7 @@ export:
 
 use_static
 
-def max_entities: 10
+def max_entities: 100
 
 def mutable systems: []
 def mutable components: []
