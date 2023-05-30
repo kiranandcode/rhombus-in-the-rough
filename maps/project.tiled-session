@@ -50,20 +50,20 @@
             "scale": 0.7995,
             "selectedLayer": 8,
             "viewCenter": {
-                "x": 771.1069418386492,
-                "y": 459.66228893058155
+                "x": 779.237023139462,
+                "y": 584.7404627892433
             }
         },
         "map2.tmx": {
             "expandedObjectLayers": [
-                20,
-                14
+                14,
+                20
             ],
             "scale": 0.9068,
             "selectedLayer": 17,
             "viewCenter": {
-                "x": 329.1795324217026,
-                "y": 642.3687692986325
+                "x": 328.6281429201588,
+                "y": 641.2659902955447
             }
         },
         "terrain.tsx": {
@@ -89,7 +89,7 @@
         "map1.tmx"
     ],
     "project": "project.tiled-project",
-    "property.type": "int",
+    "property.type": "string",
     "recentFiles": [
         "/home/kirang/Downloads/decoration_medieval/deco-med.tmx",
         "map1.tmx",

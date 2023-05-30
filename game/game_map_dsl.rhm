@@ -225,9 +225,11 @@ defn.macro
          override method init():
            $initialiser
            ...
+           #void
          override method update(): #void
          override method destroy():
            $field_deinit
            ...
+           #void
        def $id: $id_class()'
     result

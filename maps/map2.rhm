@@ -1,0 +1,42 @@
+#lang rhombus
+
+import:
+  "../lib/ecs.rhm" open
+  "../lib/datatypes.rhm" open
+
+  "../game/game_map_dsl.rhm" open
+  "../game/icons.rhm"
+
+  "../entities/player.rhm" open
+  "../entities/bat.rhm" open
+  "../entities/blacksmith.rhm" open
+
+  "../game/item_sprites.rhm"
+
+  "../components/interaction.rhm" open
+  "../components/graphics.rhm" open
+  "../components/movement.rhm" open
+  "../components/item.rhm" open
+  "../components/item_drop.rhm" open
+
+export:
+  Map2
+
+use_static
+
+
+map Map2("./map2.tmx"):
+
+  // position "start-point":
+  //   entity p :: Player
+
+  // position "in-front-of-house":
+  //   entity blacksmith :: Blacksmith
+
+  // position "grassy-plain-area":
+  //   entity bat :: Bat = build_bat():
+  //     ~with_path "bat-patrol" in set_patrol
+
+  init:
+    #void
+  

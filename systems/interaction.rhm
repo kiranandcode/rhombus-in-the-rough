@@ -11,6 +11,7 @@ import:
 
   "../components/interaction.rhm" open
   "../components/movement.rhm" open
+  "player.rhm"
 
 export:
   InteractionSystem
@@ -18,11 +19,6 @@ export:
 use_static
 
 def interaction_distance_squared: 600
-
-system PlayerSystem(player :: IsPlayer, position :: Position) with this:
-
-  method for_each(f):
-    f(this)
 
 system InteractionSystem(
     position :: Position,
@@ -41,7 +37,7 @@ system InteractionSystem(
  fun update():
    def player_interacting: raylib.IsKeyReleased(raylib.KEY_Q)
 
-   PlayerSystem.for_each(
+   player.PlayerSystem.for_each(
        fun (player :: entity.Entity):
          def player_pos :: Position = player.get_component(Position)
          update_internal(player_interacting, player_pos.value)

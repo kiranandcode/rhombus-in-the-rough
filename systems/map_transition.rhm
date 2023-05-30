@@ -1,0 +1,40 @@
+#lang rhombus
+
+import:
+  lib("raylib/2d/unsafe.rkt") as raylib
+
+  "../lib/datatypes.rhm" open
+  "../lib/ecs.rhm" open
+  "../lib/lang.rhm" open
+
+  "../lib/message.rhm" expose: message
+
+  "../components/movement.rhm"
+  "../components/map_transition.rhm"
+  "player.rhm"
+
+export: MapTransitionSystem
+
+message ChangeMap(target :: String)
+
+def map_transition_distance_squared: 600
+
+system MapTransitionSystem(
+    position :: movement.Position,
+    transition :: map_transition.MapTransition
+  ) with this:
+
+ method update_internal(player_pos :: Vector2):
+   def dx: (position.value.x - player_pos.x)
+   def dy: (position.value.y - player_pos.y)
+   when ((dx * dx) + (dy * dy) < map_transition_distance_squared):
+     // game_state.change_map(transition.target)
+     #void
+
+ fun update():
+   player.PlayerSystem.for_each(
+       fun (player :: entity.Entity):
+         def player_pos :: movement.Position = player.get_component(movement.Position)
+         update_internal(player_pos.value)
+   )
+

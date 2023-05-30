@@ -29,13 +29,13 @@ class MapManager(
      player :: entity.Entity,
      mutable current_map :: game_map.GameMap
   ):
-    constructor(player :: entity.Entity, init_map :: game_map.GameMap):
+    constructor(player :: entity.Entity, init_map_name :: String, init_map :: game_map.GameMap):
       def Pair(pos_x, pos_y): init_map.get_map().points["start-point"]
       def player_position :: movement.Position : player.get_component(movement.Position)
       player_position.value.x := pos_x
       player_position.value.y := pos_y
       init_map.init()
-      super(MutableMap{}, player, init_map)
+      super(MutableMap{init_map_name: init_map}, player, init_map)
 
     method load_map(name :: String, map :: game_map.GameMap):
       loaded_maps[name] := map

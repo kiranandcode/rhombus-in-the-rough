@@ -20,6 +20,7 @@ import:
    "entities/player.rhm" open
 
    "maps/map1.rhm"
+   "maps/map2.rhm"
 
 use_static
 
@@ -28,15 +29,20 @@ def screen_width: 800
 def screen_height: 450
 
 def player: Player.create()
+def maps: map_manager.MapManager(player, "map1", map1.Map1)
+maps.load_map("map2", map2.Map2)
 // def tmap: tiled.load_map("./maps/map1.tmx")
 def world_screen: world.WorldScreen(
     View(),
-    map_manager.MapManager(player, map1.Map1)
+    maps
   )
 
 message PickupItem(ent :: entity.Entity)
+message ChangeMap(target :: String)
+
 event.handle
 | PickupItem(ent): world_screen.player_inventory.add_item(ent)
+| ChangeMap(target): world_screen.map_manager.change_map(target)
 
 game_state.init(
   world_screen

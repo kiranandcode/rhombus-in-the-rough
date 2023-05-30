@@ -1,0 +1,18 @@
+#lang rhombus
+
+import:
+  lib("raylib/2d/unsafe.rkt") as raylib
+
+  "../lib/datatypes.rhm" open
+  "../lib/ecs.rhm" open
+  "../lib/lang.rhm" open
+
+  "../components/interaction.rhm" open
+  "../components/movement.rhm" open
+export: PlayerSystem
+
+
+system PlayerSystem(player :: IsPlayer, position :: Position) with this:
+
+  method for_each(f):
+    f(this)
