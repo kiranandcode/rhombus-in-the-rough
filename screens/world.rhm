@@ -118,7 +118,6 @@ class WorldScreen(
        def current_time: raylib.GetTime()
        def delta: current_time - start_time
        def progress: math.inexact(delta / transition_duration)
-       println(["progress", progress])
        if (delta >= transition_duration)
        | state := Normal()
          draw()
