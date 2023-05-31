@@ -27,6 +27,7 @@ use_static
 
 map Map2("./map2.tmx"):
 
+
   // position "start-point":
   //   entity p :: Player
 
