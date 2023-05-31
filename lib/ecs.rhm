@@ -64,6 +64,7 @@ namespace entity:
           sys.remove_entity(this)
         entities[id] := #false
         available_entities := List.cons(id, available_entities)
+        // println("after destroying entities, no available entities:" +& List.length(available_entities))
         destroyed := #true
 
     method destroy_safe():
@@ -78,6 +79,7 @@ namespace entity:
   fun create() :: Entity:
     def List.cons(id, rest) : available_entities
     available_entities := rest
+    // println("after allocating an entity, no available entities:" +& List.length(available_entities))
     def entity: Entity(id, #false)
     entities[id] := entity
     unsafe.#{register-finalizer}(

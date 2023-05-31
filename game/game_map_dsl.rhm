@@ -201,8 +201,8 @@ meta:
       'block:
          def ent :: entity.Entity : entity.create()
          ent.add_component(movement.Position(Vector2($x,$y)))
-         ent.add_component(map_transition.MapTransition($target))'
-      
+         ent.add_component(map_transition.MapTransition($target))
+         extra_entities := List.cons(ent, extra_entities)'
 
 
 defn.macro
@@ -237,18 +237,25 @@ defn.macro
 
     def id_class: Syntax.make(syntax.#{format-id}(id, "~a_class", to_string(id.unwrap()))).relocate(id)
     def result:
-      'class $id_class(mutable $field :~ $annot, ...):
+      'class $id_class(mutable $field :~ $annot, ..., mutable extra_entities :~ List.of(entity.Entity)):
          nonfinal
          extends game_map.GameMap
          $texture_def
          ...
          constructor():
            def map_data: $tmap
-           super(map_data)($init, ...)
+           super(map_data)($init, ..., [])
 
          method setup_map_transitions():
            $map_transition
            ...
+
+         method clear_extra_entities():
+           for:
+             each ent :: entity.Entity : extra_entities
+             ent.destroy_safe()
+           extra_entities := []
+
 
          override method init():
            $initialiser
@@ -260,6 +267,7 @@ defn.macro
          override method destroy():
            $field_deinit
            ...
+           clear_extra_entities()
            #void
        def $id: $id_class()'
     result
