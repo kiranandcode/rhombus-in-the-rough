@@ -1,0 +1,12 @@
+#lang rhombus
+
+import:
+  lib("raylib/2d/unsafe.rkt") as raylib
+  "../lib/lang.rhm" open
+  "../lib/datatypes.rhm" open
+  
+  "../lib/resources.rhm" expose: def_screen_texture def_shader Texture Shader
+
+
+class TransitionShader():
+  #void

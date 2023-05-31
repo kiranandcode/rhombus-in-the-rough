@@ -50,13 +50,26 @@ adt.datatype State
 | Normal()
 | Transition(start_time :: Real)
 
-def transition_duration: 5.0
+def transition_duration: 0.75
 def_screen_texture map_transition_old_texture
 def_screen_texture map_transition_new_texture
 
 def_shader transition_shader:
   ~vertex: "./resources/shaders/screen_transition.vert"
   ~fragment: "./resources/shaders/screen_transition.frag"
+
+def mutable params_loc: #false
+def mutable screen_size_loc: #false
+def mutable texture1_loc: #false
+
+fun setup_variables():
+  unless params_loc:
+    params_loc := raylib.GetShaderLocation(transition_shader.inner(), "params")
+  unless screen_size_loc:
+    screen_size_loc := raylib.GetShaderLocation(transition_shader.inner(), "screen_size")
+  unless texture1_loc:
+    texture1_loc := raylib.GetShaderLocation(transition_shader.inner(), "texture1")
+
 
 class WorldScreen(
     view :: View,
@@ -79,6 +92,8 @@ class WorldScreen(
      update()
      draw_texture map_transition_new_texture:
        draw()
+     setup_variables()
+
      state := Transition(raylib.GetTime())
    // setup state to do transition
 
@@ -103,35 +118,32 @@ class WorldScreen(
        def current_time: raylib.GetTime()
        def delta: current_time - start_time
        def progress: math.inexact(delta / transition_duration)
-
-       if (delta > transition_duration)
+       println(["progress", progress])
+       if (delta >= transition_duration)
        | state := Normal()
-       | def params_loc: raylib.GetShaderLocation(transition_shader.inner(), "params")
-         def texture0_loc: raylib.GetShaderLocation(transition_shader.inner(), "texture0")
-         def texture1_loc: raylib.GetShaderLocation(transition_shader.inner(), "texture1")
-
-         raylib.SetShaderValue(
+         draw()
+       | raylib.SetShaderValue(
            transition_shader.inner(),
            params_loc,
            Vector2(progress, 0.).inner(),
            raylib.SHADER_UNIFORM_VEC2
          )
-
-         raylib.SetShaderValueTexture(
+         raylib.SetShaderValue(
            transition_shader.inner(),
-           texture0_loc,
-           raylib.#{RenderTexture-texture}(map_transition_old_texture.inner())
+           screen_size_loc,
+           Vector2(raylib.GetScreenWidth(), raylib.GetScreenHeight()).inner(),
+           raylib.SHADER_UNIFORM_VEC2
          )
-         raylib.SetShaderValueTexture(
-           transition_shader.inner(),
-           texture1_loc,
-           raylib.#{RenderTexture-texture}(map_transition_new_texture.inner())
-         )
-
          draw_shader transition_shader:
-           raylib.DrawTexture(raylib.#{RenderTexture-texture}(map_transition_old_texture.inner()), 0, 0, raylib.WHITE)
-
-
+           raylib.SetShaderValueTexture(
+             transition_shader.inner(),
+             texture1_loc,
+             raylib.#{RenderTexture-texture}(map_transition_old_texture.inner())
+           )
+           raylib.DrawTexture(
+               raylib.#{RenderTexture-texture}(map_transition_new_texture.inner()),
+               0, 0, raylib.WHITE
+           )
 
  override method update():
    adt.match state

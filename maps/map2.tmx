@@ -1206,7 +1206,7 @@
  </layer>
  <layer id="19" name="rocks-2" width="80" height="80">
   <properties>
-   <property name="base-y" type="int" value="9"/>
+   <property name="base-y" type="int" value="8"/>
   </properties>
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
