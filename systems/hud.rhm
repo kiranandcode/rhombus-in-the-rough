@@ -57,7 +57,7 @@ def_texture ui_texture: "./resources/images/ui_big_pieces.png"
 def dest_rect: Rectangle(0., 0., 32., 32.)
 def origin: Vector2(0.,0.)
 
-fun draw_texture(s :: spritesheet.Sprite, x :: Real, y :: Real, w :: Real, h :: Real):
+fun draw_ui_texture(s :: spritesheet.Sprite, x :: Real, y :: Real, w :: Real, h :: Real):
   dest_rect.x := x
   dest_rect.y := y
   dest_rect.width := w
@@ -80,9 +80,9 @@ fun draw_bar(offset_x, offset_y, value, max, [S, M, E] :: List.of(spritesheet.Sp
   let offset_2: offset_1 + mid_width
 
 
-  draw_texture(UIBarSprite.Start, offset_0, offset_y, 24.0, 20.)
-  draw_texture(UIBarSprite.Mid,   offset_1, offset_y, mid_width, 20.)
-  draw_texture(UIBarSprite.End,   offset_2, offset_y, 25.0, 20.)  
+  draw_ui_texture(UIBarSprite.Start, offset_0, offset_y, 24.0, 20.)
+  draw_ui_texture(UIBarSprite.Mid,   offset_1, offset_y, mid_width, 20.)
+  draw_ui_texture(UIBarSprite.End,   offset_2, offset_y, 25.0, 20.)  
 
   let width: math.exact(math.floor(scaling * value))
   let contents_offset_y: offset_y + 3.0
@@ -92,16 +92,16 @@ fun draw_bar(offset_x, offset_y, value, max, [S, M, E] :: List.of(spritesheet.Sp
   let offset_2: offset_1 + mid_width
   if mid_width > 0.
   | when (value > 0.):
-      draw_texture(S, offset_0, contents_offset_y, 8.0, 14.)  
+      draw_ui_texture(S, offset_0, contents_offset_y, 8.0, 14.)  
     when (mid_width > 0.):
-      draw_texture(M, offset_1, contents_offset_y, mid_width, 14.)  
+      draw_ui_texture(M, offset_1, contents_offset_y, mid_width, 14.)  
     when (value > 0.):
-      draw_texture(E, offset_2, contents_offset_y, 8.0, 14.)  
+      draw_ui_texture(E, offset_2, contents_offset_y, 8.0, 14.)  
   | let end_pos: offset_0 + width
     let mid_width_1: math.floor(width / 2.0)
     let mid_width_2: end_pos - mid_width_1 - offset_0
-    draw_texture(S, offset_0, contents_offset_y, mid_width_1, 14.0)
-    draw_texture(E, offset_0 + mid_width_1, contents_offset_y, mid_width_2, 14.0)
+    draw_ui_texture(S, offset_0, contents_offset_y, mid_width_1, 14.0)
+    draw_ui_texture(E, offset_0 + mid_width_1, contents_offset_y, mid_width_2, 14.0)
 
 system HUDDrawingSystem(
     player :: IsPlayer,

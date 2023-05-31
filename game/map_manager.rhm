@@ -46,12 +46,12 @@ class MapManager(
     method update():
       current_map.update()
 
-    method change_map(target :: String):
+    method change_map(target :: String) :: Boolean:
       def [map_name, entry_point_name]: racket.#{string-split}(target, ".")
       let map_name: to_string(map_name)
       let entry_point_name: to_string(entry_point_name)
-      when (Map.has_key(loaded_maps, map_name)):
-        def next_map :: game_map.GameMap: loaded_maps[map_name]
+      if (Map.has_key(loaded_maps, map_name))
+      | def next_map :: game_map.GameMap: loaded_maps[map_name]
         def tile_map :: game_map.TileMap: next_map.get_map()
         if !Map.has_key(tile_map.points, entry_point_name)
         | println("entry point " +& entry_point_name +& " not found in map " +& map_name)
@@ -68,6 +68,6 @@ class MapManager(
           player.add_component(movement.Position(player_position.value))
 
           current_map.init()
-
-
+          #true
+      | #false
 

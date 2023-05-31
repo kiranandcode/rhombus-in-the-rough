@@ -15,6 +15,7 @@ import:
    "game/view.rhm" open
    "game/game_state.rhm"
    "game/map_manager.rhm"
+   "game/constants.rhm"
 
    "screens/world.rhm"
    "entities/player.rhm" open
@@ -24,9 +25,7 @@ import:
 
 use_static
 
-// constants
-def screen_width: 800
-def screen_height: 450
+
 
 def player: Player.create()
 def maps: map_manager.MapManager(player, "map1", map1.Map1)
@@ -42,14 +41,14 @@ message ChangeMap(target :: String)
 
 event.handle
 | PickupItem(ent): world_screen.player_inventory.add_item(ent)
-| ChangeMap(target): world_screen.map_manager.change_map(target)
+| ChangeMap(target): world_screen.change_map(target)
 
 game_state.init(
   world_screen
 )
 
 // raylib.SetConfigFlags(raylib.FLAG_FULLSCREEN_MODE)
-raylib.InitWindow(screen_width,screen_height, "Game")
+raylib.InitWindow(constants.screen_width,constants.screen_height, "Game")
 resources.init()
 raylib.SetTargetFPS(60);
 

@@ -1,0 +1,9 @@
+#lang rhombus
+
+export:
+  screen_width
+  screen_height
+
+  // constants
+def screen_width: 800
+def screen_height: 450

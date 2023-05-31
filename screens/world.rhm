@@ -4,8 +4,12 @@ import:
   lib("raylib/2d/unsafe.rkt") as raylib
 
   "../lib/lang.rhm" open
+  "../lib/datatypes.rhm" open
+  "../lib/adt.rhm"
+  "../lib/resources.rhm" expose: def_screen_texture def_shader Texture Shader
 
   "../game/raylib_lang.rhm" open
+
   "../lib/ordered_drawing.rhm"
 
   "../game/view.rhm" open
@@ -42,74 +46,127 @@ export:
 
 use_static
 
+adt.datatype State
+| Normal()
+| Transition(start_time :: Real)
+
+def transition_duration: 5.0
+def_screen_texture map_transition_old_texture
+def_screen_texture map_transition_new_texture
+
+def_shader transition_shader:
+  ~vertex: "./resources/shaders/screen_transition.vert"
+  ~fragment: "./resources/shaders/screen_transition.frag"
 
 class WorldScreen(
     view :: View,
     map_manager :: map_manager.MapManager,
     player_inventory :: inventory.Inventory,
-    mutable omap :: maybe(game_map.GameMap)
+    mutable omap :: maybe(game_map.GameMap),
+    mutable state :: State
   ):
  implements game_state.Screen
 
  constructor(view, map_manager :: map_manager.MapManager):
-   super(view, map_manager, inventory.Inventory(), #false)
+   super(view, map_manager, inventory.Inventory(), #false, Normal())
 
- // method set_map(new_map :: game_map.GameMap):
- //   when omap:
- //     def map :~ game_map.GameMap = omap
- //     map.destroy()
- //   omap := new_map
- //   def map :~ game_map.GameMap = omap
- //   map.init()
+ method change_map(target :: String):
+   // draw to texture
+   draw_texture map_transition_old_texture:
+     draw()
+   when (this.map_manager.change_map(target)):
+     update()
+     update()
+     draw_texture map_transition_new_texture:
+       draw()
+     state := Transition(raylib.GetTime())
+   // setup state to do transition
 
  override method draw():
-    def map :~ game_map.GameMap = omap
-    draw_2d view:
-      map_manager.draw(view)
-      // CollisionSystem.draw()
-      // DamageAreaSystem.draw()
-      // HurtSystem.draw()
-      CharacterDrawingSystem.draw()
-      WeaponAnimationSystem.draw()
-      ItemDrawingSystem.draw()
+   adt.match state
+   | Normal():
+       def map :~ game_map.GameMap = omap
+       draw_2d view:
+         map_manager.draw(view)
+         // CollisionSystem.draw()
+         // DamageAreaSystem.draw()
+         // HurtSystem.draw()
+         CharacterDrawingSystem.draw()
+         WeaponAnimationSystem.draw()
+         ItemDrawingSystem.draw()
 
-      ordered_drawing.draw()
+         ordered_drawing.draw()
 
-      InteractionSystem.draw()
-    HUDDrawingSystem.draw()
+         InteractionSystem.draw()
+       HUDDrawingSystem.draw()
+   | Transition(start_time):
+       def current_time: raylib.GetTime()
+       def delta: current_time - start_time
+       def progress: math.inexact(delta / transition_duration)
+
+       if (delta > transition_duration)
+       | state := Normal()
+       | def params_loc: raylib.GetShaderLocation(transition_shader.inner(), "params")
+         def texture0_loc: raylib.GetShaderLocation(transition_shader.inner(), "texture0")
+         def texture1_loc: raylib.GetShaderLocation(transition_shader.inner(), "texture1")
+
+         raylib.SetShaderValue(
+           transition_shader.inner(),
+           params_loc,
+           Vector2(progress, 0.).inner(),
+           raylib.SHADER_UNIFORM_VEC2
+         )
+
+         raylib.SetShaderValueTexture(
+           transition_shader.inner(),
+           texture0_loc,
+           raylib.#{RenderTexture-texture}(map_transition_old_texture.inner())
+         )
+         raylib.SetShaderValueTexture(
+           transition_shader.inner(),
+           texture1_loc,
+           raylib.#{RenderTexture-texture}(map_transition_new_texture.inner())
+         )
+
+         draw_shader transition_shader:
+           raylib.DrawTexture(raylib.#{RenderTexture-texture}(map_transition_old_texture.inner()), 0, 0, raylib.WHITE)
 
 
 
  override method update():
-   map_manager.update()
- 
-   view.update()
-   CameraSystem.update(view,map_manager.current_map)
-   DeAggroSystem.update()
-   AggroSystem.update()
-   BehaviourSystem.update()
-   UserControlSystem.update()
-   DamageAreaSystem.update()
-   DamageReceivingSystem.update()
-   DamageApplicationSystem.update()
-   PhysicalDamageApplicationSystem.update()
-   DeathSystem.update()
-   MonsterAttackSystem.update()
-   WeaponAttackSystem.update()
-   ItemAnimationSystem.update()
-   AnimationSystem.update()
-   MovementSystem.update()
-   FrictionSystem.update()
-   ItemDropSystem.update()
-   PickupItemSystem.update()
-   DirectionSystem.update()
-   CollisionSystem.update(map_manager.current_map.get_map())
-   MapClampSystem.update(map_manager.current_map)
-   InteractionSystem.update()
-   DialogSystem.update()
-   map_transition.MapTransitionSystem.update()
+   adt.match state
+   | Transition(_):
+       #void
+   | Normal():
+       map_manager.update()
 
-   handle_inputs (raylib.IsKeyPressed)
-   | raylib.KEY_I
-     game_state.push(InventoryScreen(player_inventory))
+       view.update()
+       CameraSystem.update(view,map_manager.current_map)
+       DeAggroSystem.update()
+       AggroSystem.update()
+       BehaviourSystem.update()
+       UserControlSystem.update()
+       DamageAreaSystem.update()
+       DamageReceivingSystem.update()
+       DamageApplicationSystem.update()
+       PhysicalDamageApplicationSystem.update()
+       DeathSystem.update()
+       MonsterAttackSystem.update()
+       WeaponAttackSystem.update()
+       ItemAnimationSystem.update()
+       AnimationSystem.update()
+       MovementSystem.update()
+       FrictionSystem.update()
+       ItemDropSystem.update()
+       PickupItemSystem.update()
+       DirectionSystem.update()
+       CollisionSystem.update(map_manager.current_map.get_map())
+       MapClampSystem.update(map_manager.current_map)
+       InteractionSystem.update()
+       DialogSystem.update()
+       map_transition.MapTransitionSystem.update()
+
+       handle_inputs (raylib.IsKeyPressed)
+       | raylib.KEY_I
+         game_state.push(InventoryScreen(player_inventory))
 

@@ -8,22 +8,43 @@ import:
 export:
   init
   def_texture
-  only_space annot: Texture
-  rename: build_texture as load_texture
+  def_render_texture
+  def_screen_texture
+  def_shader
+  only_space annot: Texture Shader
+  rename:
+    build_texture as load_texture
+    build_render_texture as load_render_texture
 
-class Texture(mutable self, resource :: String):
+class Texture(mutable self, resource :: maybe(String)):
   prefab
 
-  constructor(name): super(#false, name)
+  constructor
+  | (name): super(#false, name)
+  | (): super(#false, #false)
 
   final method initialize(value):
     self := value
 
   final method inner(): self
 
+class Shader(mutable self, vertex_resource :: maybe(String), fragment_resource :: maybe(String)):
+  prefab
+
+  constructor
+  | (vert, frag): super(#false, vert, frag)
+  | (): super(#false, #false, #false)
+
+  final method initialize(value):
+    self := value
+
+  final method inner(): self
+
+
 def mutable initialised: #false
 def textures: MutableMap()
 def mutable texture_requests: MutableMap()
+def mutable deferred_requests :: List.of(Function): []
 
 fun load_texture(resource):
   if textures.has_key(resource)
@@ -40,13 +61,25 @@ fun declare_texture(resource,on_load):
      | texture_requests[resource] := List.cons(on_load, texture_requests[resource])
      | texture_requests[resource] := [on_load]
 
+fun deferred_load(on_load):
+  cond
+  | initialised:
+     on_load()
+  | ~else:
+     deferred_requests := List.cons(on_load, deferred_requests)
+
+
 fun init():
   for:
     each (k, v): texture_requests
     def texture: load_texture(k)
     each on_load: v
     on_load(texture)
+  for:
+    each f: deferred_requests
+    f()
   texture_requests := MutableMap()
+  deferred_requests := []
 
 fun build_texture(resource :: String) :: Texture:
   def texture : Texture(resource)
@@ -57,6 +90,16 @@ fun build_texture(resource :: String) :: Texture:
   )
   texture
 
+fun build_render_texture(width :: Int, height :: Int) :: Texture:
+  def texture : Texture("RenderedTexture<" +& width +& "," +& height +& ">")
+  deferred_load(
+       fun ():
+         def vl: raylib.LoadRenderTexture(width, height)
+         (texture :~ Texture).initialize(vl)
+  )
+  texture
+
+
 defn.macro 'def_texture $name : $(resource :: String)':
   'def $name: Texture($resource)
    declare_texture(
@@ -64,3 +107,37 @@ defn.macro 'def_texture $name : $(resource :: String)':
      fun (vl):
        ($name :~ Texture).initialize(vl)
    )'
+
+defn.macro 'def_render_texture $name : [$width, $height]':
+  'def width: $width
+   def height: $height
+   def $name: Texture("RenderedTexture<" +& width +& "," +& height +& ">")
+   deferred_load(
+     fun ():
+       def vl: raylib.LoadRenderTexture(width,height)
+       ($name :~ Texture).initialize(vl)
+   )'
+
+defn.macro 'def_screen_texture $name':
+  'def $name: Texture("RenderedTexture<screen_width, screen_height>")
+   deferred_load(
+     fun ():
+       def width: raylib.GetScreenWidth()
+       def height: raylib.GetScreenHeight()
+       def vl: raylib.LoadRenderTexture(width,height)
+       ($name :~ Texture).initialize(vl)
+   )'
+
+
+defn.macro 'def_shader $name:
+               ~vertex: $(vertex_source :: String)
+               ~fragment: $(frag_source :: String)':
+  'def vert: $vertex_source
+   def frag: $frag_source
+   def $name: Shader(vert, frag)
+   deferred_load(
+     fun ():
+       def vl: raylib.LoadShader(vert,frag)
+       ($name :~ Shader).initialize(vl)
+   )'
+

@@ -5,11 +5,14 @@ import:
   "../lib/lang.rhm" open
   "view.rhm" open
   "../lib/datatypes.rhm" open
+  "../lib/resources.rhm" expose: Texture Shader
   lib("raylib/2d/unsafe.rkt") as raylib
 
 export:
   draw_block
   draw_2d
+  draw_texture
+  draw_shader
   handle_inputs
 
 
@@ -34,6 +37,24 @@ macro 'draw_2d $view:
    $body
    ...
    raylib.EndMode2D()'
+
+macro 'draw_texture $texture:
+        $body
+        ...':
+ 'block:
+   raylib.BeginTextureMode(($texture :~ Texture).inner())
+   $body
+   ...
+   raylib.EndTextureMode()'
+
+macro 'draw_shader $shader:
+        $body
+        ...':
+ 'block:
+   raylib.BeginShaderMode(($shader :~ Shader).inner())
+   $body
+   ...
+   raylib.EndShaderMode()'
 
 expr.macro
 | 'handle_input_any_body([~any, [$body, ...]], $rest, ...)':
