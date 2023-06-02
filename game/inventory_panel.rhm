@@ -18,15 +18,19 @@ export:
 
 
 def INVENTORY_ROWS: 5.0
-def INVENTORY_COLS: 5.0
-def SIZE: 80.0
-def PADDING: 8.
+def INVENTORY_COLS: 4.0
+def SIZE: 78.0
+def PANEL_SIZE: 40.0
+def PADDING: 14.
 
 def draw_rect: Rectangle(0.,0., 32.0, 32.0)
 def inventory_slot: Rectangle(0.,0.,SIZE,SIZE)
+def panel_slot: Rectangle(0.,0.,PANEL_SIZE,PANEL_SIZE)
 def item_slot: Rectangle(0.,0.,SIZE - PADDING,SIZE - PADDING)
 def origin: Vector2(0.,0.)
-def base_offset_x: -150.0
+
+def base_offset_inventory_contents_x: -125.0
+def base_offset_inventory_equipment_x: -90.0 + base_offset_inventory_contents_x
 def base_offset_y: 0.0
 
 def_texture ui_texture: "./resources/images/ui_big_pieces.png"
@@ -47,9 +51,140 @@ fun select_left():
 fun select_up():
   currently_selected_row := (INVENTORY_ROWS + currently_selected_row - 1) mod INVENTORY_ROWS
 
+fun draw_panel(offset_x, offset_y, no_cols, no_rows):
+  for:
+    each i: 0. .. no_cols
+    each j: 0. .. no_rows
+    def x: offset_x + PANEL_SIZE * i
+    def y: offset_y + PANEL_SIZE * j
+    panel_slot.x := x
+    panel_slot.y := y
+    def sprite :: Sprite:
+        cond
+        | i == 0.                    && j == 0.                   : InventoryBox.TOP_LEFT
+        | i == (no_cols - 1.) && j == (no_rows - 1.)              : InventoryBox.BOT_RIGHT
+        | i == 0.                    && j == (no_rows - 1.)       : InventoryBox.BOT_LEFT
+        | i == (no_cols - 1.) && j == 0.                          : InventoryBox.TOP_RIGHT
+        | i == 0.                                                 : InventoryBox.MID_LEFT
+        | j == 0.                                                 : InventoryBox.TOP_EDGE
+        | i == (no_cols - 1.)                                     : InventoryBox.MID_RIGHT
+        | j == (no_rows - 1.)                                     : InventoryBox.BOT_EDGE
+        | ~else                                                   : InventoryBox.MIDDLE
 
-fun draw(player_inventory :: inventory.Inventory, ~offset_x: offset_x = base_offset_x, ~offset_y: offset_y = base_offset_y):
-  let offset_x: math.floor(offset_x + (raylib.GetScreenWidth() - (SIZE * INVENTORY_COLS)) / 2.0)
+    raylib.DrawTexturePro(
+      ui_texture.inner(),
+      sprite.sprite_rect.inner(),
+      panel_slot.inner(),
+      origin.inner(),
+      0.,
+      raylib.WHITE
+    )
+
+def ACTION_HEIGHT: 40.0
+def ACTION_WIDTH: 81.0
+def action_slot: Rectangle(0.,0., ACTION_WIDTH, ACTION_HEIGHT)
+
+fun draw_action(offset_x :: Real, offset_y :: Real, active :: Boolean = #false):
+  def sprites :: List.of(Sprite):
+    if active
+    | [InventoryActionButton.ACTIVE_L, InventoryActionButton.ACTIVE_M, InventoryActionButton.ACTIVE_R]
+    | [InventoryActionButton.BASE_L, InventoryActionButton.BASE_M, InventoryActionButton.BASE_R]
+
+  action_slot.x := offset_x
+  action_slot.y := offset_y
+  raylib.DrawTexturePro(
+    ui_texture.inner(),
+    sprites[0].sprite_rect.inner(),
+    action_slot.inner(),
+    origin.inner(),
+    0.,
+    raylib.WHITE
+  )
+  action_slot.x := offset_x + ACTION_WIDTH
+  action_slot.y := offset_y
+  raylib.DrawTexturePro(
+    ui_texture.inner(),
+    sprites[1].sprite_rect.inner(),
+    action_slot.inner(),
+    origin.inner(),
+    0.,
+    raylib.WHITE
+  )
+  action_slot.x := offset_x + ACTION_WIDTH + ACTION_WIDTH
+  action_slot.y := offset_y
+  raylib.DrawTexturePro(
+    ui_texture.inner(),
+    sprites[2].sprite_rect.inner(),
+    action_slot.inner(),
+    origin.inner(),
+    0.,
+    raylib.WHITE
+  )
+
+
+fun draw_inventory_selected(player_inventory :: inventory.Inventory, offset_y :: Real):
+  let offset_x:
+      math.floor(
+        200.0 + (raylib.GetScreenWidth() - (SIZE * INVENTORY_COLS)) / 2.0
+      )
+  let offset_y: 150.0 + math.floor(offset_y + (raylib.GetScreenHeight() - (SIZE * INVENTORY_ROWS)) / 2.0)
+  def PANEL_COLS: 8.
+  def PANEL_ROWS: 6.
+  draw_panel(offset_x, offset_y, PANEL_COLS, PANEL_ROWS)
+  draw_panel(offset_x + 100.0, offset_y - 140., 3., 3.)
+
+  let action_start_x : offset_x + 40.0
+  let action_start_y : offset_y + 80.0
+
+  draw_action(action_start_x, action_start_y, #false)
+  draw_action(action_start_x, action_start_y + ACTION_HEIGHT + 10., #true)
+  draw_action(action_start_x, action_start_y + (ACTION_HEIGHT + 10.) * 2, #false)
+
+
+fun draw_inventory_equipment(player_inventory :: inventory.Inventory, offset_y :: Real):
+  let offset_x:
+      math.floor(
+        base_offset_inventory_equipment_x + (raylib.GetScreenWidth() - (SIZE * INVENTORY_COLS)) / 2.0
+      )
+  let offset_y: math.floor(offset_y + (raylib.GetScreenHeight() - (SIZE * INVENTORY_ROWS)) / 2.0)
+
+  for:
+    each:
+      slot: [InventoryItemHint.HELMET, InventoryItemHint.CHEST, InventoryItemHint.SHOES, InventoryItemHint.SWORD, InventoryItemHint.RING]
+      j : 0 ..
+
+    def x: offset_x
+    def y: offset_y + (SIZE * j)
+    def sprite :: Sprite : InventorySinglePanels.BASE
+
+    inventory_slot.x := x
+    inventory_slot.y := y
+    raylib.DrawTexturePro(
+      ui_texture.inner(),
+      sprite.sprite_rect.inner(),
+      inventory_slot.inner(),
+      origin.inner(),
+      0.,
+      raylib.WHITE
+    )
+    item_slot.x := x + PADDING/2
+    item_slot.y := y + PADDING/2
+
+    raylib.DrawTexturePro(
+      ui_texture.inner(),
+      slot.sprite_rect.inner(),
+      item_slot.inner(),
+      origin.inner(),
+      0.,
+      raylib.WHITE
+    )
+
+
+fun draw_inventory_contents(player_inventory :: inventory.Inventory, offset_y :: Real):
+  let offset_x:
+      math.floor(
+        base_offset_inventory_contents_x + (raylib.GetScreenWidth() - (SIZE * INVENTORY_COLS)) / 2.0
+      )
   let offset_y: math.floor(offset_y + (raylib.GetScreenHeight() - (SIZE * INVENTORY_ROWS)) / 2.0)
   def mutable items: player_inventory.to_sequence()
 
@@ -72,15 +207,15 @@ fun draw(player_inventory :: inventory.Inventory, ~offset_x: offset_x = base_off
 
     def sprite :: Sprite :
       cond
-      | i == 0                    && j == 0                   : panel.TL
-      | i == (INVENTORY_COLS - 1) && j == (INVENTORY_ROWS - 1): panel.BR
-      | i == 0                    && j == (INVENTORY_ROWS - 1): panel.BL
-      | i == (INVENTORY_COLS - 1) && j == 0                   : panel.TR
-      | i == 0                                                : panel.LM
-      | j == 0                                                : panel.TM
-      | i == (INVENTORY_COLS - 1)                             : panel.RM
-      | j == (INVENTORY_ROWS - 1)                             : panel.BM
-      | ~else                                                 : panel.MM
+      | i == 0.                    && j == 0.                   : panel.TL
+      | i == (INVENTORY_COLS - 1.) && j == (INVENTORY_ROWS - 1.): panel.BR
+      | i == 0.                    && j == (INVENTORY_ROWS - 1.): panel.BL
+      | i == (INVENTORY_COLS - 1.) && j == 0.                   : panel.TR
+      | i == 0.                                                 : panel.LM
+      | j == 0.                                                 : panel.TM
+      | i == (INVENTORY_COLS - 1.)                              : panel.RM
+      | j == (INVENTORY_ROWS - 1.)                              : panel.BM
+      | ~else                                                  : panel.MM
     inventory_slot.x := x
     inventory_slot.y := y
 
@@ -118,3 +253,10 @@ fun draw(player_inventory :: inventory.Inventory, ~offset_x: offset_x = base_off
           math.exact(x + SIZE - 16),
           math.exact(y + SIZE - 20), 15, raylib.WHITE
         )
+
+fun draw(player_inventory :: inventory.Inventory, ~offset_y: offset_y = base_offset_y):
+  draw_inventory_equipment(player_inventory, offset_y)
+  draw_inventory_contents(player_inventory, offset_y)
+  draw_inventory_selected(player_inventory, offset_y)
+
+

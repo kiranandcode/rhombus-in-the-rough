@@ -2,7 +2,9 @@
 
 import:
   lib("raylib/2d/unsafe.rkt") as raylib
+  lib("pict/main.rkt") as pict
 
+  "../lib/send.rhm"
   "../lib/datatypes.rhm" open
 
   "../lib/lang.rhm" open
@@ -12,6 +14,9 @@ import:
 export:
   InventoryPanels
   InventorySinglePanels
+  InventoryItemHint
+  InventoryActionButton
+  InventoryBox
   Panel
 
 spritesheet InventoryPanels:
@@ -92,6 +97,7 @@ def Panel.active:
   import .InventoryPanels open
   Panel(ACTIVE_TL, ACTIVE_TM, ACTIVE_TR, ACTIVE_LM, ACTIVE_MM, ACTIVE_RM, ACTIVE_BL, ACTIVE_BM, ACTIVE_BR)
 
-def_texture ui_spritesheet: "../resources/images/ui_big_pieces.png"
-spritesheet.render(InventoryBox.tiles, ui_spritesheet)
-
+// def_texture ui_spritesheet: "../resources/images/ui_big_pieces.png"
+// def res: spritesheet.render(InventoryPanels.tiles, ui_spritesheet)
+// def bm: pict.#{pict->bitmap}(res)
+// send.send bm.#{save-file}("tiles.png", #'png)
