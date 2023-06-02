@@ -126,9 +126,11 @@ meta:
           )'
 
   fun
-  | parse_tile_definition(shared_sprite_map, opts, offset_y, offset_x, '$(data :: Identifier) ($tile_arg, ...) $rest ...', row, col):
+  | parse_tile_definition(shared_sprite_map, opts, ooffset_y, ooffset_x, '$(data :: Identifier) ($tile_arg, ...) $rest ...', row, col):
       def rest: '$rest ...'
       def tile_opts: parse_opts(['$tile_arg', ...], Map{})
+      def offset_x: Map.ref(tile_opts, "offset_x", ooffset_x)
+      def offset_y: Map.ref(tile_opts, "offset_y", ooffset_y)
       def x: '$offset_x + $(Map.ref(tile_opts, "offset", 0.))'
 
       def size_y:

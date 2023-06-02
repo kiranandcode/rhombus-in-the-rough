@@ -18,7 +18,7 @@ export:
 
 
 def INVENTORY_ROWS: 5.0
-def INVENTORY_COLS: 8.0
+def INVENTORY_COLS: 5.0
 def SIZE: 80.0
 def PADDING: 8.
 
@@ -26,6 +26,8 @@ def draw_rect: Rectangle(0.,0., 32.0, 32.0)
 def inventory_slot: Rectangle(0.,0.,SIZE,SIZE)
 def item_slot: Rectangle(0.,0.,SIZE - PADDING,SIZE - PADDING)
 def origin: Vector2(0.,0.)
+def base_offset_x: -150.0
+def base_offset_y: 0.0
 
 def_texture ui_texture: "./resources/images/ui_big_pieces.png"
 def_texture item_texture: "./resources/images/sprites-out.png"
@@ -46,9 +48,9 @@ fun select_up():
   currently_selected_row := (INVENTORY_ROWS + currently_selected_row - 1) mod INVENTORY_ROWS
 
 
-fun draw(player_inventory :: inventory.Inventory):
-  def offset_x: math.floor((raylib.GetScreenWidth() - (SIZE * INVENTORY_COLS)) / 2.0)
-  def offset_y: math.floor((raylib.GetScreenHeight() - (SIZE * INVENTORY_ROWS)) / 2.0)
+fun draw(player_inventory :: inventory.Inventory, ~offset_x: offset_x = base_offset_x, ~offset_y: offset_y = base_offset_y):
+  let offset_x: math.floor(offset_x + (raylib.GetScreenWidth() - (SIZE * INVENTORY_COLS)) / 2.0)
+  let offset_y: math.floor(offset_y + (raylib.GetScreenHeight() - (SIZE * INVENTORY_ROWS)) / 2.0)
   def mutable items: player_inventory.to_sequence()
 
   fun next_item() :: False || Pair.of(String || False, inventory.InventorySlot):
@@ -97,7 +99,7 @@ fun draw(player_inventory :: inventory.Inventory):
     def maybe_item: next_item()
 
     when maybe_item:
-      def Pair(name :: (String || False), slot :: inventory.InventorySlot): maybe_item
+      def Pair(name :: maybe(String), slot :: inventory.InventorySlot): maybe_item
       raylib.DrawTexturePro(
         item_texture.inner(),
         slot.sprite.sprite_rect.inner(),
@@ -116,6 +118,3 @@ fun draw(player_inventory :: inventory.Inventory):
           math.exact(x + SIZE - 16),
           math.exact(y + SIZE - 20), 15, raylib.WHITE
         )
-      
-
-

@@ -11,6 +11,7 @@ import:
 
 export:
   InventoryPanels
+  InventorySinglePanels
   Panel
 
 spritesheet InventoryPanels:
@@ -25,6 +26,55 @@ spritesheet InventoryPanels:
   BASE_TL BASE_TM(~width:36.0) BASE_TR(~spacing_x: 12.0)  INACTIVE_TL INACTIVE_TM(~width:36.0) INACTIVE_TR(~spacing_x: 12.0)  ACTIVE_TL ACTIVE_TM(~width:36.0) ACTIVE_TR
   BASE_LM BASE_MM(~width:36.0) BASE_RM(~spacing_x: 12.0)  INACTIVE_LM INACTIVE_MM(~width:36.0) INACTIVE_RM(~spacing_x: 12.0)  ACTIVE_LM ACTIVE_MM(~width:36.0) ACTIVE_RM
   BASE_BL BASE_BM(~width:36.0) BASE_BR(~spacing_x: 12.0)  INACTIVE_BL INACTIVE_BM(~width:36.0) INACTIVE_BR(~spacing_x: 12.0)  ACTIVE_BL ACTIVE_BM(~width:36.0) ACTIVE_BR
+
+spritesheet InventorySinglePanels:
+  options:
+    ~spacing_x: 1.0
+    ~spacing_y: 1.0
+    ~offset_x: 75.0
+    ~offset_y: 288.0
+    ~width: 40.0
+    ~height: 40.0
+    ~shared
+  BASE
+  ACTIVE
+  INACTIVE
+
+spritesheet InventoryItemHint:
+  options:
+    ~offset_x: 208.0
+    ~offset_y: 424.0
+    ~width: 32.0
+    ~height: 32.0
+    ~shared
+  HELMET CHEST NECKLACE SHIELD
+  SWORD BELT SHOES RING
+
+spritesheet InventoryActionButton:
+  options:
+    ~spacing_x: 1.0
+    ~spacing_y: 1.0
+    ~offset_x: 633.0
+    ~offset_y: 23.0
+    ~width: 41.0
+    ~height: 28.0
+    ~shared
+  BASE_L BASE_M(~width: 40.0) BASE_R
+  ACTIVE_L ACTIVE_M(~width: 40.0) ACTIVE_R
+  INACTIVE_L INACTIVE_M(~width: 40.0) INACTIVE_R
+
+spritesheet InventoryBox:
+  options:
+    ~spacing_x: 1.0
+    ~offset_x: 16.0
+    ~offset_y: 40.0
+    ~width: 32.0
+    ~height: 32.0
+    ~shared
+  TOP_LEFT TOP_EDGE TOP_RIGHT
+  MID_LEFT(~offset_x: 478.0, ~offset_y: 24.0) MIDDLE(~offset_y: 24.0) MID_RIGHT(~offset_y: 24.0)
+  BOT_LEFT(~offset_x: 478.0, ~offset_y: 80.0) BOT_EDGE(~offset_y: 80.0) BOT_RIGHT(~offset_y: 80.0)
+
 
 class Panel(
    TL :: Sprite, TM :: Sprite, TR :: Sprite,
@@ -41,3 +91,7 @@ def Panel.inactive:
 def Panel.active:
   import .InventoryPanels open
   Panel(ACTIVE_TL, ACTIVE_TM, ACTIVE_TR, ACTIVE_LM, ACTIVE_MM, ACTIVE_RM, ACTIVE_BL, ACTIVE_BM, ACTIVE_BR)
+
+def_texture ui_spritesheet: "../resources/images/ui_big_pieces.png"
+spritesheet.render(InventoryBox.tiles, ui_spritesheet)
+

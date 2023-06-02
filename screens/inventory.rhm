@@ -6,6 +6,7 @@ import:
   "../lib/lang.rhm" open
   "../lib/datatypes.rhm" open
   "../game/raylib_lang.rhm" open
+  "../lib/adt.rhm" 
   "../lib/ordered_drawing.rhm"
 
   "../game/view.rhm" open
@@ -29,25 +30,76 @@ def INVENTORY_ROWS: 5.0
 def INVENTORY_COLS: 8.0
 def origin: Vector2(0.,0.)
 def SIZE: 80.0
+def open_transition_duration: 0.5
+def close_transition_duration: 0.25
 
-class InventoryScreen(player_inventory :: inventory.Inventory, mutable completed :: Boolean):
+
+adt.datatype State
+| OpenTransition(start_time :: Real)
+| Normal()
+| CloseTransition(start_time :: Real)
+| Completed()
+
+fun open_transition_fun(progress :: Real):
+  let c1: 1.00158
+  let c3: c1 + 1
+  1. + c3 * math.expt(progress - 1., 3.) + c1 * math.expt(progress - 1., 2.)
+
+fun close_transition_fun(progress :: Real):
+  let c1 = 1.00158
+  let c3 = c1 + 1
+
+  c3 * progress * progress * progress - c1 * progress * progress
+
+class InventoryScreen(mutable state :: State, player_inventory :: inventory.Inventory):
   implements game_state.Screen
-  constructor (inventory): super(inventory, #false)
+  constructor (inventory): super(OpenTransition(raylib.GetTime()), inventory)
 
   override method draw():
-    inventory_panel.draw(player_inventory)
+    adt.match state
+    | Normal():
+        inventory_panel.draw(player_inventory)
+    | OpenTransition(start_time):
+        def current_time: raylib.GetTime()
+        def delta: (current_time - start_time)
+        def progress: open_transition_fun(math.max(math.min(delta / open_transition_duration, 1.0), 0.0))
+        inventory_panel.draw(player_inventory, ~offset_y: -1000.0 + 1000.0 * progress)
+    | CloseTransition(start_time):
+        def current_time: raylib.GetTime()
+        def delta: (current_time - start_time)
+        def progress: close_transition_fun(math.max(math.min(delta / close_transition_duration, 1.0), 0.0))
+        inventory_panel.draw(player_inventory, ~offset_y: -1000.0 * progress)
+    | ~else:
+        #void
 
   override method update():
-    handle_inputs (raylib.IsKeyPressed)
-    | raylib.KEY_A
-      inventory_panel.select_left()
-    | raylib.KEY_D
-      inventory_panel.select_right()
-    | raylib.KEY_W
-      inventory_panel.select_up()
-    | raylib.KEY_S
-      inventory_panel.select_down()
-    | raylib.KEY_I
-      completed := #true
+    adt.match state
+    | Normal():
+       handle_inputs (raylib.IsKeyPressed)
+       | raylib.KEY_A
+         inventory_panel.select_left()
+       | raylib.KEY_D
+         inventory_panel.select_right()
+       | raylib.KEY_W
+         inventory_panel.select_up()
+       | raylib.KEY_S
+         inventory_panel.select_down()
+       | raylib.KEY_I
+         state := CloseTransition(raylib.GetTime())
+    | OpenTransition(start_time):
+        def current_time: raylib.GetTime()
+        def delta: current_time - start_time
+        when (delta > open_transition_duration):
+          state := Normal()
+    | CloseTransition(start_time):
+        def current_time: raylib.GetTime()
+        def delta: current_time - start_time
+        when (delta > close_transition_duration):
+          state := Completed()
+    | ~else:
+        #void
 
-  override method should_pop(): completed
+  override method should_pop():
+    adt.match state
+    | Completed(): #true
+    | ~else: #false
