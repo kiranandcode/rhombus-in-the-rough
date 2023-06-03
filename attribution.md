@@ -61,3 +61,17 @@ This will eventually be displayed in-game as well, but for now, I'll keep track 
   - from [[LPC] Weapons Mega Pack](https://opengameart.org/content/lpc-weapons-mega-pack)
   - attribution: see [CREDITS-weapons.txt](./attribution/CREDITS-weapons.txt)
   - license: CC-BY-SA 3.0
+
+- [blacksmith_smelter.png](./resources/images/blacksmith_smelter.png)
+  - from [[LPC] Blacksmith](https://opengameart.org/content/lpc-blacksmith)
+  - attribution: "[LPC] Blacksmith" by bluecarrot16. License: OGA-BY 3.0, CC-BY 3.0+, GPL 2.0+. http://opengameart.org/content/lpc-blacksmith
+  - license: CC-BY 3.0+
+- [tools](./resources/images/tools)
+  - from [[LPC] Hand Tools](https://opengameart.org/content/lpc-hand-tools)
+  - attribution: see [CREDITS-hand-tools.txt](./attribution/CREDITS-hand-tools.txt), and: "[LPC] Hand Tools" by bluecarrot16, Pierre Vigier, Tuomo Untinen, Johannes Sjölund (wulax), and Inboxninja. License: CC-BY-SA 3.0 <https://creativecommons.org/licenses/by-sa/3.0/>. URL: <https://opengameart.org/content/lpc-hand-tools> Based on: "[LPC] Spear and Shovel Reworked" by Pierre Vigier, Johannes Sjölund (wulax) and Inboxninja. License: CC-BY-SA 3.0 <https://opengameart.org/content/lpc-spear-and-shovel-reworked>; "[LPC] Smash Weapons" by Pierre Vigier and Tuomo Untinen. License: OGA-BY 3.0, CC-BY 4.0, CC-BY-SA 4.0, CC-BY-SA 3.0, GPL 3.0, or GPL 2.0. <https://opengameart.org/content/lpc-smash-weapons>; "[LPC] Fishing Rod" by bluecarrot16. License: OGA-BY 3.0+, CC-BY 3.0+, GPL v2.0+. For all contributions by bluecarrot16, clauses of the CC licenses pertaining to the use of effective technological measures (e.g. DRM) are waived.
+  - license: CC-BY-SA 3.0
+
+- [giant-fungi.png](./resources/images/giant-fungi.png), [giant-plants.png](./resources/images/giant-plants.png), [giant-trees.png](./resources/images/giant-trees.png), [viney-trees.png](./resources/images/viney-trees.png)
+  - from [[LPC] Jungle](https://opengameart.org/content/lpc-jungle)
+  - attribution: see [CREDITS-jungle.txt](./attribution/CREDITS-jungle.txt)
+  - license: CC-BY-SA 4.0

@@ -1,0 +1,169 @@
+Seven animated hand tools--axe, pickaxe, hammer, shovel, hoe, watering can, and fishing rod---in the style of the Liberated Pixel Cup. 
+
+License
+=======
+
+"[LPC] Hand Tools" by bluecarrot16, Pierre Vigier, Tuomo Untinen Johannes Sjölund (wulax), and Inboxninja. 
+License: CC-BY-SA 3.0 <https://creativecommons.org/licenses/by-sa/3.0/>. URL: <https://opengameart.org/content/lpc-hand-tools>
+
+Based on: 
+
+- "[LPC] Spear and Shovel Reworked" by Pierre Vigier, Johannes Sjölund (wulax) and Inboxninja. License: CC-BY-SA 3.0.
+https://opengameart.org/content/lpc-spear-and-shovel-reworked. 
+- "[LPC] Smash Weapons" by Pierre Vigier and Tuomo Untinen. License: OGA-BY 3.0, CC-BY 4.0, CC-BY-SA 4.0, CC-BY-SA 3.0, GPL 3.0, or GPL 2.0. https://opengameart.org/content/lpc-smash-weapons
+- "[LPC] Fishing Rod" by bluecarrot16. License: OGA-BY 3.0+, CC-BY 3.0+, GPL v2.0+.
+
+For all contributions by bluecarrot16, clauses of the CC licenses pertaining to the use of effective technological measures (e.g. DRM) are waived.
+
+
+Optional attributions: 
+
+- Fishing rod was commissioned by MedicineStorm. 
+- Watering can and hoe were commissioned by SWRG.
+
+Certain items from this submission are available under additional licenses: 
+
+|     Item     |                               Authors                                |                               License(s)                               |
+|--------------|----------------------------------------------------------------------|------------------------------------------------------------------------|
+| axe          | bluecarrot16, Pierre Vigier, Tuomo Untinen                           | OGA-BY 3.0, CC-BY 4.0, CC-BY-SA 4.0, CC-BY-SA 3.0, GPL 3.0, or GPL 2.0 |
+| pickaxe      | bluecarrot16, Pierre Vigier, Tuomo Untinen                           | OGA-BY 3.0, CC-BY 4.0, CC-BY-SA 4.0, CC-BY-SA 3.0, GPL 3.0, or GPL 2.0 |
+| hammer       | bluecarrot16, Pierre Vigier, Tuomo Untinen                           | OGA-BY 3.0, CC-BY 4.0, CC-BY-SA 4.0, CC-BY-SA 3.0, GPL 3.0, or GPL 2.0 |
+| hoe          | bluecarrot16, Pierre Vigier, Johannes Sjölund (wulax)                | CC-BY-SA 3.0                                                           |
+| shovel       | bluecarrot16, Pierre Vigier, Johannes Sjölund (wulax) and Inboxninja | CC-BY-SA 3.0                                                           |
+| watering can | bluecarrot16                                                         | OGA-BY 3.0+, CC-BY 4.0+, or GPL 2.0+                                   |
+| fishing rod  | bluecarrot16                                                         | OGA-BY 3.0+, CC-BY 4.0+, or GPL 2.0+                                   |
+
+
+The above license applies to contents of the tools/ subdirectory. 
+
+.tmx and .tsx files are released into the public domain under CC0 <https://creativecommons.org/publicdomain/zero/1.0/>
+
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  
+
+Preview images include art by the following additional authors, which is subject to different licenses: Stephen Challener (Redshrike), Johannes Sjölund (wulax), bluecarrot16, Manuel Riecke (MrBeast), Fabzy, David Conway Jr. (JaidynReiman), Joe White, Matthew Krohn (makrohn), Nila122
+
+- body/male/human/white.png: by Stephen Challener (Redshrike), Johannes Sjölund (wulax). License(s): CC-BY-SA 3.0, GPL 3.0. 
+    - https://opengameart.org/content/liberated-pixel-cup-lpc-base-assets-sprites-map-tiles
+    - https://opengameart.org/content/lpc-medieval-fantasy-character-sprites
+- beards/winter/male/raven.png: by bluecarrot16. License(s): CC0. 
+    - https://opengameart.org/content/lpc-santa
+- hair/bangsshort/male/raven.png: by Manuel Riecke (MrBeast). License(s): CC-BY-SA 3.0, GPL 3.0. 
+    - https://opengameart.org/content/lpc-medieval-fantasy-character-sprites
+- hat/pirate/tricorne/male/brown.png: by bluecarrot16. License(s): OGA-BY 3.0. 
+    - https://opengameart.org/content/lpc-pirates
+- torso/clothes/longsleeve/male/white.png: by Johannes Sjölund (wulax). License(s): CC-BY-SA 3.0, GPL 3.0. 
+    - https://opengameart.org/content/lpc-medieval-fantasy-character-sprites
+- legs/pants/male/blue.png: by bluecarrot16, David Conway Jr. (JaidynReiman), Joe White, Matthew Krohn (makrohn), Johannes Sjölund (wulax). License(s): CC-BY-SA 3.0, GPL 3.0. 
+    - https://opengameart.org/content/liberated-pixel-cup-lpc-base-assets-sprites-map-tiles
+    - https://opengameart.org/content/lpc-medieval-fantasy-character-sprites
+- torso/clothes/apron/male/brown.png: by Nila122. License(s): CC-BY-SA 3.0, GPL 2.0, GPL 3.0. 
+    - https://opengameart.org/content/lpc-aprons
+
+
+Usage instructions
+==================
+
+All items use existing animation frames and hence are compatible with all existing clothing items. However to assemble the completed spritesheet, some frames will need to be used in different ways, duplicated, and/or played in a different order, as described below. Additionally, there are Tiled .tmx and .tsx maps which show the intended animation sequences (select "Edit tileset", click the Animation button, then select one of the tiles with a film strip overlay to view frame order and timing). 
+
+
+There are three categories of items:
+
+- **"thrust" tools** (hoe, shovel, watering can) use frames from the "thrust" animation. Layer the following sheets, back-to-front: {tool}-bg.png, {everything else}, {tool}.png. Play frames from the thrust animation in order. 
+- **"smash" tools** (axe, pickaxe, hammer) use frames from the "slash" animation, but played in a different order; additionally, they require frames from the character sheet to be spread into 128x128px frames (i.e. "oversized" animation frames). To assemble the complete animated spritesheet:
+	1. Assemble your complete spritesheet as usual by layering all other items (e.g. base, clothing, hair, accessories, etc.). This is your 'character spritesheet'.
+	2. Re-assemble each frame from the slash animation of your character spritesheet into a 128x128px ("oversize") frame, such that each original 64x64px sprite is centered within the 128x128px frame. 
+	3. Layer the following sheets, back-to-front: {tool}-bg.png, {everything else}, {tool}.png, {sparks or sparks-wood}.png (optional)
+	4. Play the frames in the following order, with the indicated timing (the leftmost frame in each row is frame 0):
+
+		- axe, pickaxe:
+
+			| Frame | Time (ms) |
+			|-------|-----------|
+			|     5 | 100       |
+			|     4 | 100       |
+			|     3 | 50        |
+			|     1 | 50 or 100 |
+			|     0 | 300       |
+
+		- hammer: (alternatively, frame 3 from the axe and pickaxe animations can be skipped, and all animations can be played with this timing)
+
+			| Frame | Time (ms) |
+			|-------|-----------|
+			|     5 |       100 |
+			|     4 |       100 |
+			|     1 |       100 |
+			|     0 |       300 |
+
+- **fishing rod**: This sheet is to be used with frames from the "thrust" animation. However to assemble the completed spritesheet, some frames from the thrust animation will need to be duplicated and layered with frames from the rod animation in different order than usual. Frame numbers below all refer to the thrust animation, where the frame on the leftmost edge of the spritesheet is frame 0.
+
+	- To assemble the complete animated spritesheet of the character throwing, reeling, and landing the line:
+	
+		1. Assemble your complete spritesheet as usual by layering all other items (e.g. base, clothing, hair, accessories, etc.). This is your 'character spritesheet'.
+		2. Re-assemble frames from the thrust animation of your character spritesheet into a 128x128px ("oversize") frame. 
+		3. Arrange frames from the thrust animation of your characther in the following order (left-to-right): 0, 1, 2, 3, 4, 5, 4, 4, 4, 5, 4, 2, 3
+		4. Layer the following sheets, back-to-front: rod-bg.png, {your character sheet with re-arranged thrust animations}, rod-fg.png. 
+		5. Play the animation from this assembled sheet, with timing summarized below: 
+
+			| Time (ms) |  500  | 250 | 100 | (variable) |   125   | 125 | 125 |  125   | 125  | 125 | 125 | 500 |
+			|-----------|-------|-----|-----|------------|---------|-----|-----|--------|------|-----|-----|-----|
+			| Phase     | Throw |     |     |            | Reel... |     |     | (loop) | Land |     |     |     |
+			| Frame     | 2     |   3 |   4 |          5 | 6       |   7 |   8 | 9      | 10   |  11 |  12 |   3 |
+
+		6. Optionally, to signify a bite, you can add frames 0, 1, 2 of "emote.png" over top of the character, aligned with the first 3 frames of the "reel" phase of animation.
+
+	- An animated bobber is also included, which should be timed as follows:
+
+		| Time (ms) |  250   | 250 | 250 |  240   |  125   | 125 | 125 | (variable) |
+		|-----------|--------|-----|-----|--------|--------|-----|-----|------------|
+		| Phase     | Bob... |     |     | (loop) | Strike |     |     |            |
+		| Frame     | 0      |   1 |   2 | 1      | 3      |   4 |   5 |          5 |
+
+	- This spritesheet does not depict the line itself. Instead, draw a straight line using your game engine between the tip of the rod and the position of the bobber in your game. During the throwing part of the animation, start with the bobber at the tip of the rod, then arc towards its eventual position. The coordinates of the tip of the rod, in pixels, at each frame are indicated below, (where the top-left corner of the frame is X = 0 px , Y = 0 px)
+
+
+		| Direction | Rod Frame # |  X  | Y  |
+		|-----------|-------------|-----|----|
+		| N         |           2 |  84 | 35 |
+		|           |           3 |  40 | 40 |
+		|           |           4 |  57 | 39 |
+		|           |           5 | 109 | 41 |
+		|           |           6 | 109 | 48 |
+		|           |           7 | 109 | 48 |
+		|           |           8 | 109 | 48 |
+		|           |           9 | 109 | 43 |
+		|           |          10 | 106 | 37 |
+		|           |          11 |  77 | 29 |
+		|           |          12 |  59 | 33 |
+		| W         |           2 |  18 | 58 |
+		|           |           3 | 118 | 61 |
+		|           |           4 |  82 | 62 |
+		|           |           5 |   2 | 59 |
+		|           |           6 |   5 | 67 |
+		|           |           7 |   5 | 67 |
+		|           |           8 |   5 | 67 |
+		|           |           9 |   4 | 71 |
+		|           |          10 |   4 | 68 |
+		|           |          11 |  42 | 44 |
+		|           |          12 |  46 | 47 |
+		| S         |           2 |  69 | 31 |
+		|           |           3 |  31 | 42 |
+		|           |           4 |  44 | 45 |
+		|           |           5 |  92 | 69 |
+		|           |           6 |  92 | 70 |
+		|           |           7 |  92 | 69 |
+		|           |           8 |  92 | 69 |
+		|           |           9 |  92 | 70 |
+		|           |          10 |  84 | 64 |
+		|           |          11 |  71 | 44 |
+		|           |          12 |  60 | 41 |
+		| E         |           2 | 110 | 58 |
+		|           |           3 |  10 | 61 |
+		|           |           4 |  46 | 62 |
+		|           |           5 | 126 | 59 |
+		|           |           6 | 123 | 67 |
+		|           |           7 | 123 | 67 |
+		|           |           8 | 123 | 67 |
+		|           |           9 | 124 | 71 |
+		|           |          10 | 124 | 68 |
+		|           |          11 |  86 | 44 |
+		|           |          12 |  82 | 47 |

@@ -1,0 +1,104 @@
+[LPC] Fishing Rod by bluecarrot16. License: OGA-BY 3.0+, CC-BY 3.0+, GPL v2.0+. Clauses of the CC licenses pertaining to the use of effective technological measures (e.g. DRM) are waived. https://opengameart.org/content/lpc-fishing-rod
+
+
+Preview images in preview/ subdirectory contain images by Stephen Challener (Redshrike) from "Liberated Pixel Cup (LPC) Base Assets", License: OGA-BY 3.0, CC-BY-SA 3.0, GPL 3.0. https://opengameart.org/content/liberated-pixel-cup-lpc-base-assets-sprites-map-tiles
+
+
+## INSTRUCTIONS
+
+Animated fishing rod, in the style of the Liberated Pixel Cup.
+
+This sheet is to be used with frames from the "thrust" animation and hence is compatible with all existing clothing items. However to assemble the completed spritesheet, some frames from the thrust animation will need to be duplicated and layered with frames from the rod animation in different order than usual. Frame numbers below all refer to the thrust animation, where the frame on the leftmost edge of the spritesheet is frame 0.
+
+To assemble the complete animated spritesheet of the character throwing, reeling, and landing the line:
+- Assemble your complete spritesheet as usual by layering all other items (e.g. base, clothing, hair, accessories, etc.). This is your 'character spritesheet'.
+- Re-assemble frames from the thrust animation of your character spritesheet into a 128x128px ("oversize") frame. 
+- Arrange frames from the thrust animation of your characther in the following order (left-to-right): 0, 1, 2, 3, 4, 5, 4, 4, 4, 5, 4, 2, 3
+- Layer the following sheets, back-to-front: rod-bg.png, {your character sheet with re-arranged thrust animations}, rod-fg.png. 
+- Play the animation from this assembled sheet, with timing summarized below: 
+
+| Time (ms) |  500  | 250 | 100 | (variable) |   125   | 125 | 125 |  125   | 125  | 125 | 125 | 500 |
+|-----------|-------|-----|-----|------------|---------|-----|-----|--------|------|-----|-----|-----|
+| Phase     | Throw |     |     |            | Reel... |     |     | (loop) | Land |     |     |     |
+| Frame     | 2     |   3 |   4 |          5 | 6       |   7 |   8 | 9      | 10   |  11 |  12 |   3 |
+
+- Optionally, to signify a bite, you can add frames 0, 1, 2 of "emote.png" over top of the character, aligned with the first 3 frames of the "reel" animation
+
+Here is an alternative description of the above: 
+
+	|             |                   |   | Phase frame  ↓   |
+	|    Phase    |      Layer ↓      |   | 0  | 1  | 2  | 3 |
+	|-------------|-------------------|---|----|----|----|---|
+	| Throw       | Character Frame # |   |  2 |  3 |  4 | 5 |
+	|             | Rod Frame  #      |   |  2 |  3 |  4 | 5 |
+	|             |                   |   |    |    |    |   |
+	| Reel (Loop) | Character Frame # |   |  4 |  4 |  4 | 5 |
+	|             | Rod Frame  #      |   |  6 |  7 |  8 | 9 |
+	|             | Emote Frame #     |   |  0 |  1 |  2 |   |
+	|             |                   |   |    |    |    |   |
+	| Land        | Character Frame # |   |  4 |  5 |  6 | 3 |
+	|             | Rod Frame  #      |   | 10 | 11 | 12 | 3 |
+
+
+### Notes
+
+See also the included Tiled map which shows the intended animation sequence (select "Edit tileset", then click the Animation button, to view frame order and timing). 
+
+An animated bobber is also included:
+
+| Time (ms) |  250   | 250 | 250 |  240   |  125   | 125 | 125 | (variable) |
+|-----------|--------|-----|-----|--------|--------|-----|-----|------------|
+| Phase     | Bob... |     |     | (loop) | Strike |     |     |            |
+| Frame     | 0      |   1 |   2 | 1      | 3      |   4 |   5 |          5 |
+
+
+This spritesheet does not depict the line itself. Instead, draw a straight line using your game engine between the tip of the rod and the position of the bobber in your game. During the throwing part of the animation, start with the bobber at the tip of the rod, then arc towards its eventual position. The coordinates of the tip of the rod, in pixels, at each frame are indicated below, (where the top-left corner of the frame is X = 0 px , Y = 0 px)
+
+
+| Direction | Rod Frame # |  X  | Y  |
+|-----------|-------------|-----|----|
+| N         |           2 |  84 | 35 |
+|           |           3 |  40 | 40 |
+|           |           4 |  57 | 39 |
+|           |           5 | 109 | 41 |
+|           |           6 | 109 | 48 |
+|           |           7 | 109 | 48 |
+|           |           8 | 109 | 48 |
+|           |           9 | 109 | 43 |
+|           |          10 | 106 | 37 |
+|           |          11 |  77 | 29 |
+|           |          12 |  59 | 33 |
+| W         |           2 |  18 | 58 |
+|           |           3 | 118 | 61 |
+|           |           4 |  82 | 62 |
+|           |           5 |   2 | 59 |
+|           |           6 |   5 | 67 |
+|           |           7 |   5 | 67 |
+|           |           8 |   5 | 67 |
+|           |           9 |   4 | 71 |
+|           |          10 |   4 | 68 |
+|           |          11 |  42 | 44 |
+|           |          12 |  46 | 47 |
+| S         |           2 |  69 | 31 |
+|           |           3 |  31 | 42 |
+|           |           4 |  44 | 45 |
+|           |           5 |  92 | 69 |
+|           |           6 |  92 | 70 |
+|           |           7 |  92 | 69 |
+|           |           8 |  92 | 69 |
+|           |           9 |  92 | 70 |
+|           |          10 |  84 | 64 |
+|           |          11 |  71 | 44 |
+|           |          12 |  60 | 41 |
+| E         |           2 | 110 | 58 |
+|           |           3 |  10 | 61 |
+|           |           4 |  46 | 62 |
+|           |           5 | 126 | 59 |
+|           |           6 | 123 | 67 |
+|           |           7 | 123 | 67 |
+|           |           8 | 123 | 67 |
+|           |           9 | 124 | 71 |
+|           |          10 | 124 | 68 |
+|           |          11 |  86 | 44 |
+|           |          12 |  82 | 47 |
+
