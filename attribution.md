@@ -47,3 +47,7 @@ This will eventually be displayed in-game as well, but for now, I'll keep track 
    - from [[LPC] Medieval village decorations](https://opengameart.org/content/lpc-medieval-village-decorations)
    - attribution: [LPC] Medieval Village Decorations" by bluecarrot16, Lanea Zimmerman (Sharm), Reemax (Tuomo Untinen), Xenodora, Johann C, Johannes Sjölund, Casper Nilsson, Daniel Cook, Rayane Félix (RayaneFLX), Wolthera van Hövell tot Westerflier (TheraHedwig), Hyptosis, mold, Zachariah Husiar (Zabin), Clint Bellanger, Jetrel, Nemisys, Guido Bos, Curt, Bertram, and Daniel Eddeland (daneeklu). see [Credits-decorations-medieval.txt](./attribution/CREDITS-decorations-medieval.txt)
    - license: CC-BY-SA 4.0
+- [Female_mask.png](./resources/images/Female_mask.png), [Male_mask.png](./resources/images/Male_mask.png)
+  - from [LPC Masks](https://opengameart.org/content/lpc-masks)
+  - attribution: [Nila122](https://opengameart.org/users/nila122)
+  - license: CC-BY-SA 3.0
