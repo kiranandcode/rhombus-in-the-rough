@@ -51,3 +51,13 @@ This will eventually be displayed in-game as well, but for now, I'll keep track 
   - from [LPC Masks](https://opengameart.org/content/lpc-masks)
   - attribution: [Nila122](https://opengameart.org/users/nila122)
   - license: CC-BY-SA 3.0
+
+- [conifers.png](./resources/images/conifers.png)
+  - from [[LPC] Conifers](https://opengameart.org/content/lpc-conifers)
+  - attribution: see [CREDITS-conifers.txt](./attribution/CREDITS-conifers.txt)
+  - license: CC-BY-SA 3.0
+
+- [weapons](./resources/images/weapons)
+  - from [[LPC] Weapons Mega Pack](https://opengameart.org/content/lpc-weapons-mega-pack)
+  - attribution: see [CREDITS-weapons.txt](./attribution/CREDITS-weapons.txt)
+  - license: CC-BY-SA 3.0
