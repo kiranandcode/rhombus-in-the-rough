@@ -75,3 +75,15 @@ This will eventually be displayed in-game as well, but for now, I'll keep track 
   - from [[LPC] Jungle](https://opengameart.org/content/lpc-jungle)
   - attribution: see [CREDITS-jungle.txt](./attribution/CREDITS-jungle.txt)
   - license: CC-BY-SA 4.0
+
+- [cottage.png](./resources/images/cottage.png), [thatched-roof.png](./resources/images/thatched-roof.png)
+  - from [[LPC] Thatched roof cottage](https://opengameart.org/content/lpc-thatched-roof-cottage)
+  - attribution: "LPC Thatched-roof Cottage" by bluecarrot16. License: CC-BY-SA 3.0 / GPL 3.0+ Based on: "LPC Base Assets" by Lanea Zimmerman (AKA Sharm) and Daniel Armstrong (AKA HughSpectrum). License: CC-BY-SA 3.0 / GPL 3.0+. http://opengameart.org/content/liberated-pixel-cup-lpc-base-assets-sprites-map-tiles "LPC art entry" by Casper Nilsson. License: CC-BY-SA 3.0 / GPL 3.0+. http://opengameart.org/content/lpc-cnilsson
+  - license: CC-BY-SA 3.0
+  
+- [doors.png](./resources/images/doors.png), [windows.png](./resources/images/windows.png)
+
+  - from [[LPC] Windows & Doors](https://opengameart.org/content/lpc-windows-doors)
+  - attribution: See [CREDITS-windows-doors.txt](./attribution/CREDITS-windows-doors.txt)
+  - license: CC-BY-SA 3.0
+  
