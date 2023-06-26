@@ -14,14 +14,15 @@ annot.macro 'GVector':
       ($(statinfo_meta.map_set_key),
        gvector_set_provider),
       ($(statinfo_meta.dot_provider_key),
-       gvector_dot_provider))'
+       gvector_dot_provider),
+      ($(statinfo_meta.sequence_constructor_key),
+       in_gvector))'
   )
 fun gvector_get_provider(gvec, ind):
   gvector.#{gvector-ref}(gvec, ind)
 
 fun gvector_set_provider(gvec, ind, vl):
   gvector.#{gvector-set!}(gvec, ind, vl)
-
 
 namespace GVector:
   export: make get set insert remove remove_last add count to_vector of_vector elements sort
@@ -113,3 +114,6 @@ dot.macro
     | 'to_vector': 'fun (): GVector.to_vector($left)'
     | 'sort': 'fun (vl,$('...')): GVector.sort($left,vl,$('...'))'
     | 'elements': 'fun (): GVector.elements($left)'
+
+expr.macro 'in_gvector($expr)':
+  'gvector.#{in-gvector}($expr)'
