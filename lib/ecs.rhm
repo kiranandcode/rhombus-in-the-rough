@@ -18,8 +18,8 @@ use_static
 
 def max_entities: 100
 
-def mutable systems: []
-def mutable components: []
+def mutable systems :~ List: []
+def mutable components :~ List: []
 
 namespace entity:
   export: Entity create available_entities lookup
@@ -119,7 +119,7 @@ class.together:
        | _entities[entity] := #true
        | _entities[entity] := #false
 
-     method entities():
+     method entities() :~ Array:
        _entities
 
   class Component(
@@ -147,7 +147,7 @@ class.together:
     method add_system(sys):
       systems := List.cons(sys, systems)
 
-    method entities():
+    method entities() :~ Sequence:
       def mutable index :: Integral = 0
       fun next():
         if index < next_index

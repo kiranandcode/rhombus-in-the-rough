@@ -26,7 +26,7 @@ class _MessageBuffer(buffer :: gvector.GVector, mutable message_queue_index :: I
     | buffer.add(m)
     message_queue_index := message_queue_index + 1
 
-  method update(handlers):
+  method update(handlers :: Sequence):
     for:
       each:
         i : 0 .. message_queue_index
